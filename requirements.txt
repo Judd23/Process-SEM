@@ -1,0 +1,32 @@
+# Process-SEM Monte Carlo Study Requirements
+
+# Core dependencies
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Configuration
+PyYAML>=6.0
+
+# Progress bars
+tqdm>=4.65.0
+
+# Testing
+pytest>=7.3.0
+pytest-cov>=4.1.0
+
+# Optional: Parallel processing
+# joblib>=1.2.0
+
+# Optional: Advanced SEM
+# semopy>=2.3.0
+# statsmodels>=0.14.0
+
+# Optional: Jupyter notebooks
+# jupyter>=1.0.0
+# ipykernel>=6.23.0
+# notebook>=6.5.0
