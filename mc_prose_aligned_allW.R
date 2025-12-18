@@ -38,6 +38,57 @@ install_if_missing <- function(pkg) {
 install_if_missing("lavaan")
 library(lavaan)
 
+# =============================================================
+# Stabilization constants (RQ4 MG-WLSMV)
+# =============================================================
+ORDERED_VARS <- c(
+  "SB1","SB2","SB3","PG1","PG2","PG3","PG4","PG5","SE1","SE2","SE3",
+  "MHWdacad","MHWdlonely","MHWdmental","MHWdpeers","MHWdexhaust",
+  "QIstudent","QIfaculty","QIadvisor","QIstaff"
+)
+NVAR_ORD <- length(ORDERED_VARS)
+MIN_N_PER_GROUP <- max(NVAR_ORD, 50)
+
+collapse_sex_2grp <- function(sex) {
+  s <- as.character(sex)
+  s <- trimws(tolower(s))
+
+  out <- ifelse(s %in% c("man", "male", "m"), "Man",
+    ifelse(s %in% c("woman", "female", "f"), "Woman", "Another")
+  )
+  out[out == "Another"] <- "Woman"
+  factor(out, levels = c("Woman", "Man"))
+}
+
+group_sizes_ok <- function(dat, Wvar, min_n = MIN_N_PER_GROUP) {
+  g <- dat[[Wvar]]
+  if (is.null(g)) return(FALSE)
+  tab <- table(g)
+  if (length(tab) < 2) return(FALSE)
+  all(tab >= min_n)
+}
+
+safe_fit_apath <- function(dat, Wvar) {
+  if (!group_sizes_ok(dat, Wvar)) {
+    return(list(ok = FALSE, reason = "small_cell", res = NULL))
+  }
+
+  fit <- try(fit_apath_mg_test(dat, Wvar), silent = TRUE)
+  if (inherits(fit, "try-error") || is.null(fit)) {
+    return(list(ok = FALSE, reason = "fit_error", res = NULL))
+  }
+
+  if (!isTRUE(lavaan::inspect(fit$fit_freeA, "converged"))) {
+    return(list(ok = FALSE, reason = "no_converge", res = NULL))
+  }
+
+  if (is.null(fit$p) || !is.finite(fit$p)) {
+    return(list(ok = FALSE, reason = "bad_p", res = NULL))
+  }
+
+  list(ok = TRUE, reason = "ok", res = fit)
+}
+
 seed   <- as.integer(get_arg("--seed", 12345))
 N      <- as.integer(get_arg("--N", 1500))
 Rreps  <- as.integer(get_arg("--R", 200))
@@ -74,11 +125,7 @@ analysis_model <- '
   Distress ~~ Interact
 '
 
-ordered_vars <- c(
-  "SB1","SB2","SB3","PG1","PG2","PG3","PG4","PG5","SE1","SE2","SE3",
-  "MHWdacad","MHWdlonely","MHWdmental","MHWdpeers","MHWdexhaust",
-  "QIstudent","QIfaculty","QIadvisor","QIstaff"
-)
+ordered_vars <- ORDERED_VARS
 
 # ============================================================
 # GROUP DEFINITIONS (EDIT labels/probs to match your real coding)
@@ -100,6 +147,8 @@ gen_W <- function(N) {
     size = N, replace = TRUE,
     prob = c(0.55, 0.43, 0.02)
   )
+
+  sex <- collapse_sex_2grp(sex)
   list(
     re_all = factor(re_all),
     firstgen = factor(firstgen),
@@ -291,6 +340,11 @@ gen_dat <- function(N, p_fast, moderate_W = c("re_all","firstgen","living","sex"
   )
 
   dat[ordered_vars] <- lapply(dat[ordered_vars], function(x) ordered(x))
+
+  # belt + suspenders: ensure sex is always collapsed/estimable
+  if ("sex" %in% names(dat)) {
+    dat$sex <- collapse_sex_2grp(dat$sex)
+  }
   dat
 }
 
@@ -309,7 +363,7 @@ fit_apath_mg_test <- function(dat, Wvar) {
     analysis_model,
     data = dat,
     group = Wvar,
-    ordered = ordered_vars,
+    ordered = ORDERED_VARS,
     estimator = "WLSMV",
     parameterization = "theta",
     std.lv = TRUE,
@@ -327,7 +381,7 @@ fit_apath_mg_test <- function(dat, Wvar) {
     analysis_model,
     data = dat,
     group = Wvar,
-    ordered = ordered_vars,
+    ordered = ORDERED_VARS,
     estimator = "WLSMV",
     parameterization = "theta",
     std.lv = TRUE
@@ -400,15 +454,25 @@ run_mc_oneW <- function(Wvar, N, R, p_fast) {
   pvals <- rep(NA_real_, R)
   conv  <- rep(FALSE, R)
   indirects_list <- vector("list", R)
+  fail_reason <- rep(NA_character_, R)
 
   for (r in seq_len(R)) {
     dat <- gen_dat(N, p_fast = p_fast, moderate_W = Wvar)
-    res <- try(fit_apath_mg_test(dat, Wvar), silent = TRUE)
-    if (inherits(res, "try-error") || is.null(res)) next
+
+    if (Wvar == "sex" && "sex" %in% names(dat)) {
+      dat$sex <- collapse_sex_2grp(dat$sex)
+    }
+
+    fit_out <- safe_fit_apath(dat, Wvar)
+    if (!fit_out$ok) {
+      fail_reason[r] <- fit_out$reason
+      next
+    }
 
     conv[r] <- TRUE
-    pvals[r] <- res$p
-    indirects_list[[r]] <- compute_group_indirects(res$fit_freeA, z_vals = c(0,1,2))
+    pvals[r] <- fit_out$res$p
+    indirects_list[[r]] <- compute_group_indirects(fit_out$res$fit_freeA, z_vals = c(0,1,2))
+    fail_reason[r] <- "ok"
   }
 
   used <- which(conv & !is.na(pvals))
@@ -421,7 +485,8 @@ run_mc_oneW <- function(Wvar, N, R, p_fast) {
     convergence_rate = mean(conv),
     power_apath_moderation = power,
     pvals = pvals,
-    indirects = indirects_list[used]
+    indirects = indirects_list[used],
+    fail_reason = fail_reason
   )
 }
 
