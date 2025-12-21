@@ -5,22 +5,22 @@ Unit tests for Monte Carlo simulation modules
 import sys
 from pathlib import Path
 
-# Make `src/` importable when running tests from a fresh checkout.
-# Prefer installed/editable installs in real workflows, but keep this for local CI simplicity.
+# Make project modules importable for local runs without requiring an editable install.
+# This repo’s import style is `from monte_carlo import ...` (modules live in `src/`).
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SRC_PATH = str(REPO_ROOT / "src")
-if SRC_PATH not in sys.path:
-    sys.path.insert(0, SRC_PATH)
+SRC_DIR = REPO_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
 import numpy as np
 import pytest
-from process_sem.monte_carlo import (
+from monte_carlo import (
     MonteCarloSimulator,
     SimulationConfig,
     example_data_generator,
     example_estimator
 )
-from process_sem.utils import (
+from utils import (
     calculate_bias,
     calculate_mse,
     calculate_coverage,
