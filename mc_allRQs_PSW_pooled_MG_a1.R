@@ -50,6 +50,21 @@ SAVE_FITS <- as.integer(get_arg("--save_fits", 1))
 # -------------------------
 DIAG_N <- as.integer(get_arg("--diag", 0))
 
+# Optional: run a targeted subset of replication IDs (e.g. "5,20,30,79,90").
+# Critical: we keep the *same* seed stream by still using set.seed(SEED + r).
+REPS_SUBSET_STR <- as.character(get_arg("--reps", NA_character_))
+REPS_SUBSET <- NULL
+if (isTRUE(nzchar(REPS_SUBSET_STR)) && !isTRUE(is.na(REPS_SUBSET_STR))) {
+  toks <- unlist(strsplit(REPS_SUBSET_STR, "[,;\\s]+"))
+  toks <- toks[nzchar(toks)]
+  vals <- suppressWarnings(as.integer(toks))
+  vals <- vals[is.finite(vals)]
+  if (length(vals) == 0) {
+    stop("--reps must be a comma/space-separated list of integers, e.g. --reps 5,20,30")
+  }
+  REPS_SUBSET <- sort(unique(vals))
+}
+
 # Representative study mode: generate one dataset and save full outputs for pooled + MG.
 DO_REP_STUDY <- as.integer(get_arg("--repStudy", 0))
 
@@ -118,6 +133,10 @@ mk_run_id <- function() {
     paste0("psw", USE_PSW),
     paste0("mg", RUN_MG)
   )
+  if (!is.null(REPS_SUBSET) && length(REPS_SUBSET) > 0) {
+    # Compact encoding: reps005-090_n5 when sparse; else repn and a preview
+    parts <- c(parts, paste0("reps", sprintf("%03d", min(REPS_SUBSET)), "-", sprintf("%03d", max(REPS_SUBSET)), "_n", length(REPS_SUBSET)))
+  }
   if (isTRUE(nzchar(WVAR_SINGLE)) && isTRUE(!is.na(WVAR_SINGLE))) {
     parts <- c(parts, paste0("W", WVAR_SINGLE))
   }
@@ -172,6 +191,66 @@ write_lavaan_output <- function(fit, file_path, title = NULL) {
   warn <- try(lavInspect(fit, "warnings"), silent = TRUE)
   if (!inherits(warn, "try-error") && length(warn) > 0) {
     writeLines(capture.output(print(warn)), con)
+  } else {
+    w("(none)")
+  }
+
+  invisible(TRUE)
+}
+
+write_mg_error_log <- function(file_path, rep, Wvar, reason, err_msg = NULL, fit = NULL, dat = NULL) {
+  dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
+
+  con <- file(file_path, open = "wt")
+  on.exit(close(con), add = TRUE)
+
+  w <- function(...) writeLines(paste0(...), con = con)
+  w("# MG ERROR LOG")
+  w("# rep: ", rep)
+  w("# Wvar: ", Wvar)
+  w("# reason: ", reason)
+  w("# Generated: ", as.character(Sys.time()))
+  w("#")
+
+  if (!is.null(err_msg) && isTRUE(nzchar(err_msg))) {
+    w("\n## conditionMessage\n")
+    writeLines(err_msg, con)
+  }
+
+  if (!is.null(dat) && isTRUE(Wvar %in% names(dat))) {
+    w("\n## Group sizes (post-collapsing)")
+    g <- dat[[Wvar]]
+    if (!is.factor(g)) g <- factor(g)
+    tab <- sort(table(g), decreasing = TRUE)
+    writeLines(capture.output(print(tab)), con)
+  }
+
+  w("\n## Ordered vars")
+  w("n_ORDERED_VARS: ", length(ORDERED_VARS))
+  w("n_6pt_items: ", sum(infer_K_for_item(ORDERED_VARS) == 6L, na.rm = TRUE))
+
+  if (!is.null(fit)) {
+    conv <- try(lavInspect(fit, "converged"), silent = TRUE)
+    w("\n## lavInspect(converged)\n")
+    w(if (!inherits(conv, "try-error")) as.character(conv) else as.character(conv))
+
+    warn <- try(lavInspect(fit, "warnings"), silent = TRUE)
+    w("\n## lavInspect(warnings)\n")
+    if (!inherits(warn, "try-error") && length(warn) > 0) {
+      writeLines(capture.output(print(warn)), con)
+    } else {
+      w("(none)")
+    }
+
+    w("\n## sessionInfo\n")
+    writeLines(capture.output(utils::sessionInfo()), con)
+  }
+
+  # Snapshot warnings() at the time the error is logged (best-effort).
+  w("\n## warnings() snapshot\n")
+  ww <- try(warnings(), silent = TRUE)
+  if (!inherits(ww, "try-error") && length(ww) > 0) {
+    writeLines(capture.output(print(ww)), con)
   } else {
     w("(none)")
   }
@@ -364,7 +443,7 @@ run_representative_study <- function(N, use_psw = TRUE) {
   for (Wvar in W_TARGETS) {
     datW <- dat
     if (Wvar == "sex") datW$sex <- collapse_sex_2grp(datW$sex)
-    if (Wvar %in% c("re_all", "living18")) datW[[Wvar]] <- collapse_small_to_other(datW[[Wvar]])
+    datW[[Wvar]] <- merge_rare_categories_nearest(datW[[Wvar]], min_prop = 0.01, min_expected_n = 5)
 
     outW <- fit_mg_a1_test(datW, Wvar)
     if (is.null(outW$fit)) {
@@ -427,6 +506,23 @@ make_ordinal <- function(x, K, probs = NULL) {
   if (is.null(probs)) {
     probs <- rep(1/K, K)
   }
+  # Policy: for 6-point items, ensure every category has at least 2% mass.
+  # This reduces sparse-category thresholds that can destabilize WLSMV (esp. in MG).
+  if (isTRUE(K == 6L) || isTRUE(K == 6)) {
+    pmin_cat <- 0.02
+    probs <- as.numeric(probs)
+    if (length(probs) != K || any(!is.finite(probs))) probs <- rep(1 / K, K)
+    probs <- pmax(probs, 0)
+    if (sum(probs) <= 0) probs <- rep(1 / K, K)
+
+    # Floor and renormalize. If the floor is infeasible (K*pmin_cat >= 1), fallback.
+    if ((K * pmin_cat) < 1) {
+      probs <- pmax(probs, pmin_cat)
+    } else {
+      probs <- rep(1 / K, K)
+    }
+  }
+
   probs <- probs / sum(probs)
   cuts <- quantile(x, probs = cumsum(probs)[-length(probs)], na.rm = TRUE, type = 7)
   ordered(cut(x, breaks = c(-Inf, cuts, Inf), labels = FALSE, right = TRUE))
@@ -436,16 +532,21 @@ make_ordinal <- function(x, K, probs = NULL) {
 # Goal: feed category probabilities into make_ordinal() so simulated items reproduce empirical marginals.
 
 infer_K_for_item <- function(var) {
-  if (var %in% c("sbmyself","sbvalued","sbcommunity")) return(5L)
-  if (var %in% c(
+  # Returns K for each item name. Vectorized over `var`.
+  out <- rep(NA_integer_, length(var))
+  out[var %in% c("sbmyself","sbvalued","sbcommunity")] <- 5L
+  out[var %in% c(
     "pgthink","pganalyze","pgwork","pgvalues","pgprobsolve",
     "SEwellness","SEnonacad","SEactivities","SEacademic","SEdiverse",
     "evalexp","sameinst",
     "SFcareer","SFotherwork","SFdiscuss","SFperform"
-  )) return(4L)
-  if (var %in% c("MHWdacad","MHWdlonely","MHWdmental","MHWdexhaust","MHWdsleep","MHWdfinancial")) return(6L)
-  if (var %in% c("QIstudent","QIadvisor","QIfaculty","QIstaff","QIadmin")) return(7L)
-  NA_integer_
+  )] <- 4L
+  out[var %in% c("MHWdacad","MHWdlonely","MHWdmental","MHWdexhaust","MHWdsleep","MHWdfinancial")] <- 6L
+  out[var %in% c("QIstudent","QIadvisor","QIfaculty","QIstaff","QIadmin")] <- 7L
+
+  # Preserve old behavior for scalar input.
+  if (length(out) == 1) return(out[[1]])
+  out
 }
 
 normalize_to_1K <- function(x, K) {
@@ -519,6 +620,127 @@ collapse_small_to_other <- function(x, min_n = MIN_N_PER_GROUP, other_label = "O
   small <- names(tab)[tab < min_n]
   if (length(small) > 0) x[x %in% small] <- other_label
   factor(x)
+}
+
+diag_check_6pt_marginals <- function(dat, group_var = NULL, vars = NULL, min_prop = 0.02) {
+  # Diagnostics-only helper: checks that every category (1..6) has at least min_prop
+  # probability for each 6-point item, overall and optionally by group.
+  if (is.null(vars)) vars <- names(dat)
+  six_vars <- vars[infer_K_for_item(vars) == 6L]
+  if (length(six_vars) == 0) return(invisible(NULL))
+
+  check_one <- function(d, label) {
+    mins <- sapply(six_vars, function(v) {
+      x <- normalize_to_1K(d[[v]], K = 6L)
+      tab <- table(factor(x, levels = 1:6), useNA = "no")
+      p <- as.numeric(tab)
+      s <- sum(p)
+      if (!is.finite(s) || s <= 0) return(NA_real_)
+      min(p / s)
+    })
+    worst <- suppressWarnings(min(mins, na.rm = TRUE))
+    bad <- names(mins)[is.finite(mins) & mins < min_prop]
+    if (length(bad) > 0) {
+      message("[diag] 6-point marginal check FAILED (", label, ")")
+      message("[diag] Worst min category proportion: ", sprintf("%.4f", worst), " (target >= ", min_prop, ")")
+      show_n <- min(6L, length(bad))
+      for (v in head(bad, show_n)) {
+        message(sprintf("[diag] - %s: min=%.4f", v, mins[[v]]))
+      }
+    } else {
+      message("[diag] 6-point marginal check OK (", label, ") | worst min=", sprintf("%.4f", worst))
+    }
+    invisible(mins)
+  }
+
+  check_one(dat, label = "overall")
+
+  if (!is.null(group_var) && group_var %in% names(dat)) {
+    g <- dat[[group_var]]
+    if (!is.factor(g)) g <- factor(g)
+    levs <- levels(g)
+    for (lv in levs) {
+      idx <- which(g == lv)
+      if (length(idx) == 0) next
+      check_one(dat[idx, , drop = FALSE], label = paste0(group_var, "=", lv, " (n=", length(idx), ")"))
+    }
+  }
+
+  invisible(NULL)
+}
+
+merge_rare_categories_nearest <- function(x, min_prop = 0.01, min_expected_n = 5) {
+  # Merge rare categories into a neighboring category to avoid empty/small cells in MG.
+  # Rule: if a category proportion < min_prop OR count < min_expected_n, merge it with a
+  #       "nearest" category (tail-inward for ordered/numeric categories: 1->2, max->max-1;
+  #       otherwise merge into the currently largest category).
+  #
+  # Returns a factor.
+  if (is.null(x)) return(factor(x))
+  x0 <- x
+  x <- x[!is.na(x)]
+  if (length(x) == 0) return(factor(x0))
+
+  # Preserve ordering when possible
+  ordered_in <- is.ordered(x0)
+
+  # Work in factor space for stable level handling
+  f <- factor(x0, exclude = NULL)
+
+  # helper: can we interpret levels as consecutive integers?
+  lev <- levels(f)
+  lev_int <- suppressWarnings(as.integer(lev))
+  is_int_levels <- !any(is.na(lev_int)) && all(sort(unique(lev_int)) == seq(min(lev_int), max(lev_int)))
+
+  repeat {
+    tab <- table(f, useNA = "no")
+    if (length(tab) < 2) break
+
+    n <- sum(tab)
+    prop <- as.numeric(tab) / n
+    rare <- (prop < min_prop) | (as.numeric(tab) < min_expected_n)
+    if (!any(rare)) break
+
+    rare_levels <- names(tab)[rare]
+
+    # Merge one level at a time to avoid cascading surprises
+    lvl <- rare_levels[1]
+
+    if (is_int_levels) {
+      # Tail-inward on numeric codes
+      li <- as.integer(lvl)
+      lo <- min(lev_int)
+      hi <- max(lev_int)
+      target <- NULL
+      if (li <= lo) target <- as.character(li + 1L)
+      else if (li >= hi) target <- as.character(li - 1L)
+      else {
+        # interior: merge toward the nearer neighbor by size (break ties inward)
+        left <- as.character(li - 1L)
+        right <- as.character(li + 1L)
+        nl <- if (left %in% names(tab)) as.numeric(tab[[left]]) else 0
+        nr <- if (right %in% names(tab)) as.numeric(tab[[right]]) else 0
+        target <- if (nr >= nl) right else left
+      }
+      f[f == lvl] <- target
+    } else {
+      # Unordered labels: merge rare into the largest remaining category
+      biggest <- names(tab)[which.max(as.numeric(tab))]
+      if (!identical(lvl, biggest)) f[f == lvl] <- biggest
+    }
+
+    f <- droplevels(f)
+    lev <- levels(f)
+    lev_int <- suppressWarnings(as.integer(lev))
+    is_int_levels <- !any(is.na(lev_int)) && all(sort(unique(lev_int)) == seq(min(lev_int), max(lev_int)))
+  }
+
+  if (ordered_in && is_int_levels) {
+    # restore ordered factor with original numeric ordering
+    f <- ordered(f, levels = as.character(sort(unique(suppressWarnings(as.integer(levels(f)))))))
+  }
+
+  f
 }
 
 collapse_sex_2grp <- function(sex) {
@@ -688,8 +910,10 @@ gen_dat <- function(N) {
     "Black/African American",
     "Other/Multiracial/Unknown"
   )
-  # Target (CSU systemwide, Fall 2024; collapsed): Hispanic 0.489, White 0.201, Asian 0.155, Black 0.041, Other/Multiracial/Unknown 0.114
-  re_all_probs <- c(0.489, 0.201, 0.155, 0.041, 0.114)
+  # Adjusted for MG stability / user request: make Black slightly more common than Other/Multi.
+  # (Keep total probability 1.0; leave Hispanic/White/Asian unchanged.)
+  # Hispanic 0.489, White 0.201, Asian 0.155, Black 0.078, Other/Multiracial/Unknown 0.077
+  re_all_probs <- c(0.489, 0.201, 0.155, 0.078, 0.077)
   re_all <- factor(sample(re_all_levels, N, replace = TRUE, prob = re_all_probs), levels = re_all_levels)
 
   living18_levels <- c(
@@ -1027,19 +1251,24 @@ fit_mg_a1_test <- function(dat, Wvar) {
       msg <- as.character(fit0)
       message("[MG fit_error] Wvar=", Wvar, " | ", msg)
     }
-    return(list(ok = FALSE, p = NA_real_, reason = "fit_error", fit = NULL))
+    return(list(ok = FALSE, p = NA_real_, reason = "fit_error", fit = NULL, err_msg = as.character(fit0)))
   }
-  if (!isTRUE(lavInspect(fit0, "converged"))) return(list(ok = FALSE, p = NA_real_, reason = "no_converge", fit = fit0))
+  if (!isTRUE(lavInspect(fit0, "converged"))) {
+    warn <- try(lavInspect(fit0, "warnings"), silent = TRUE)
+    warn_msg <- NULL
+    if (!inherits(warn, "try-error") && length(warn) > 0) warn_msg <- paste(warn, collapse = "\n")
+    return(list(ok = FALSE, p = NA_real_, reason = "no_converge", fit = fit0, err_msg = warn_msg))
+  }
 
   fit <- fit0
   cnstr <- make_a1_equal_constraints(G)
   wald <- try(lavTestWald(fit, constraints = cnstr), silent = TRUE)
-  if (inherits(wald, "try-error")) return(list(ok = FALSE, p = NA_real_, reason = "wald_error", fit = fit))
+  if (inherits(wald, "try-error")) return(list(ok = FALSE, p = NA_real_, reason = "wald_error", fit = fit, err_msg = as.character(wald)))
 
   p <- as.numeric(wald[["p.value"]])
-  if (!is.finite(p)) return(list(ok = FALSE, p = NA_real_, reason = "bad_p", fit = fit))
+  if (!is.finite(p)) return(list(ok = FALSE, p = NA_real_, reason = "bad_p", fit = fit, err_msg = "Non-finite p.value returned by lavTestWald"))
 
-  list(ok = TRUE, p = p, reason = "ok", fit = fit)
+  list(ok = TRUE, p = p, reason = "ok", fit = fit, err_msg = NULL)
 }
 
 run_mc <- function() {
@@ -1072,6 +1301,11 @@ run_mc <- function() {
   one_rep <- function(r) {
     dat <- gen_dat(N)
 
+    if (isTRUE(DIAG_N > 0)) {
+      # Sanity check the generator-side K=6 floor (overall).
+      diag_check_6pt_marginals(dat, group_var = NULL, vars = ORDERED_VARS, min_prop = 0.02)
+    }
+
     # PSW first (weights computed prior to SEM estimation)
     if (isTRUE(USE_PSW == 1)) {
       dat <- make_overlap_weights(dat)
@@ -1102,18 +1336,40 @@ run_mc <- function() {
     mg_paths <- list()
     if (isTRUE(RUN_MG == 1)) {
       for (Wvar in W_TARGETS) {
+        if (isTRUE(DIAG_N > 0)) {
+          # Optional: also report per-group marginals for the Wvar we're about to MG on.
+          diag_check_6pt_marginals(dat, group_var = Wvar, vars = ORDERED_VARS, min_prop = 0.02)
+        }
         # light category handling for MC stability
         if (Wvar == "sex") dat$sex <- collapse_sex_2grp(dat$sex)
-        if (Wvar %in% c("re_all","living18")) dat[[Wvar]] <- collapse_small_to_other(dat[[Wvar]])
+        # Merge rare categories for any MG grouping Wvar
+        dat[[Wvar]] <- merge_rare_categories_nearest(dat[[Wvar]], min_prop = 0.01, min_expected_n = 5)
 
         outW <- fit_mg_a1_test(dat, Wvar)
         mg[[Wvar]] <- outW
 
-        if (isTRUE(SAVE_FITS == 1) && !is.null(outW[["fit"]])) {
+        if (isTRUE(SAVE_FITS == 1)) {
           run_dir <- file.path("results", "lavaan", mk_run_id())
-          mg_path <- file.path(run_dir, sprintf("rep%03d_mg_%s.txt", r, safe_filename(Wvar)))
-          mg_paths[[Wvar]] <- mg_path
-          write_lavaan_output(outW$fit, mg_path, title = paste0("MG SEM (W=", Wvar, ", rep ", r, ")"))
+
+          if (!is.null(outW[["fit"]])) {
+            mg_path <- file.path(run_dir, sprintf("rep%03d_mg_%s.txt", r, safe_filename(Wvar)))
+            mg_paths[[Wvar]] <- mg_path
+            write_lavaan_output(outW$fit, mg_path, title = paste0("MG SEM (W=", Wvar, ", rep ", r, ")"))
+          }
+
+          # If MG failed for any reason, write an explicit error log that captures the exact message/warnings.
+          if (!isTRUE(outW[["ok"]])) {
+            mg_err_path <- file.path(run_dir, sprintf("rep%03d_mg_%s_ERROR.txt", r, safe_filename(Wvar)))
+            write_mg_error_log(
+              file_path = mg_err_path,
+              rep = r,
+              Wvar = Wvar,
+              reason = outW[["reason"]],
+              err_msg = outW[["err_msg"]],
+              fit = outW[["fit"]],
+              dat = dat
+            )
+          }
         }
       }
     }
@@ -1129,8 +1385,15 @@ run_mc <- function() {
 
   # --- Run replications ---
   reps <- seq_len(R_REPS)
+  if (!is.null(REPS_SUBSET) && length(REPS_SUBSET) > 0) {
+    reps <- REPS_SUBSET
+  }
   if (isTRUE(DIAG_N > 0)) {
-    message("run_mc(): reps=", R_REPS, ", N=", N, ", mg=", RUN_MG, ", psw=", USE_PSW, ", cores=", NCORES)
+    message(
+      "run_mc(): reps=",
+      if (is.null(REPS_SUBSET)) R_REPS else paste0(length(REPS_SUBSET), " (subset)"),
+      ", N=", N, ", mg=", RUN_MG, ", psw=", USE_PSW, ", cores=", NCORES
+    )
   }
 
   # Reproducible parallel RNG: each fork inherits stream; we then set per-rep seed.
@@ -1156,8 +1419,10 @@ run_mc <- function() {
   }
 
   # --- Collect results back into the pre-allocated containers ---
-  for (r in reps) {
-    out <- results[[r]]
+  # Note: results list is aligned with `reps`, not absolute replication indices.
+  for (i in seq_along(reps)) {
+    r <- reps[[i]]
+    out <- results[[i]]
     pooled_converged[r] <- out$pooled_ok
     pooled_est[r, names(out$pooled_row)] <- as.numeric(out$pooled_row)
 
