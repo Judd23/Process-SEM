@@ -1,6 +1,6 @@
 # ============================================================
 # MC: PSW -> pooled SEM (RQ1–RQ3) + MG SEM a1 test (RQ4; W1–W4 one-at-a-time)
-# Design: X = 1(trnsfr_cr >= 12), Zplus10 = max(0, trnsfr_cr - 12)/10
+# Design: X = 1(trnsfr_cr >= 12), credit_dose = max(0, trnsfr_cr - 12)/10
 # Estimator: WLSMV (ordered indicators)
 # Weights: overlap weights from PS model (PSW computed for diagnostics; NOT used as SEM case weights)
 # ============================================================
@@ -8,13 +8,18 @@
 suppressPackageStartupMessages({
   # Needed for non-interactive Rscript runs (prevents 'trying to use CRAN without setting a mirror')
   options(repos = c(CRAN = "https://cloud.r-project.org"))
-  if (!requireNamespace("lavaan", quietly = TRUE)) install.packages("lavaan")
+  if (!requireNamespace("lavaan", quietly = TRUE)) {
+    stop(
+      "Package 'lavaan' is required but not installed.\n",
+      "Install it once, then rerun:\n",
+      "  install.packages('lavaan')\n",
+      call. = FALSE
+    )
+  }
   library(lavaan)
 })
 
-# Parallel is part of base R, but we still follow the user's requested pattern.
-if (!requireNamespace("parallel", quietly = TRUE)) install.packages("parallel")
-library(parallel)
+# 'parallel' ships with base R; no install step needed.
 
 get_arg <- function(flag, default = NULL) {
   args <- commandArgs(trailingOnly = TRUE)
@@ -48,8 +53,21 @@ DIAG_N <- as.integer(get_arg("--diag", 0))
 # Representative study mode: generate one dataset and save full outputs for pooled + MG.
 DO_REP_STUDY <- as.integer(get_arg("--repStudy", 0))
 
+# Optional: pooled multiple imputation (MI) for representative study only.
+# Uses mice + semTools::runMI; derived terms credit_dose_c and XZ_c are recomputed post-imputation.
+MI_POOLED <- as.integer(get_arg("--mi_pooled", 0))
+MI_M <- as.integer(get_arg("--mi_m", 30))
+MI_MAXIT <- as.integer(get_arg("--mi_maxit", 20))
+
 SEED <- as.integer(get_arg("--seed", 20251219))
 set.seed(SEED)
+
+# Optional: calibrate item response marginals to match an empirical NSSE dataset
+# --item_probs: path to an .rds file containing a named list of probability vectors per item
+# --calib_from: path to a CSV file with the NSSE items as columns; if provided, we estimate probs and save an .rds
+ITEM_PROBS_FILE <- as.character(get_arg("--item_probs", NA_character_))
+CALIB_FROM_FILE <- as.character(get_arg("--calib_from", NA_character_))
+ITEM_PROBS <- NULL
 
 # -------------------------
 # SETTINGS YOU EDIT FIRST
@@ -191,6 +209,119 @@ run_representative_study <- function(N, use_psw = TRUE) {
   fm <- fitMeasures(fitP)
   utils::write.csv(data.frame(measure = names(fm), value = as.numeric(fm)), file.path(rep_dir, "pooled_fitMeasures.csv"), row.names = FALSE)
 
+  # 3b) OPTIONAL: pooled MI (representative study only)
+  if (isTRUE(MI_POOLED == 1)) {
+    mi_out <- file.path(rep_dir, "mi_summary.txt")
+    message("MI pooled enabled: writing ", mi_out)
+
+    if (!requireNamespace("mice", quietly = TRUE)) {
+      writeLines(
+        c(
+          "MI requested via --mi_pooled 1 but package 'mice' is not installed.",
+          "Install once then rerun:",
+          "  install.packages('mice')"
+        ),
+        con = mi_out
+      )
+    } else if (!requireNamespace("semTools", quietly = TRUE)) {
+      writeLines(
+        c(
+          "MI requested via --mi_pooled 1 but package 'semTools' is not installed.",
+          "Install once then rerun:",
+          "  install.packages('semTools')"
+        ),
+        con = mi_out
+      )
+    } else {
+      suppressPackageStartupMessages({
+        library(mice)
+        library(semTools)
+      })
+
+      vars_for_mi <- unique(c(
+        ORDERED_VARS,
+        "X", "credit_dose",
+        "hgrades", "bparented", "pell", "hapcl", "hprecalc13", "hchallenge", "cSFcareer", "cohort",
+        "re_all", "firstgen", "living18", "sex"
+      ))
+
+      dat_mi <- dat[, vars_for_mi, drop = FALSE]
+      # Enforce ordered-factor class for ordinal indicators
+      for (v in ORDERED_VARS) dat_mi[[v]] <- as.ordered(dat_mi[[v]])
+
+  meth <- mice::make.method(dat_mi)
+  meth[ORDERED_VARS] <- "polr"
+  meth[c("hgrades", "bparented", "hchallenge", "cSFcareer", "credit_dose")] <- "pmm"
+      meth[c("X", "pell", "hapcl", "hprecalc13", "firstgen", "cohort")] <- "logreg"
+      meth[c("re_all", "living18", "sex")] <- "polyreg"
+
+      pred <- mice::make.predictorMatrix(dat_mi)
+      diag(pred) <- 0
+
+      imp <- try(
+        mice::mice(
+          dat_mi,
+          m = MI_M,
+          method = meth,
+          predictorMatrix = pred,
+          maxit = MI_MAXIT,
+          printFlag = isTRUE(DIAG_N > 0),
+          seed = SEED
+        ),
+        silent = TRUE
+      )
+
+      if (inherits(imp, "try-error")) {
+        writeLines(
+          c(
+            "MI failed during mice() call.",
+            "Error:",
+            as.character(imp)
+          ),
+          con = mi_out
+        )
+      } else {
+        fit_fun <- function(data) {
+          # recompute derived terms post-imputation for internal consistency
+          zbar <- mean(data$credit_dose, na.rm = TRUE)
+          data$credit_dose_c <- as.numeric(scale(data$credit_dose, center = TRUE, scale = FALSE))
+          data$XZ_c <- data$X * data$credit_dose_c
+
+          lavaan::sem(
+            model = build_model_pooled(zbar = zbar),
+            data = data,
+            ordered = ORDERED_VARS,
+            estimator = "WLSMV",
+            parameterization = "theta",
+            std.lv = FALSE,
+            auto.fix.first = FALSE,
+            missing = "pairwise"
+          )
+        }
+
+        fit_mi <- try(semTools::runMI(data = imp, fun = fit_fun), silent = TRUE)
+        if (inherits(fit_mi, "try-error")) {
+          writeLines(
+            c(
+              "MI failed during semTools::runMI() call.",
+              "Error:",
+              as.character(fit_mi)
+            ),
+            con = mi_out
+          )
+        } else {
+          con <- file(mi_out, open = "wt")
+          on.exit(close(con), add = TRUE)
+          writeLines("Representative Study — Pooled MI (mice + semTools::runMI)", con = con)
+          writeLines(paste0("m=", MI_M, ", maxit=", MI_MAXIT, ", seed=", SEED), con = con)
+          writeLines("", con = con)
+          out_txt <- utils::capture.output(summary(fit_mi, standardized = TRUE, fit.measures = TRUE))
+          writeLines(out_txt, con = con)
+        }
+      }
+    }
+  }
+
   # 4) descriptives: credit bands + W sizes
   dat$credit_band <- cut(dat$trnsfr_cr, breaks = c(-Inf, 0, 11, Inf), labels = c("0", "1–11", "12+"), right = TRUE)
   tab_credit <- as.data.frame(table(dat$credit_band))
@@ -271,7 +402,8 @@ run_representative_study <- function(N, use_psw = TRUE) {
 }
 
 # Minimum per-group size for MG (polychoric/threshold estimation needs space)
-MIN_N_PER_GROUP <- 120
+# Lowered to reduce 'small_cell' dropouts in MG runs when W has rare categories.
+MIN_N_PER_GROUP <- 60
 
 # -------------------------
 # VARIABLE NAMES (KEEP CONSISTENT WITH YOUR R FILES)
@@ -300,6 +432,87 @@ make_ordinal <- function(x, K, probs = NULL) {
   ordered(cut(x, breaks = c(-Inf, cuts, Inf), labels = FALSE, right = TRUE))
 }
 
+# --- Calibration helpers ---
+# Goal: feed category probabilities into make_ordinal() so simulated items reproduce empirical marginals.
+
+infer_K_for_item <- function(var) {
+  if (var %in% c("sbmyself","sbvalued","sbcommunity")) return(5L)
+  if (var %in% c(
+    "pgthink","pganalyze","pgwork","pgvalues","pgprobsolve",
+    "SEwellness","SEnonacad","SEactivities","SEacademic","SEdiverse",
+    "evalexp","sameinst",
+    "SFcareer","SFotherwork","SFdiscuss","SFperform"
+  )) return(4L)
+  if (var %in% c("MHWdacad","MHWdlonely","MHWdmental","MHWdexhaust","MHWdsleep","MHWdfinancial")) return(6L)
+  if (var %in% c("QIstudent","QIadvisor","QIfaculty","QIstaff","QIadmin")) return(7L)
+  NA_integer_
+}
+
+normalize_to_1K <- function(x, K) {
+  # Accepts ordered factors, factors, character, numeric.
+  # Returns integer codes 1..K with NAs preserved.
+  if (is.ordered(x) || is.factor(x)) {
+    x <- suppressWarnings(as.integer(as.character(x)))
+    if (all(is.na(x))) x <- as.integer(x)
+  }
+  if (is.character(x)) x <- suppressWarnings(as.integer(x))
+  if (!is.numeric(x)) x <- suppressWarnings(as.numeric(x))
+
+  # Common NSSE pattern is 1..K; some extracts may be 0..(K-1)
+  if (is.finite(suppressWarnings(min(x, na.rm = TRUE))) && is.finite(suppressWarnings(max(x, na.rm = TRUE)))) {
+    mn <- suppressWarnings(min(x, na.rm = TRUE))
+    mx <- suppressWarnings(max(x, na.rm = TRUE))
+    if (mn == 0 && mx == (K - 1)) x <- x + 1
+  }
+
+  x <- as.integer(round(x))
+  x[!(x %in% seq_len(K))] <- NA_integer_
+  x
+}
+
+empirical_probs_1K <- function(x, K, eps = 1e-6) {
+  x <- normalize_to_1K(x, K)
+  tab <- table(factor(x, levels = seq_len(K)), useNA = "no")
+  p <- as.numeric(tab)
+  s <- sum(p)
+  if (!is.finite(s) || s <= 0) return(rep(1 / K, K))
+  p <- p / s
+  # guard against zero-mass categories (quantile cuts become unstable)
+  p <- pmax(p, eps)
+  p / sum(p)
+}
+
+estimate_item_probs_from_csv <- function(csv_path, vars) {
+  df <- utils::read.csv(csv_path, stringsAsFactors = FALSE)
+  out <- list()
+  for (v in vars) {
+    if (!v %in% names(df)) next
+    K <- infer_K_for_item(v)
+    if (is.na(K)) next
+    out[[v]] <- empirical_probs_1K(df[[v]], K = K)
+  }
+  out
+}
+
+load_item_probs <- function() {
+  # Priority: calib_from (estimate + save) then item_probs (load)
+  if (isTRUE(nzchar(CALIB_FROM_FILE)) && isTRUE(!is.na(CALIB_FROM_FILE)) && file.exists(CALIB_FROM_FILE)) {
+    probs <- estimate_item_probs_from_csv(CALIB_FROM_FILE, ORDERED_VARS)
+    dir.create(file.path("results", "calibration"), showWarnings = FALSE, recursive = TRUE)
+    out_path <- file.path("results", "calibration", safe_filename(paste0("item_probs_", basename(CALIB_FROM_FILE), "_", mk_run_id(), ".rds")))
+    saveRDS(probs, out_path)
+    message("Saved item probability calibration to: ", out_path)
+    return(probs)
+  }
+
+  if (isTRUE(nzchar(ITEM_PROBS_FILE)) && isTRUE(!is.na(ITEM_PROBS_FILE)) && file.exists(ITEM_PROBS_FILE)) {
+    probs <- readRDS(ITEM_PROBS_FILE)
+    if (is.list(probs)) return(probs)
+  }
+
+  NULL
+}
+
 collapse_small_to_other <- function(x, min_n = MIN_N_PER_GROUP, other_label = "Other") {
   x <- as.character(x)
   tab <- table(x)
@@ -326,7 +539,8 @@ group_sizes_ok <- function(dat, Wvar, min_n = MIN_N_PER_GROUP) {
 covars_for_mg <- function(Wvar) {
   # Baseline covariates used in SEM equations (selection-bias adjustment proxies)
   # NOTE: firstgen is treated as a demographic/W variable, not a baseline covariate in the SEM.
-  base <- c("hgrades","bparented","pell","hapcl","hprecalc13","hchallenge","cSFcareer","cohort")
+  # Use centered versions for continuous covariates for stability.
+  base <- c("hgrades_c","bparented_c","pell","hapcl","hprecalc13","hchallenge_c","cSFcareer_c","cohort")
 
   # Drop the grouping variable if it is in the covariate list
   setdiff(base, Wvar)
@@ -335,7 +549,7 @@ covars_for_mg <- function(Wvar) {
 # PSW (overlap weights) computed for diagnostics only (not carried into SEM)
 make_overlap_weights <- function(dat) {
   ps_mod <- try(glm(
-    X ~ hgrades + bparented + pell + hapcl + hprecalc13 + hchallenge + cSFcareer + cohort,
+    X ~ hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c + cohort,
     data = dat, family = binomial()
   ), silent = TRUE)
 
@@ -364,19 +578,19 @@ PAR <- list(
   cxz = -0.08,  # X×Z moderation on direct path (RQ1)
 
   # RQ2: distress mediator
-  a1  =  0.15,   # X -> M1 (at threshold)
-  a1z =  0.10,   # Zplus10 -> M1 (dose above threshold)
-  a1xz =  0.08, # X×Z moderation on X->M1 (RQ2/Model 7 logic)
+  a1  =  0.35,   # X -> M1 (at threshold)
+  a1z =  0.20,   # credit_dose (centered) -> M1 (dose above threshold)
+  a1xz =  0.16, # X×Z moderation on X->M1 (RQ2/Model 7 logic)
   b1  = -0.30,   # M1 -> Y
 
   # RQ3: interaction-quality mediator
-  a2  =  0.20,   # X -> M2 (at threshold)
-  a2z = -0.05,   # Zplus10 -> M2 (dose above threshold)
-  a2xz = -0.05, # X×Z moderation on X->M2 (RQ3/Model 7 logic)
+  a2  =  0.30,   # X -> M2 (at threshold)
+  a2z = -0.08,   # credit_dose (centered) -> M2 (dose above threshold)
+  a2xz = -0.08, # X×Z moderation on X->M2 (RQ3/Model 7 logic)
   b2  =  0.35,   # M2 -> Y
 
   # Optional serial link (set d = 0 if you do NOT want the serial path)
-  d   = -0.20,
+  d   = -0.30,
 
   # Cohort shifts (pooled indicator)
   g1 = 0.05,
@@ -404,17 +618,37 @@ gen_dat <- function(N) {
   # Create mild correlation structure via a shared academic-prep factor.
   prep <- rnorm(N, 0, 1)
   bparented <- 0.40*prep + rnorm(N, 0, sqrt(1 - 0.40^2))
-  hgrades   <- 0.60*prep + rnorm(N, 0, sqrt(1 - 0.60^2))
+
+  # HS grades: generate a continuous propensity, then collapse to A/B/C/D/F (no +/-)
+  hgrades_cont <- 0.60*prep + rnorm(N, 0, sqrt(1 - 0.60^2))
+
+  # Target grade shares (calibration choices): A=0.35, B=0.35, C=0.20, D=0.07, F=0.03
+  qF <- stats::quantile(hgrades_cont, probs = 0.03, na.rm = TRUE, type = 7)
+  qD <- stats::quantile(hgrades_cont, probs = 0.10, na.rm = TRUE, type = 7)
+  qC <- stats::quantile(hgrades_cont, probs = 0.30, na.rm = TRUE, type = 7)
+  qB <- stats::quantile(hgrades_cont, probs = 0.65, na.rm = TRUE, type = 7)
+
+  hgrades_AF <- cut(
+    hgrades_cont,
+    breaks = c(-Inf, qF, qD, qC, qB, Inf),
+    labels = c("F","D","C","B","A"),
+    right = TRUE,
+    ordered_result = TRUE
+  )
+
+  # Numeric version for modeling (A=4 ... F=0), then standardize to mean 0 / SD 1
+  hgrades_num <- as.numeric(hgrades_AF) - 1
+  hgrades     <- as.numeric(scale(hgrades_num, center = TRUE, scale = TRUE))
 
   # Demographic/W variables
-  # First-generation (CSU systemwide undergraduates): 29.4% first in family to attend college
-  firstgen  <- rbinom(N, 1, 0.294)
+  # First-generation (CSU systemwide undergraduates): "more than one-third" (calibration choice)
+  firstgen  <- rbinom(N, 1, 0.35)
 
-  # Pell Grant recipient (simulation target ~49%)
-  pell      <- rbinom(N, 1, 0.49)
+  # Pell Grant recipient: "nearly half" (calibration choice)
+  pell      <- rbinom(N, 1, 0.50)
 
   # hapcl: completed >2 AP courses in HS (binary; higher probability with stronger grades)
-  hapcl <- rbinom(N, 1, plogis(-0.30 + 0.65*hgrades))
+  hapcl <- rbinom(N, 1, plogis(-0.20 + 0.55*hgrades))
 
   # hprecalc13: HS attendance type recoded to binary Public(0) vs Private-bucket(1)
   # Private-bucket includes: Private religiously-affiliated, Private not religiously-affiliated, Home school, Other
@@ -425,7 +659,8 @@ gen_dat <- function(N) {
     "Home school",
     "Other"
   )
-  hprecalc13_raw_probs  <- c(0.90, 0.03, 0.03, 0.02, 0.02)
+  # Target: ~87% California public HS, ~13% private-bucket
+  hprecalc13_raw_probs  <- c(0.87, 0.05, 0.04, 0.02, 0.02)
   hprecalc13_raw <- sample(hprecalc13_raw_levels, N, replace = TRUE, prob = hprecalc13_raw_probs)
   hprecalc13 <- as.integer(hprecalc13_raw != "Public")
 
@@ -434,6 +669,14 @@ gen_dat <- function(N) {
 
   # cSFcareer: baseline career orientation/goals (continuous)
   cSFcareer  <- 0.25*hgrades + rnorm(N, 0, 1)
+
+  # Center selected continuous covariates for SEM stability.
+  # Keep the original variables too (useful for descriptives / backwards compatibility),
+  # but prefer *_c in SEM covariate tails.
+  hgrades_c    <- as.numeric(scale(hgrades,    center = TRUE, scale = FALSE))
+  bparented_c  <- as.numeric(scale(bparented,  center = TRUE, scale = FALSE))
+  hchallenge_c <- as.numeric(scale(hchallenge, center = TRUE, scale = FALSE))
+  cSFcareer_c  <- as.numeric(scale(cSFcareer,  center = TRUE, scale = FALSE))
 
   # -------------------------
   # W variables (simulation draws; CSU-realistic marginal distributions)
@@ -445,7 +688,8 @@ gen_dat <- function(N) {
     "Black/African American",
     "Other/Multiracial/Unknown"
   )
-  re_all_probs <- c(0.46, 0.21, 0.16, 0.05, 0.12)
+  # Target (CSU systemwide, Fall 2024; collapsed): Hispanic 0.489, White 0.201, Asian 0.155, Black 0.041, Other/Multiracial/Unknown 0.114
+  re_all_probs <- c(0.489, 0.201, 0.155, 0.041, 0.114)
   re_all <- factor(sample(re_all_levels, N, replace = TRUE, prob = re_all_probs), levels = re_all_levels)
 
   living18_levels <- c(
@@ -467,17 +711,17 @@ gen_dat <- function(N) {
   # -------------------------
   credit_lat <- 0.50*hgrades + 0.12*bparented + 0.18*hapcl + 0.15*hchallenge + 0.10*cSFcareer -
     0.12*pell - 0.10*hprecalc13 + rnorm(N, 0, 1)
-  trnsfr_cr  <- pmax(0, pmin(60, round(10 + 12*credit_lat + rnorm(N, 0, 8))))
+  trnsfr_cr  <- pmax(0, pmin(60, round(10 + 14*credit_lat + rnorm(N, 0, 8))))
 
-  # Treatment + Zplus10 from trnsfr_cr (your confirmed rule)
+  # Treatment + dose from trnsfr_cr (your confirmed rule)
   X <- as.integer(trnsfr_cr >= 12)
-  Zplus10 <- pmax(0, trnsfr_cr - 12) / 10
+  credit_dose <- pmax(0, trnsfr_cr - 12) / 10
 
   # Center Z to improve numerical stability of XZ interactions in WLSMV.
   # Note: when using XZ interaction, we must use a centered Z term consistently
   # to avoid rank deficiency in the exogenous covariate matrix.
-  Zplus10_c <- as.numeric(scale(Zplus10, center = TRUE, scale = FALSE))
-  XZ_c <- X * Zplus10_c
+  credit_dose_c <- as.numeric(scale(credit_dose, center = TRUE, scale = FALSE))
+  XZ_c <- X * credit_dose_c
 
   # Keep named categories intact here; collapsing (if needed) is handled at MG-fit time.
   # sex already 2-group
@@ -497,21 +741,21 @@ gen_dat <- function(N) {
     delta_sex[as.character(sex)]
 
   # Latent M1 (Distress)
-  M1_lat <- (a1_i*X) + (PAR$a1xz*XZ_c) + (PAR$a1z*Zplus10_c) + (PAR$g1*cohort) +
+  M1_lat <- (a1_i*X) + (PAR$a1xz*XZ_c) + (PAR$a1z*credit_dose_c) + (PAR$g1*cohort) +
     BETA_M1["hgrades"]*hgrades + BETA_M1["bparented"]*bparented +
     BETA_M1["pell"]*pell + BETA_M1["hapcl"]*hapcl + BETA_M1["hprecalc13"]*hprecalc13 +
     BETA_M1["hchallenge"]*hchallenge + BETA_M1["cSFcareer"]*cSFcareer +
-    rnorm(N, 0, 1)
+    rnorm(N, 0, 0.70)
 
   # Latent M2 (Quality of Interactions)
-  M2_lat <- (PAR$a2*X) + (PAR$a2xz*XZ_c) + (PAR$a2z*Zplus10_c) + (PAR$d*M1_lat) + (PAR$g2*cohort) +
+  M2_lat <- (PAR$a2*X) + (PAR$a2xz*XZ_c) + (PAR$a2z*credit_dose_c) + (PAR$d*M1_lat) + (PAR$g2*cohort) +
     BETA_M2["hgrades"]*hgrades + BETA_M2["bparented"]*bparented +
     BETA_M2["pell"]*pell + BETA_M2["hapcl"]*hapcl + BETA_M2["hprecalc13"]*hprecalc13 +
     BETA_M2["hchallenge"]*hchallenge + BETA_M2["cSFcareer"]*cSFcareer +
-    rnorm(N, 0, 1)
+    rnorm(N, 0, 0.70)
 
   # Latent DevAdj (second-order)
-  Y_lat <- (PAR$c*X) + (PAR$cxz*XZ_c) + (PAR$cz*Zplus10_c) + (PAR$b1*M1_lat) + (PAR$b2*M2_lat) + (PAR$g3*cohort) +
+  Y_lat <- (PAR$c*X) + (PAR$cxz*XZ_c) + (PAR$cz*credit_dose_c) + (PAR$b1*M1_lat) + (PAR$b2*M2_lat) + (PAR$g3*cohort) +
     BETA_Y["hgrades"]*hgrades + BETA_Y["bparented"]*bparented +
     BETA_Y["pell"]*pell + BETA_Y["hapcl"]*hapcl + BETA_Y["hprecalc13"]*hprecalc13 +
     BETA_Y["hchallenge"]*hchallenge + BETA_Y["cSFcareer"]*cSFcareer +
@@ -523,54 +767,60 @@ gen_dat <- function(N) {
   Satisf_lat  <- 0.85*Y_lat + rnorm(N, 0, sqrt(1 - 0.85^2))
 
   # Generate continuous item tendencies, then make ordinal
+  make_item <- function(var, eta, K) {
+    p <- NULL
+    if (!is.null(ITEM_PROBS) && !is.null(ITEM_PROBS[[var]])) p <- ITEM_PROBS[[var]]
+    make_ordinal(eta, K = K, probs = p)
+  }
+
   # SB, PG, SE set to 5-category for SB (Belong) indicators
-  sbmyself    <- make_ordinal(LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
-  sbvalued    <- make_ordinal(LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
-  sbcommunity <- make_ordinal(LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
+  sbmyself    <- make_item("sbmyself",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
+  sbvalued    <- make_item("sbvalued",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
+  sbcommunity <- make_item("sbcommunity", LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
 
-  pgthink     <- make_ordinal(LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  pganalyze   <- make_ordinal(LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  pgwork      <- make_ordinal(LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  pgvalues    <- make_ordinal(LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  pgprobsolve <- make_ordinal(LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  pgthink     <- make_item("pgthink",     LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  pganalyze   <- make_item("pganalyze",   LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  pgwork      <- make_item("pgwork",      LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  pgvalues    <- make_item("pgvalues",    LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  pgprobsolve <- make_item("pgprobsolve", LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
-  SEwellness   <- make_ordinal(LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SEnonacad    <- make_ordinal(LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SEactivities <- make_ordinal(LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SEacademic   <- make_ordinal(LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SEdiverse    <- make_ordinal(LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SEwellness   <- make_item("SEwellness",   LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SEnonacad    <- make_item("SEnonacad",    LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SEactivities <- make_item("SEactivities", LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SEacademic   <- make_item("SEacademic",   LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SEdiverse    <- make_item("SEdiverse",    LAM*SuppEnv_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
-  evalexp  <- make_ordinal(LAM*Satisf_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  sameinst <- make_ordinal(LAM*Satisf_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  evalexp  <- make_item("evalexp",  LAM*Satisf_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  sameinst <- make_item("sameinst", LAM*Satisf_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
   # MHW difficulty set to 6-category
-  MHWdacad    <- make_ordinal(LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdlonely  <- make_ordinal(LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdmental  <- make_ordinal(LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdexhaust <- make_ordinal(LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdsleep   <- make_ordinal(LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdfinancial <- make_ordinal(LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdacad      <- make_item("MHWdacad",      LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdlonely    <- make_item("MHWdlonely",    LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdmental    <- make_item("MHWdmental",    LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdexhaust   <- make_item("MHWdexhaust",   LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdsleep     <- make_item("MHWdsleep",     LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdfinancial <- make_item("MHWdfinancial", LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
 
   # Quality of Interactions (NSSE): 7-category frequency/quality items
-  QIstudent <- make_ordinal(LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
-  QIadvisor <- make_ordinal(LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
-  QIfaculty <- make_ordinal(LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
-  QIstaff   <- make_ordinal(LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
-  QIadmin   <- make_ordinal(LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  QIstudent <- make_item("QIstudent", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  QIadvisor <- make_item("QIadvisor", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  QIfaculty <- make_item("QIfaculty", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  QIstaff   <- make_item("QIstaff",   LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  QIadmin   <- make_item("QIadmin",   LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
 
   # Student–Faculty Interaction (NSSE): 4-category frequency items
-  SFcareer    <- make_ordinal(LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SFotherwork <- make_ordinal(LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SFdiscuss   <- make_ordinal(LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SFperform   <- make_ordinal(LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SFcareer    <- make_item("SFcareer",    LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SFotherwork <- make_item("SFotherwork", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SFdiscuss   <- make_item("SFdiscuss",   LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SFperform   <- make_item("SFperform",   LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
   dat <- data.frame(
     cohort,
-    hgrades, bparented, pell, hapcl, hprecalc13, hchallenge, cSFcareer,
+    hgrades, hgrades_c, hgrades_AF, bparented, bparented_c, pell, hapcl, hprecalc13, hchallenge, hchallenge_c, cSFcareer, cSFcareer_c,
     firstgen,
     re_all, living18, sex,
     trnsfr_cr,
-    X, Zplus10, Zplus10_c, XZ_c,
+  X, credit_dose, credit_dose_c, XZ_c,
     sbmyself, sbvalued, sbcommunity,
     pgthink, pganalyze, pgwork, pgvalues, pgprobsolve,
     SEwellness, SEnonacad, SEactivities, SEacademic, SEdiverse,
@@ -587,37 +837,37 @@ gen_dat <- function(N) {
 # POOLED SEM SYNTAX (RQ1–RQ3)
 # -------------------------
 build_model_pooled <- function(zbar) {
-  # Conditional effects are defined at raw Zplus10 values (0,1,2,3,4),
-  # but the fitted model uses centered Zplus10_c and XZ_c.
-  # For a given raw z, the corresponding centered value is z - zbar.
-  zc0 <- 0 - zbar
-  zc1 <- 1 - zbar
-  zc2 <- 2 - zbar
-  zc3 <- 3 - zbar
-  zc4 <- 4 - zbar
+  # Probe dose at meaningful entry-credit totals:
+  # credit_dose = (entry_credits - 12) / 10
+  # Entry credits: 12, 24, 36, 48, 60  ->  credit_dose: 0.0, 1.2, 2.4, 3.6, 4.8
+  zc0 <- 0.0 - zbar  # 12 credits at entry
+  zc1 <- 1.2 - zbar  # 24 credits at entry
+  zc2 <- 2.4 - zbar  # 36 credits at entry
+  zc3 <- 3.6 - zbar  # 48 credits at entry
+  zc4 <- 4.8 - zbar  # 60 credits at entry
 
   paste0('
-  # measurement
-  Belong =~ sbmyself + sbvalued + sbcommunity
-  Gains  =~ pgthink + pganalyze + pgwork + pgvalues + pgprobsolve
-  SuppEnv =~ SEwellness + SEnonacad + SEactivities + SEacademic + SEdiverse
-  Satisf =~ evalexp + sameinst
-  DevAdj =~ Belong + Gains + SuppEnv + Satisf
+  # measurement (marker-variable identification)
+  Belong =~ 1*sbvalued + sbmyself + sbcommunity
+  Gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve
+  SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse
+  Satisf =~ 1*sameinst + evalexp
+  DevAdj =~ 1*Belong + Gains + SuppEnv + Satisf
 
-  M1 =~ MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
-  M2 =~ QIstudent + QIadvisor + QIfaculty + QIstaff + QIadmin + SFcareer + SFotherwork + SFdiscuss + SFperform
+  M1 =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
+  M2 =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff + SFcareer + SFotherwork + SFdiscuss + SFperform
 
   # structural (pooled)
-  M1 ~ a1*X + a1xz*XZ_c + a1z*Zplus10_c + g1*cohort +
-    hgrades + bparented + pell + hapcl + hprecalc13 + hchallenge + cSFcareer
+  M1 ~ a1*X + a1xz*XZ_c + a1z*credit_dose_c + g1*cohort +
+    hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
-  M2 ~ a2*X + a2xz*XZ_c + a2z*Zplus10_c + d*M1 + g2*cohort +
-    hgrades + bparented + pell + hapcl + hprecalc13 + hchallenge + cSFcareer
+  M2 ~ a2*X + a2xz*XZ_c + a2z*credit_dose_c + d*M1 + g2*cohort +
+    hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
-  DevAdj ~ c*X + cxz*XZ_c + cz*Zplus10_c + b1*M1 + b2*M2 + g3*cohort +
-     hgrades + bparented + pell + hapcl + hprecalc13 + hchallenge + cSFcareer
+  DevAdj ~ c*X + cxz*XZ_c + cz*credit_dose_c + b1*M1 + b2*M2 + g3*cohort +
+    hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
-  # conditional effects along raw Zplus10 = 0,1,2,3,4 (0/10/20/30/40 credits above threshold)
+  # conditional effects along entry credits = 12,24,36,48,60 (raw credit_dose = 0.0,1.2,2.4,3.6,4.8)
 
   # X->M paths conditional on Z (a-paths)
   a1_z0 := a1 + a1xz*', sprintf('%.8f', zc0), '
@@ -677,22 +927,22 @@ make_model_mg_a1 <- function(G, cov_string) {
   a1xz_free <- paste0("c(", paste(a1xz_vec, collapse = ","), ")*XZ_c")
 
   paste0('
-    # measurement
-    Belong =~ sbmyself + sbvalued + sbcommunity
-    Gains  =~ pgthink + pganalyze + pgwork + pgvalues + pgprobsolve
-    SuppEnv =~ SEwellness + SEnonacad + SEactivities + SEacademic + SEdiverse
-    Satisf =~ evalexp + sameinst
-    DevAdj =~ Belong + Gains + SuppEnv + Satisf
+    # measurement (marker-variable identification)
+    Belong =~ 1*sbvalued + sbmyself + sbcommunity
+    Gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve
+    SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse
+    Satisf =~ 1*sameinst + evalexp
+    DevAdj =~ 1*Belong + Gains + SuppEnv + Satisf
 
-    M1 =~ MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
-    M2 =~ QIstudent + QIadvisor + QIfaculty + QIstaff + QIadmin + SFcareer + SFotherwork + SFdiscuss + SFperform
+    M1 =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
+    M2 =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff + SFcareer + SFotherwork + SFdiscuss + SFperform
 
     # structural (a1 and a1xz vary by group; other paths equal)
-    M1 ~ ', a1_free, ' + ', a1xz_free, ' + a1z*Zplus10_c + g1*cohort + ', cov_string, '
+  M1 ~ ', a1_free, ' + ', a1xz_free, ' + a1z*credit_dose_c + g1*cohort + ', cov_string, '
 
-    M2 ~ a2*X + a2xz*XZ_c + a2z*Zplus10_c + d*M1 + g2*cohort + ', cov_string, '
+  M2 ~ a2*X + a2xz*XZ_c + a2z*credit_dose_c + d*M1 + g2*cohort + ', cov_string, '
 
-    DevAdj ~ c*X + cxz*XZ_c + cz*Zplus10_c + b1*M1 + b2*M2 + g3*cohort + ', cov_string, '
+  DevAdj ~ c*X + cxz*XZ_c + cz*credit_dose_c + b1*M1 + b2*M2 + g3*cohort + ', cov_string, '
   ')
 }
 
@@ -706,12 +956,13 @@ make_a1_equal_constraints <- function(G) {
 
 fit_pooled <- function(dat) {
   args <- list(
-    model = build_model_pooled(zbar = mean(dat$Zplus10, na.rm = TRUE)),
+    model = build_model_pooled(zbar = mean(dat$credit_dose, na.rm = TRUE)),
     data = dat,
     ordered = ORDERED_VARS,
     estimator = "WLSMV",
     parameterization = "theta",
-    std.lv = TRUE,
+    std.lv = FALSE,
+    auto.fix.first = FALSE,
     missing = "pairwise",
     control = list(iter.max = 2000)  # hard stop instead of endless churn
   )
@@ -763,7 +1014,8 @@ fit_mg_a1_test <- function(dat, Wvar) {
     ordered = ORDERED_VARS,
     estimator = "WLSMV",
     parameterization = "theta",
-    std.lv = TRUE,
+    std.lv = FALSE,
+    auto.fix.first = FALSE,
     missing = "pairwise",
     # make measurement comparable for MG test in the simulation
     group.equal = c("loadings","thresholds")
@@ -951,7 +1203,7 @@ run_mc <- function() {
     } else {
       cat("RQ4 MG a1 tests (one W at a time)\n")
     }
-    for (Wvar in W_TARGETS) {
+    for (Wvar in names(rq4_pvals)) {
       used <- which(rq4_ok[[Wvar]] == 1 & is.finite(rq4_pvals[[Wvar]]))
       power <- if (length(used) > 0) mean(rq4_pvals[[Wvar]][used] < 0.05) else NA_real_
       cat("\nW:", Wvar, "\n")
@@ -973,6 +1225,13 @@ run_mc <- function() {
 
 # Only run the Monte Carlo when executed via Rscript, not when sourced()
 if (sys.nframe() == 0) {
+  # Load calibrated item marginals once so gen_dat() can reuse them
+  ITEM_PROBS <<- load_item_probs()
+  if (!is.null(ITEM_PROBS)) {
+    message("Item marginals: using calibrated probabilities for ", length(ITEM_PROBS), " items")
+  } else {
+    message("Item marginals: using default equal-quantile cuts (no calibration loaded)")
+  }
   if (isTRUE(DO_REP_STUDY == 1)) {
     run_representative_study(N = N, use_psw = isTRUE(USE_PSW == 1))
   } else {
