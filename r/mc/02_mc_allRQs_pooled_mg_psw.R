@@ -888,6 +888,18 @@ group_sizes_ok <- function(dat, Wvar, min_n = MIN_N_PER_GROUP) {
   all(tab >= min_n)
 }
 
+drop_smallest_group <- function(dat, Wvar) {
+  # Drop the smallest group (post-prep) to avoid numerical instabilities in MG fits.
+  # Returns a filtered data.frame; if fewer than 2 groups, returns original dat.
+  if (is.null(dat) || !isTRUE(Wvar %in% names(dat))) return(dat)
+  g <- dat[[Wvar]]
+  if (!is.factor(g)) g <- factor(g)
+  tab <- table(g)
+  if (length(tab) < 2) return(dat)
+  smallest <- names(tab)[which.min(as.integer(tab))][[1]]
+  dat[g != smallest, , drop = FALSE]
+}
+
 covars_for_mg <- function(Wvar) {
   # Baseline covariates used in SEM equations (selection-bias adjustment proxies)
   # NOTE: firstgen is treated as a demographic/W variable, not a baseline covariate in the SEM.
@@ -1803,6 +1815,10 @@ run_mc <- function() {
         if (Wvar == "sex") dat$sex <- collapse_sex_2grp(dat$sex)
         # Merge rare categories for any MG grouping Wvar
         dat[[Wvar]] <- merge_rare_categories_nearest(dat[[Wvar]], min_prop = 0.01, min_expected_n = 5)
+
+        # User-requested stability fallback: drop the smallest group to reduce
+        # numerical failures (e.g., Lapack 'dgesdd') when W has uneven groups.
+        dat <- drop_smallest_group(dat, Wvar)
 
         if (isTRUE(DIAG_N > 0)) {
           gm <- diag_min_category_prop_vars(dat, ORDERED_VARS)

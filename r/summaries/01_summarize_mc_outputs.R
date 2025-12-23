@@ -62,8 +62,8 @@ format_round <- function(x, digits = 3) {
 # ------------------------
 # Load pooled parameterEstimates (per-rep)
 # ------------------------
-pe_files <- list.files(opt$run_dir, pattern = "^rep[0-9]{3}_pooled_pe\\.csv$", full.names = TRUE)
-if (length(pe_files) == 0) stop("No repXXX_pooled_pe.csv files in ", opt$run_dir)
+pe_files <- list.files(opt$run_dir, pattern = "^rep[0-9]{3}_pooled(_[A-Za-z0-9]+)?_pe\\.csv$", full.names = TRUE)
+if (length(pe_files) == 0) stop("No repXXX_pooled*_pe.csv files in ", opt$run_dir)
 pe_files <- sort(pe_files)
 
 extract_rep_id <- function(path) {
