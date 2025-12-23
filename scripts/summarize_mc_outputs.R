@@ -51,6 +51,10 @@ summ_num <- function(x) {
   c(n = length(x), mean = mean(x), sd = sd(x), rmse = sqrt(mean(x^2)))
 }
 
+format_round <- function(x, digits = 3) {
+  ifelse(is.na(x), NA, round(x, digits))
+}
+
 # ------------------------
 # Load pooled parameterEstimates (per-rep)
 # ------------------------
@@ -78,6 +82,37 @@ if (is.null(pooled_long) || nrow(pooled_long) == 0) stop("Could not read pooled 
 # These labels follow lavaan conventions: lhs, op, rhs, label.
 # We prefer label-based selection when present.
 key_labels <- c("c", "cxz", "cz", "a1", "a1xz", "a1z", "a2", "a2xz", "a2z", "b1", "b2", "d")
+
+# True values used in the simulation (for bias/RMSE reporting)
+true_vals <- c(
+  c = 0.20,
+  cxz = -0.08,
+  cz = -0.10,
+  a1 = 0.35,
+  a1xz = 0.16,
+  a1z = 0.20,
+  a2 = 0.30,
+  a2xz = -0.08,
+  a2z = -0.08,
+  b1 = -0.30,
+  b2 = 0.35,
+  d = -0.30
+)
+
+apa_labels <- c(
+  c = "c (direct effect)",
+  cxz = "c×Z (moderation of c)",
+  cz = "Z (covariate in Y)",
+  a1 = "a1 (X → M1)",
+  a1xz = "a1×Z (X → M1 moderation)",
+  a1z = "Z (predictor of M1)",
+  a2 = "a2 (X → M2)",
+  a2xz = "a2×Z (X → M2 moderation)",
+  a2z = "Z (predictor of M2)",
+  b1 = "b1 (M1 → Y)",
+  b2 = "b2 (M2 → Y)",
+  d = "d (X → Y residual)"
+)
 
 sel <- pooled_long
 if ("label" %in% names(sel)) {
@@ -110,6 +145,37 @@ pooled_summary <- do.call(rbind, lapply(names(split(sel$est, sel$param)), functi
 }))
 
 utils::write.csv(pooled_summary, file.path(opt$out_dir, "pooled_param_summary.csv"), row.names = FALSE)
+
+# APA/Word-ready pooled table (most complete)
+pooled_apa <- pooled_summary
+pooled_apa$true <- true_vals[pooled_apa$param]
+pooled_apa$bias <- pooled_apa$mean_est - pooled_apa$true
+pooled_apa$mcse_mean <- pooled_apa$sd_est / sqrt(pooled_apa$n)
+pooled_apa$ci95_lo <- pooled_apa$mean_est - 1.96 * pooled_apa$mcse_mean
+pooled_apa$ci95_hi <- pooled_apa$mean_est + 1.96 * pooled_apa$mcse_mean
+pooled_apa$label <- apa_labels[pooled_apa$param]
+
+# Reorder rows in a standard PROCESS-style order
+order_params <- key_labels
+pooled_apa <- pooled_apa[match(order_params, pooled_apa$param), ]
+
+# Round for Word
+pooled_apa_out <- data.frame(
+  Parameter = pooled_apa$label,
+  Symbol = pooled_apa$param,
+  True = format_round(pooled_apa$true, 3),
+  Mean = format_round(pooled_apa$mean_est, 3),
+  SD = format_round(pooled_apa$sd_est, 3),
+  MCSE = format_round(pooled_apa$mcse_mean, 3),
+  Bias = format_round(pooled_apa$bias, 3),
+  RMSE = format_round(pooled_apa$rmse, 3),
+  CI95_L = format_round(pooled_apa$ci95_lo, 3),
+  CI95_U = format_round(pooled_apa$ci95_hi, 3),
+  Reps = pooled_apa$n,
+  stringsAsFactors = FALSE
+)
+
+utils::write.csv(pooled_apa_out, file.path(opt$out_dir, "pooled_param_summary_APA7_Word.csv"), row.names = FALSE)
 
 # Convergence proxy: number of pooled PE files present
 pooled_conv <- data.frame(
@@ -183,32 +249,23 @@ parse_wald_p_from_txt <- function(path) {
   nums[length(nums)]
 }
 
-# MG reject indicator (alpha=.05)
-mg_pvals <- data.frame(
-  rep = vapply(mg_txt_files, extract_rep_id, integer(1)),
-  mg_wald_p = vapply(mg_txt_files, parse_wald_p_from_txt, numeric(1)),
+# MG power table:
+# In this repo, the rep-level MG text outputs don't include an explicit Wald-test line,
+# and the script does not currently save a per-rep wald CSV for this run.
+# So we summarize what we *can* from diagnostics: how many MG reps ran successfully.
+mg_tab <- data.frame(
+  W = opt$W,
+  alpha = 0.05,
+  reps_expected = opt$R,
+  reps_with_mg_txt = length(mg_txt_files),
+  reps_with_mg_pe = length(mg_pe_files),
+  reps_used = NA_integer_,
+  reps_failed = opt$R - length(mg_txt_files),
+  power_reject_equal_a1 = NA_real_,
+  note = "Per-rep Wald p-values not found in rep*_mg_*.txt; power available from console summary or if per-rep wald CSVs are saved.",
   stringsAsFactors = FALSE
 )
-mg_pvals$mg_wald_reject <- as.integer(is.finite(mg_pvals$mg_wald_p) & mg_pvals$mg_wald_p < 0.05)
-
-if (nrow(mg_pvals) > 0) {
-  reps_used <- sum(is.finite(mg_pvals$mg_wald_p))
-  power <- if (reps_used > 0) mean(mg_pvals$mg_wald_reject == 1, na.rm = TRUE) else NA_real_
-  reps_ok <- reps_used
-  reps_failed <- opt$R - reps_ok
-  mg_tab <- data.frame(
-    W = opt$W,
-    alpha = 0.05,
-    reps_expected = opt$R,
-    reps_with_mg_txt = length(mg_txt_files),
-    reps_with_mg_pe = length(mg_pe_files),
-    reps_used = reps_used,
-    reps_failed = reps_failed,
-    power_reject_equal_a1 = power,
-    stringsAsFactors = FALSE
-  )
-  utils::write.csv(mg_tab, file.path(opt$out_dir, sprintf("mg_%s_power.csv", opt$W)), row.names = FALSE)
-}
+utils::write.csv(mg_tab, file.path(opt$out_dir, sprintf("mg_%s_power.csv", opt$W)), row.names = FALSE)
 
 # Group-specific a1 summaries if we can extract per-group a1 from mg PE
 if (length(mg_pe_files) > 0) {
@@ -245,6 +302,7 @@ if (length(mg_pe_files) > 0) {
 
 cat("Wrote tables to: ", normalizePath(opt$out_dir), "\n", sep = "")
 cat("- pooled_param_summary.csv\n")
+cat("- pooled_param_summary_APA7_Word.csv\n")
 cat("- pooled_convergence.csv\n")
 if (!is.null(diag)) cat("- diagnostics_summary.csv\n")
 if (file.exists(file.path(opt$out_dir, sprintf("mg_%s_power.csv", opt$W)))) cat("- mg_", opt$W, "_power.csv\n", sep = "")
