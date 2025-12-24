@@ -969,16 +969,23 @@ impute_mice_quiet <- function(dat, m, maxit, seed) {
 
 # MI pooled SEM with per-imputation PSW (for MC runs)
 fit_pooled_mi <- function(dat, r, run_dir = NULL) {
-  if (!requireNamespace("semTools", quietly = TRUE)) {
-    stop(
-      "Package 'semTools' is required for --analysis mi but is not installed.\n",
-      "Install once: install.packages('semTools')",
-      call. = FALSE
-    )
-  }
   if (!requireNamespace("mice", quietly = TRUE)) {
     stop(
       "Package 'mice' is required for --analysis mi but is not installed.",
+      call. = FALSE
+    )
+  }
+
+  # semTools' legacy MI objects (OLDlavaan.mi) can make extraction painful.
+  # Prefer the standalone lavaan.mi package when available; fall back to semTools.
+  has_lavaan_mi <- requireNamespace("lavaan.mi", quietly = TRUE)
+  has_semtools <- requireNamespace("semTools", quietly = TRUE)
+  if (!has_lavaan_mi && !has_semtools) {
+    stop(
+      "MI analysis requires either package 'lavaan.mi' (preferred) or 'semTools'.\n",
+      "Install one of:\n",
+      "  install.packages('lavaan.mi')\n",
+      "  install.packages('semTools')",
       call. = FALSE
     )
   }
@@ -1013,8 +1020,15 @@ fit_pooled_mi <- function(dat, r, run_dir = NULL) {
   )
   if (isTRUE(USE_PSW == 1)) base_args$sampling.weights <- "psw"
 
+  fitter <- NULL
+  if (has_lavaan_mi) {
+    fitter <- lavaan.mi::lavaan.mi
+  } else {
+    fitter <- semTools::lavaan.mi
+  }
+
   fit <- tryCatch(
-    suppressWarnings(do.call(semTools::lavaan.mi, base_args)),
+    suppressWarnings(do.call(fitter, base_args)),
     warning = function(w) {
       if (isTRUE(DIAG_N > 0)) message("[pooled MI fit_warning] ", conditionMessage(w))
       invokeRestart("muffleWarning")
