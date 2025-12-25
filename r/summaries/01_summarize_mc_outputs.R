@@ -55,6 +55,56 @@ summ_num <- function(x) {
   c(n = length(x), mean = mean(x), sd = sd(x), rmse = sqrt(mean(x^2)))
 }
 
+summ_param <- function(est_vec, true = NA_real_) {
+  est_vec <- est_vec[is.finite(est_vec)]
+  n <- length(est_vec)
+  if (n == 0) {
+    return(data.frame(
+      n = 0,
+      mean_est = NA_real_,
+      sd_est = NA_real_,
+      mcse_mean = NA_real_,
+      true = true,
+      bias = NA_real_,
+      rmse = NA_real_,
+      ci95_lo = NA_real_,
+      ci95_hi = NA_real_,
+      stringsAsFactors = FALSE
+    ))
+  }
+  m <- mean(est_vec)
+  s <- stats::sd(est_vec)
+  mcse <- s / sqrt(n)
+  bias <- if (is.finite(true)) m - true else NA_real_
+  rmse <- if (is.finite(true)) sqrt(mean((est_vec - true)^2)) else NA_real_
+  data.frame(
+    n = n,
+    mean_est = m,
+    sd_est = s,
+    mcse_mean = mcse,
+    true = true,
+    bias = bias,
+    rmse = rmse,
+    ci95_lo = m - 1.96 * mcse,
+    ci95_hi = m + 1.96 * mcse,
+    stringsAsFactors = FALSE
+  )
+}
+
+safe_extract_num <- function(x, pattern) {
+  if (is.null(x) || !is.character(x) || !length(x)) return(NA_real_)
+  m <- regexec(pattern, x)
+  g <- regmatches(x, m)
+  g <- g[length(g)][[1]]
+  if (length(g) < 2) return(NA_real_)
+  suppressWarnings(as.numeric(g[2]))
+}
+
+extract_z_from_rhs <- function(rhs, term) {
+  # Example rhs: "c+cxz*-0.67551429" and term="cxz"
+  safe_extract_num(rhs, paste0(term, "\\*([+-]?[0-9.]+)"))
+}
+
 format_round <- function(x, digits = 3) {
   ifelse(is.na(x), NA, round(x, digits))
 }
@@ -186,6 +236,160 @@ if (length(pe_files) == 0 || is.null(pooled_long) || nrow(pooled_long) == 0) {
   )
 
   utils::write.csv(pooled_apa_out, file.path(opt$out_dir, "pooled_param_summary_word_ready.csv"), row.names = FALSE)
+
+  # ------------------------
+  # Six pooled-only tables requested (fit, direct, a, b, indirect, design)
+  # ------------------------
+  pooled_long_use <- pooled_long
+  if (!"label" %in% names(pooled_long_use)) pooled_long_use$label <- ""
+  pooled_long_use$label <- as.character(pooled_long_use$label)
+  pooled_long_use$est <- suppressWarnings(as.numeric(pooled_long_use$est))
+  pooled_long_use <- pooled_long_use[pooled_long_use$label != "" & is.finite(pooled_long_use$est), , drop = FALSE]
+
+  build_table_for_labels <- function(labels, out_name, pretty = NULL, true_map = NULL) {
+    if (is.null(pooled_long_use) || nrow(pooled_long_use) == 0) return(invisible(NULL))
+    rows <- list()
+    for (lab in labels) {
+      est_vec <- pooled_long_use$est[pooled_long_use$label == lab]
+      tru <- NA_real_
+      if (!is.null(true_map) && lab %in% names(true_map)) tru <- as.numeric(true_map[[lab]])
+      s <- summ_param(est_vec, true = tru)
+      rows[[lab]] <- data.frame(
+        param = lab,
+        label = if (!is.null(pretty) && lab %in% names(pretty)) pretty[[lab]] else lab,
+        s,
+        stringsAsFactors = FALSE
+      )
+    }
+    out <- do.call(rbind, rows)
+    utils::write.csv(out, file.path(opt$out_dir, out_name), row.names = FALSE)
+    invisible(out)
+  }
+
+  # Extract the Z grid used for conditional effects (z0..z4) from any available row.
+  z_grid <- rep(NA_real_, 5)
+  names(z_grid) <- paste0("z", 0:4)
+  direct_rows <- pooled_long[pooled_long$op == ":=" & pooled_long$label %in% paste0("direct_z", 0:4), , drop = FALSE]
+  if (nrow(direct_rows) > 0 && "rhs" %in% names(direct_rows)) {
+    for (k in 0:4) {
+      rhs_k <- direct_rows$rhs[direct_rows$label == paste0("direct_z", k)][1]
+      z_grid[[paste0("z", k)]] <- extract_z_from_rhs(rhs_k, term = "cxz")
+    }
+  }
+
+  # Compute true values for derived/conditional effects using the extracted z grid.
+  true_derived <- c()
+  if (all(is.finite(z_grid))) {
+    for (k in 0:4) {
+      z <- z_grid[[paste0("z", k)]]
+      true_derived[[paste0("direct_z", k)]] <- true_vals[["c"]] + true_vals[["cxz"]] * z
+      true_derived[[paste0("a1_z", k)]] <- true_vals[["a1"]] + true_vals[["a1xz"]] * z
+      true_derived[[paste0("a2_z", k)]] <- true_vals[["a2"]] + true_vals[["a2xz"]] * z
+      true_derived[[paste0("ind_M1_z", k)]] <- (true_vals[["a1"]] + true_vals[["a1xz"]] * z) * true_vals[["b1"]]
+      true_derived[[paste0("ind_M2_z", k)]] <- (true_vals[["a2"]] + true_vals[["a2xz"]] * z) * true_vals[["b2"]]
+      true_derived[[paste0("ind_serial_z", k)]] <- (true_vals[["a1"]] + true_vals[["a1xz"]] * z) * true_vals[["d"]] * true_vals[["b2"]]
+      true_derived[[paste0("total_z", k)]] <-
+        true_derived[[paste0("direct_z", k)]] +
+        true_derived[[paste0("ind_M1_z", k)]] +
+        true_derived[[paste0("ind_M2_z", k)]] +
+        true_derived[[paste0("ind_serial_z", k)]]
+    }
+  }
+
+  true_all <- c(true_vals, true_derived)
+
+  # Pretty labels for conditional grid if we can infer it.
+  pretty_derived <- c()
+  if (all(is.finite(z_grid))) {
+    for (k in 0:4) {
+      z <- z_grid[[paste0("z", k)]]
+      pretty_derived[[paste0("direct_z", k)]] <- paste0("Direct effect at Z=", round(z, 3))
+      pretty_derived[[paste0("a1_z", k)]] <- paste0("a1(X→M1) at Z=", round(z, 3))
+      pretty_derived[[paste0("a2_z", k)]] <- paste0("a2(X→M2) at Z=", round(z, 3))
+      pretty_derived[[paste0("ind_M1_z", k)]] <- paste0("Indirect via M1 at Z=", round(z, 3))
+      pretty_derived[[paste0("ind_M2_z", k)]] <- paste0("Indirect via M2 at Z=", round(z, 3))
+      pretty_derived[[paste0("ind_serial_z", k)]] <- paste0("Serial indirect (M1→M2) at Z=", round(z, 3))
+      pretty_derived[[paste0("total_z", k)]] <- paste0("Total effect at Z=", round(z, 3))
+    }
+  }
+
+  pretty_all <- c(apa_labels, pretty_derived)
+
+  # 1) Direct effects (base + conditional)
+  direct_labels <- c("c", "cxz", "cz", paste0("direct_z", 0:4))
+  build_table_for_labels(direct_labels, "pooled_direct_effects.csv", pretty = pretty_all, true_map = true_all)
+
+  # 2) a-paths (base + conditional)
+  a_labels <- c("a1", "a1xz", "a1z", paste0("a1_z", 0:4), "a2", "a2xz", "a2z", paste0("a2_z", 0:4))
+  build_table_for_labels(a_labels, "pooled_a_paths.csv", pretty = pretty_all, true_map = true_all)
+
+  # 3) b-paths
+  b_labels <- c("b1", "b2", "d")
+  build_table_for_labels(b_labels, "pooled_b_paths.csv", pretty = pretty_all, true_map = true_all)
+
+  # 4) Indirect + conditional indirect + totals
+  ind_labels <- c(
+    paste0("ind_M1_z", 0:4),
+    paste0("ind_M2_z", 0:4),
+    paste0("ind_serial_z", 0:4),
+    paste0("total_z", 0:4)
+  )
+  build_table_for_labels(ind_labels, "pooled_indirect_effects.csv", pretty = pretty_all, true_map = true_all)
+
+  # 5) Model fit summary (requires per-rep fitMeasures CSVs)
+  fm_files <- list.files(opt$run_dir, pattern = "^rep[0-9]{3}_pooled(_[A-Za-z0-9]+)?_fitMeasures\\.csv$", full.names = TRUE)
+  fm_files <- sort(fm_files)
+  if (length(fm_files) > 0) {
+    fm_long <- do.call(rbind, lapply(fm_files, function(f) {
+      x <- read_csv_safe(f)
+      if (is.null(x) || !all(c("measure","value") %in% names(x))) return(NULL)
+      x$rep <- extract_rep_id(f)
+      x
+    }))
+    if (!is.null(fm_long) && nrow(fm_long) > 0) {
+      keep_measures <- c(
+        "chisq", "df", "pvalue",
+        "cfi", "tli",
+        "rmsea", "rmsea.ci.lower", "rmsea.ci.upper",
+        "srmr"
+      )
+      fm_long$measure <- as.character(fm_long$measure)
+      fm_long$value <- suppressWarnings(as.numeric(fm_long$value))
+      fm_use <- fm_long[fm_long$measure %in% keep_measures & is.finite(fm_long$value), , drop = FALSE]
+      fit_rows <- lapply(keep_measures, function(m) {
+        v <- fm_use$value[fm_use$measure == m]
+        s <- summ_param(v, true = NA_real_)
+        data.frame(measure = m, s, stringsAsFactors = FALSE)
+      })
+      fit_tbl <- do.call(rbind, fit_rows)
+      utils::write.csv(fit_tbl, file.path(opt$out_dir, "pooled_model_fit_summary.csv"), row.names = FALSE)
+    } else {
+      utils::write.csv(
+        data.frame(note = "fitMeasures files found but unreadable", stringsAsFactors = FALSE),
+        file.path(opt$out_dir, "pooled_model_fit_summary.csv"),
+        row.names = FALSE
+      )
+    }
+  } else {
+    utils::write.csv(
+      data.frame(note = "No per-rep pooled fitMeasures CSVs found in run_dir", stringsAsFactors = FALSE),
+      file.path(opt$out_dir, "pooled_model_fit_summary.csv"),
+      row.names = FALSE
+    )
+  }
+
+  # 6) Monte Carlo design performance (counts only; timing is summarized in diagnostics_summary)
+  reps_with_pe <- length(pe_files)
+  reps_with_fm <- length(fm_files)
+  perf <- data.frame(
+    reps_expected = opt$R,
+    reps_with_pooled_pe = reps_with_pe,
+    reps_missing_pooled_pe = opt$R - reps_with_pe,
+    reps_with_pooled_fitMeasures = reps_with_fm,
+    reps_missing_pooled_fitMeasures = opt$R - reps_with_fm,
+    stringsAsFactors = FALSE
+  )
+  utils::write.csv(perf, file.path(opt$out_dir, "pooled_design_performance.csv"), row.names = FALSE)
 }
 
 # Convergence proxy: number of pooled PE files present

@@ -47,6 +47,11 @@ SAVE_FITS <- as.integer(get_arg("--save_fits", 1))
 # Add resume CLI flag
 RESUME <- as.integer(get_arg("--resume", 0))
 
+# When resuming pooled runs, optionally require fitMeasures outputs too.
+# This is useful when a run has pooled PE CSVs but was created before we started saving
+# per-rep fitMeasures; setting this to 1 forces re-running those reps to backfill fit indices.
+RESUME_REQUIRE_FITMEASURES <- as.integer(get_arg("--resume_require_fitMeasures", 0))
+
 # -------------------------
 # DEBUG/DIAGNOSTICS
 # -------------------------
@@ -130,6 +135,7 @@ NCORES <- as.integer(get_arg("--cores", NCORES))
 NCORES <- max(1L, NCORES)
 SAVE_FITS <- as.integer(get_arg("--save_fits", SAVE_FITS))
 RESUME <- as.integer(get_arg("--resume", RESUME))
+RESUME_REQUIRE_FITMEASURES <- as.integer(get_arg("--resume_require_fitMeasures", RESUME_REQUIRE_FITMEASURES))
 
 # W variables (you run one at a time; rename to match your file)
 W_LIST <- c("re_all", "firstgen", "pell", "living18", "sex")
@@ -1126,7 +1132,14 @@ extract_pe_numeric <- function(fit_obj, standardized = FALSE) {
   pe <- normalize_pe(pe_try)
   if (!is.null(pe)) {
     pe <- add_pooled_labels(pe)
-    if ("est" %in% names(pe) && !all(is.na(pe$est))) return(pe)
+    if ("est" %in% names(pe) && !all(is.na(pe$est))) {
+      # For OLDlavaan.mi, parameterEstimates() often returns est but no usable SE.
+      # If SE is entirely missing/non-finite and ParTableList exists, fall through
+      # to the pooling code below so we can compute SE from between-imputation.
+      has_ptl <- isS4(fit_obj) && ("ParTableList" %in% slotNames(fit_obj))
+      se_bad <- (!("se" %in% names(pe))) || all(!is.finite(pe$se))
+      if (!(has_ptl && se_bad)) return(pe)
+    }
   }
 
   # 2) OLDlavaan.mi fallback: pool across imputations via ParTableList
@@ -1151,25 +1164,30 @@ extract_pe_numeric <- function(fit_obj, standardized = FALSE) {
         pooled <- stats::aggregate(all_pe$est, by = list(key = key), FUN = function(v) mean(v, na.rm = TRUE))
         names(pooled)[names(pooled) == "x"] <- "est"
 
-        # Optionally pool SE using Rubin's rules when per-imputation SE exists.
-        if ("se" %in% names(all_pe) && any(is.finite(all_pe$se))) {
-          split_est <- split(all_pe$est, key)
-          split_se  <- split(all_pe$se,  key)
-          m <- length(pe_list)
-          se_pool <- vapply(names(split_est), function(k) {
-            est_k <- split_est[[k]]
-            se_k  <- split_se[[k]]
-            est_k <- est_k[is.finite(est_k)]
-            se_k  <- se_k[is.finite(se_k)]
-            if (length(est_k) == 0) return(NA_real_)
+        # Pool SE using Rubin's rules when possible.
+        # If within-imputation SE is missing/non-finite (common for WLSMV MI tables),
+        # fall back to between-imputation variability only.
+        split_est <- split(all_pe$est, key)
+        split_se <- if ("se" %in% names(all_pe)) split(all_pe$se, key) else NULL
+        m <- length(pe_list)
+        se_pool <- vapply(names(split_est), function(k) {
+          est_k <- split_est[[k]]
+          est_k <- est_k[is.finite(est_k)]
+          if (length(est_k) == 0) return(NA_real_)
 
-            W <- if (length(se_k) > 0) mean(se_k^2, na.rm = TRUE) else NA_real_
-            B <- if (length(est_k) > 1) stats::var(est_k, na.rm = TRUE) else 0
-            if (!is.finite(W)) return(NA_real_)
-            sqrt(W + (1 + 1 / m) * B)
-          }, numeric(1))
-          pooled$se <- unname(se_pool[pooled$key])
-        }
+          se_k <- if (!is.null(split_se)) split_se[[k]] else numeric(0)
+          se_k <- se_k[is.finite(se_k)]
+
+          W <- if (length(se_k) > 0) mean(se_k^2, na.rm = TRUE) else NA_real_
+          B <- if (length(est_k) > 1) stats::var(est_k, na.rm = TRUE) else 0
+
+          if (!is.finite(W)) {
+            if (!is.finite(B) || B <= 0) return(NA_real_)
+            return(sqrt((1 + 1 / m) * B))
+          }
+          sqrt(W + (1 + 1 / m) * B)
+        }, numeric(1))
+        pooled$se <- unname(se_pool[pooled$key])
 
         # Reconstruct representative columns by taking the first row per key.
         first_row <- all_pe[match(pooled$key, key), key_cols, drop = FALSE]
@@ -1953,6 +1971,17 @@ run_mc <- function() {
           write_lavaan_output(fitP, pooled_path, title = paste0("Pooled SEM (", pooled_analysis_used, ") rep ", r))
         }
 
+        # Machine-readable fit measures for aggregation (preferred over parsing text)
+        fm_out <- try(fitMeasures(fitP), silent = TRUE)
+        if (!inherits(fm_out, "try-error") && length(fm_out) > 0) {
+          fm_df <- data.frame(measure = names(fm_out), value = as.numeric(fm_out), stringsAsFactors = FALSE)
+          utils::write.csv(
+            fm_df,
+            file.path(run_dir, sprintf("rep%03d_pooled_%s_fitMeasures.csv", r, safe_filename(pooled_analysis_used))),
+            row.names = FALSE
+          )
+        }
+
         # Machine-readable parameter estimates for aggregation/resume
         pe_out <- extract_pe_numeric(fitP, standardized = FALSE)
         if (!is.null(pe_out)) {
@@ -2077,7 +2106,10 @@ run_mc <- function() {
       }, logical(1))
     } else {
       done <- vapply(seq_len(R_REPS), function(r) {
-        file.exists(file.path(run_dir, sprintf("rep%03d_pooled_%s_pe.csv", r, safe_filename(DEFAULT_ANALYSIS))))
+        pe_ok <- file.exists(file.path(run_dir, sprintf("rep%03d_pooled_%s_pe.csv", r, safe_filename(DEFAULT_ANALYSIS))))
+        if (!isTRUE(RESUME_REQUIRE_FITMEASURES == 1)) return(pe_ok)
+        fm_ok <- file.exists(file.path(run_dir, sprintf("rep%03d_pooled_%s_fitMeasures.csv", r, safe_filename(DEFAULT_ANALYSIS))))
+        isTRUE(pe_ok && fm_ok)
       }, logical(1))
     }
 
