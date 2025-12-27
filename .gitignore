@@ -74,3 +74,38 @@ results/
 # --- local data (keep examples only) ---
 data/*.csv
 !data/example_*.csv
+
+# ------------------------------
+# Generated analysis outputs (do not track)
+# ------------------------------
+results/
+outputs/
+figures/
+plots/
+tables/
+
+# Logs / temp
+*.log
+*.tmp
+*.bak
+*~
+
+# R / IDE / OS artifacts
+.Rhistory
+.RData
+.Rproj.user/
+.DS_Store
+.vscode/
+.idea/
+
+# Common derived artifacts written by this pipeline
+**/*rep_data_with_psw*.csv
+**/*psw_stage_report*.txt
+**/*psw_balance_smd*.txt
+**/*diagnostics*.csv
+
+# Local scratch data
+process_sem/Dataset/
+
+# Editor/backup artifacts
+**/*.bak_*
