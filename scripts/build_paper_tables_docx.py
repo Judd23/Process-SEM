@@ -22,10 +22,11 @@ import math
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, cast
 
 import pandas as pd
-from docx import Document
+from docx import Document as DocumentFactory
+from docx.document import Document as DocxDocument
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
@@ -63,13 +64,35 @@ def read_table_any(path: Path) -> pd.DataFrame:
     """
     USED_INPUT_PATHS.add(path)
     try:
-        return pd.read_csv(path, sep="\t", dtype=str, keep_default_na=False)
+        return cast(pd.DataFrame, pd.read_csv(str(path), sep="\t", dtype=str, keep_default_na=False))
     except Exception:
-        return pd.read_csv(path, delim_whitespace=True, dtype=str, keep_default_na=False)
+        # sep regex avoids the deprecated/poorly-typed delim_whitespace signature
+        return cast(
+            pd.DataFrame,
+            pd.read_csv(str(path), sep=r"\s+", engine="python", dtype=str, keep_default_na=False),
+        )
 
 
 def as_numeric(series: pd.Series) -> pd.Series:
-    return pd.to_numeric(series, errors="coerce")
+    # Pandas' typing allows scalar returns; we only call this with Series.
+    return cast(pd.Series, pd.to_numeric(series, errors="coerce"))
+
+
+def _parse_float(x: object) -> Optional[float]:
+    if x is None:
+        return None
+    if isinstance(x, str):
+        s = x.strip()
+        if s == "":
+            return None
+        try:
+            return float(s)
+        except Exception:
+            return None
+    try:
+        return float(str(x).strip())
+    except Exception:
+        return None
 
 
 def fmt_num(x: object, nd: int = 3) -> str:
@@ -77,9 +100,8 @@ def fmt_num(x: object, nd: int = 3) -> str:
         return ""
     if isinstance(x, str) and x.strip() == "":
         return ""
-    try:
-        v = float(x)
-    except Exception:
+    v = _parse_float(x)
+    if v is None:
         return str(x)
 
     if math.isnan(v):
@@ -90,9 +112,8 @@ def fmt_num(x: object, nd: int = 3) -> str:
 
 
 def fmt_p(x: object) -> str:
-    try:
-        v = float(x)
-    except Exception:
+    v = _parse_float(x)
+    if v is None:
         return ""
     if math.isnan(v):
         return ""
@@ -194,7 +215,8 @@ def compute_weight_diagnostics(psw_stage: Path, rep_data_csv: Path) -> TableSpec
         # weight column could be psw
         wcol = "psw" if "psw" in d.columns else None
         if wcol is not None:
-            w = pd.to_numeric(d[wcol], errors="coerce").dropna()
+            w_series = cast(pd.Series, pd.to_numeric(d[wcol], errors="coerce"))
+            w = w_series.dropna()
             if len(w) > 0:
                 ess = (w.sum() ** 2) / (w.pow(2).sum())
 
@@ -312,7 +334,8 @@ def _extract_paths(df: pd.DataFrame, include_labels: Optional[Sequence[str]] = N
         if col in d.columns:
             out_cols.append(col)
 
-    d = d[out_cols].copy()
+    # Use .loc to ensure a DataFrame (even if out_cols changes).
+    d = d.loc[:, cast(List[str], out_cols)].copy()
 
     # Friendly renames
     rename = {
@@ -323,7 +346,7 @@ def _extract_paths(df: pd.DataFrame, include_labels: Optional[Sequence[str]] = N
         "pvalue": "p",
         "std.all": "Std (all)",
     }
-    d.rename(columns=rename, inplace=True)
+    d = d.rename(mapper=rename, axis=1)
 
     if "p" in d.columns:
         d["p"] = as_numeric(d["p"]).map(fmt_p)
@@ -351,24 +374,23 @@ def _extract_defined(df: pd.DataFrame) -> pd.DataFrame:
     df = normalize_columns(df)
     if not {"lhs", "op"}.issubset(df.columns):
         return pd.DataFrame()
-    d = df.copy()
-    d = d[d["op"].astype(str) == ":="].copy()
+    d: pd.DataFrame = df.copy()
+    d = cast(pd.DataFrame, d[d["op"].astype(str) == ":="].copy())
     if d.empty:
-        return d
+        return cast(pd.DataFrame, d)
 
-    d.rename(
-        columns={
-            "lhs": "Defined parameter",
-            "est": "Estimate",
-            "se": "SE",
-            "z": "z",
-            "pvalue": "p",
-            "std.all": "Std (all)",
-        },
-        inplace=True,
-    )
+    # Avoid pandas.rename typing-stub issues; do a deterministic column remap.
+    rename_map = {
+        "lhs": "Defined parameter",
+        "est": "Estimate",
+        "se": "SE",
+        "z": "z",
+        "pvalue": "p",
+        "std.all": "Std (all)",
+    }
+    d.columns = [rename_map.get(str(c), str(c)) for c in d.columns]
     keep = [c for c in ["Defined parameter", "Estimate", "SE", "z", "p", "ci.lower", "ci.upper"] if c in d.columns]
-    d = d[keep].copy()
+    d = d.loc[:, keep].copy()
 
     if "p" in d.columns:
         d["p"] = as_numeric(d["p"]).map(fmt_p)
@@ -383,7 +405,7 @@ def _extract_defined(df: pd.DataFrame) -> pd.DataFrame:
         d["95% CI"] = [fmt_ci(a, b, nd=3) for a, b in zip(d["ci.lower"], d["ci.upper"])]
         d.drop(columns=["ci.lower", "ci.upper"], inplace=True)
 
-    return d
+    return cast(pd.DataFrame, d)
 
 
 def table_structural_paths(pe_path: Path, caption: str, include_labels: Optional[Sequence[str]] = None) -> TableSpec:
@@ -392,7 +414,7 @@ def table_structural_paths(pe_path: Path, caption: str, include_labels: Optional
         missing.append(pe_path)
         return TableSpec(caption=caption, dataframe=None, missing_paths=missing)
 
-    df = read_table_any(pe_path)
+    df = cast(pd.DataFrame, read_table_any(pe_path))
     d = _extract_paths(df, include_labels=include_labels)
     if d is None or d.empty:
         missing.append(pe_path)
@@ -406,7 +428,7 @@ def table_defined_params(pe_path: Path, caption: str) -> TableSpec:
         missing.append(pe_path)
         return TableSpec(caption=caption, dataframe=None, missing_paths=missing)
 
-    df = read_table_any(pe_path)
+    df = cast(pd.DataFrame, read_table_any(pe_path))
     d = _extract_defined(df)
     if d is None or d.empty:
         missing.append(pe_path)
@@ -425,11 +447,11 @@ def table_total_effect(pe_path: Path) -> TableSpec:
             missing_paths=missing,
         )
 
-    df = read_table_any(pe_path)
+    df = cast(pd.DataFrame, read_table_any(pe_path))
     df = normalize_columns(df)
     if "label" in df.columns:
-        df = df[df["label"].astype(str).isin({"c_total"})].copy()
-    d = _extract_paths(df)
+        df = cast(pd.DataFrame, df[df["label"].astype(str).isin({"c_total"})].copy())
+    d = _extract_paths(cast(pd.DataFrame, df))
     if d is None or d.empty:
         missing.append(pe_path)
         return TableSpec(
@@ -451,11 +473,11 @@ def table_invariance_for_W(by_w_dir: Path, w_name: str) -> List[TableSpec]:
     stack = by_w_dir / "fit_index_stack.txt"
 
     missing: List[Path] = []
-    df_deltas = None
-    df_stack = None
+    df_deltas: Optional[pd.DataFrame] = None
+    df_stack: Optional[pd.DataFrame] = None
 
     if _exists(deltas):
-        df_deltas = read_table_any(deltas)
+        df_deltas = cast(pd.DataFrame, read_table_any(deltas))
         df_deltas = normalize_columns(df_deltas)
         for col in ["delta_cfi", "delta_rmsea", "delta_srmr"]:
             if col in df_deltas.columns:
@@ -464,11 +486,14 @@ def table_invariance_for_W(by_w_dir: Path, w_name: str) -> List[TableSpec]:
         missing.append(deltas)
 
     if _exists(stack):
-        df_stack = read_table_any(stack)
+        df_stack = cast(pd.DataFrame, read_table_any(stack))
         df_stack = normalize_columns(df_stack)
         # reshape to wide: one row per model
         if set(df_stack.columns) >= {"model", "measure", "value"}:
-            wide = df_stack.pivot_table(index="model", columns="measure", values="value", aggfunc="first").reset_index()
+            wide = cast(
+                pd.DataFrame,
+                df_stack.pivot_table(index="model", columns="measure", values="value", aggfunc="first").reset_index(),
+            )
             # keep common indices
             keep = ["model", "df", "chisq", "cfi", "tli", "rmsea", "srmr"]
             cols = [c for c in keep if c in wide.columns]
@@ -476,8 +501,9 @@ def table_invariance_for_W(by_w_dir: Path, w_name: str) -> List[TableSpec]:
             for col in ["df", "chisq", "cfi", "tli", "rmsea", "srmr"]:
                 if col in wide.columns:
                     wide[col] = as_numeric(wide[col]).map(lambda v: fmt_num(v, nd=3) if pd.notna(v) else "")
-            wide.rename(columns={"model": "Model"}, inplace=True)
-            df_stack = wide
+            # Avoid pandas.rename typing-stub issues
+            wide.columns = ["Model" if str(c) == "model" else str(c) for c in wide.columns]
+            df_stack = cast(pd.DataFrame, wide)
     else:
         missing.append(stack)
 
@@ -542,7 +568,7 @@ def table_mg_structural_for_W(w_dir: Path, w_label: str) -> List[TableSpec]:
         )
         return specs
 
-    df = read_table_any(pe_path)
+    df = cast(pd.DataFrame, read_table_any(pe_path))
     df = normalize_columns(df)
 
     # Key structural labels tend to end with these tokens
@@ -563,9 +589,9 @@ def table_mg_structural_for_W(w_dir: Path, w_label: str) -> List[TableSpec]:
     paths["Path"] = paths["lhs"].astype(str) + " ~ " + paths["rhs"].astype(str)
 
     out_cols = [c for c in ["group", "Path", "label", "est", "se", "pvalue", "ci.lower", "ci.upper"] if c in paths.columns]
-    paths_out = paths[out_cols].copy() if out_cols else pd.DataFrame()
+    paths_out = paths.loc[:, out_cols].copy() if out_cols else pd.DataFrame()
     rename = {"group": "Group", "label": "Label", "est": "Estimate", "se": "SE", "pvalue": "p"}
-    paths_out.rename(columns=rename, inplace=True)
+    paths_out = paths_out.rename(columns=rename)
     if "Estimate" in paths_out.columns:
         paths_out["Estimate"] = as_numeric(paths_out["Estimate"]).map(lambda v: fmt_num(v, nd=3) if pd.notna(v) else "")
     if "SE" in paths_out.columns:
@@ -589,9 +615,9 @@ def table_mg_structural_for_W(w_dir: Path, w_label: str) -> List[TableSpec]:
     if not defs.empty:
         # try to focus on contrast-like definitions
         mask = defs["Defined parameter"].astype(str).str.contains(r"diff|contrast", case=False, regex=True)
-        defs_focus = defs[mask].copy()
+        defs_focus = cast(pd.DataFrame, defs.loc[mask, :].copy())
         if defs_focus.empty:
-            defs_focus = defs
+            defs_focus = cast(pd.DataFrame, defs)
         specs.append(
             TableSpec(
                 caption=f"Multi-group structural model by {w_label}: defined parameters (including contrasts where available).",
@@ -611,7 +637,7 @@ def table_mg_structural_for_W(w_dir: Path, w_label: str) -> List[TableSpec]:
     return specs
 
 
-def add_missing_output_page(doc: Document, table_num: int, missing_paths: Sequence[Path]) -> None:
+def add_missing_output_page(doc: DocxDocument, table_num: int, missing_paths: Sequence[Path]) -> None:
     cap = f"Table {table_num}. Missing Output"
     p = doc.add_paragraph(cap)
     p.runs[0].bold = True
@@ -621,14 +647,17 @@ def add_missing_output_page(doc: Document, table_num: int, missing_paths: Sequen
     doc.add_page_break()
 
 
-def set_doc_default_style(doc: Document) -> None:
-    style = doc.styles["Normal"]
+def set_doc_default_style(doc: DocxDocument) -> None:
+    # python-docx typing stubs are incomplete; cast to Any for style/font access.
+    style = cast(Any, doc.styles["Normal"])
     style.font.name = "Times New Roman"
-    style._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
+    # Ensure rPr exists
+    if getattr(style, "_element", None) is not None and getattr(style._element, "rPr", None) is not None:
+        style._element.rPr.rFonts.set(qn("w:eastAsia"), "Times New Roman")
     style.font.size = Pt(12)
 
 
-def add_dataframe_table(doc: Document, df: pd.DataFrame) -> None:
+def add_dataframe_table(doc: DocxDocument, df: pd.DataFrame) -> None:
     df = df.fillna("")
     cols = list(df.columns)
 
@@ -669,7 +698,7 @@ def add_dataframe_table(doc: Document, df: pd.DataFrame) -> None:
                     run.font.size = Pt(11)
 
 
-def add_table_page(doc: Document, table_num: int, caption: str, df: Optional[pd.DataFrame], missing: Sequence[Path]) -> int:
+def add_table_page(doc: DocxDocument, table_num: int, caption: str, df: Optional[pd.DataFrame], missing: Sequence[Path]) -> int:
     """Add either the table page, or a Missing Output page if needed."""
     if missing:
         add_missing_output_page(doc, table_num, missing)
@@ -694,7 +723,7 @@ def main() -> None:
     if not BASE_DIR.exists():
         raise SystemExit(f"Base output directory not found: {BASE_DIR}")
 
-    doc = Document()
+    doc = DocumentFactory()
     set_doc_default_style(doc)
 
     table_num = 1

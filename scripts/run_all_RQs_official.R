@@ -11,15 +11,47 @@ suppressPackageStartupMessages({
   library(lavaan)
 })
 
+# Helper: read boolean env vars like 1/0, TRUE/FALSE, yes/no.
+env_flag <- function(name, default = FALSE) {
+  raw <- Sys.getenv(name, unset = "")
+  if (!nzchar(raw)) return(isTRUE(default))
+  raw <- tolower(trimws(raw))
+  raw %in% c("1", "true", "t", "yes", "y", "on")
+}
+
+# Helper: did the user explicitly set an env var?
+has_env <- function(name) nzchar(Sys.getenv(name, unset = ""))
+
 # -------------------------
 # USER SETTINGS (edit these)
 # -------------------------
 MODEL_FILE   <- "r/models/mg_fast_vs_nonfast_model.R"
-REP_DATA_CSV <- "results/repstudy_bootstrap/seed20251223_N3000_B2000_ciperc/rep_data.csv"
-OUT_BASE     <- "results/fast_treat_control/official_all_RQs"
-# Fix A: DE exposure treatment (0/1)
-EXPOSURE_FLAG_COL <- "x_FASt"
-TREATMENT_VAR <- "x_DE"
+
+# Priority order for rep_data.csv:
+#   1. REP_DATA_CSV env var (explicit override)
+#   2. repo root rep_data.csv (standard location)
+#   3. legacy paths in results/repstudy_bootstrap/
+DEFAULT_REP_DATA_CSV_CANDIDATES <- c(
+  "rep_data.csv",
+  "results/repstudy_bootstrap/seed20251223_N3000_B100_ciperc/rep_data.csv",
+  "results/repstudy_bootstrap/seed20251229_N3000_B1_ciperc/rep_data.csv"
+)
+
+# Prefer explicit env override; fall back to known default candidates.
+REP_DATA_CSV <- Sys.getenv("REP_DATA_CSV", unset = "")
+if (!nzchar(REP_DATA_CSV)) {
+  DEFAULT_REP_DATA_CSV <- DEFAULT_REP_DATA_CSV_CANDIDATES[file.exists(DEFAULT_REP_DATA_CSV_CANDIDATES)][1]
+  if (is.na(DEFAULT_REP_DATA_CSV) || !nzchar(DEFAULT_REP_DATA_CSV)) {
+    stop("No default rep_data.csv found. Set REP_DATA_CSV env var explicitly.")
+  }
+  REP_DATA_CSV <- DEFAULT_REP_DATA_CSV
+}
+OUT_BASE     <- Sys.getenv("OUT_BASE", unset = "results/fast_treat_control/official_all_RQs")
+
+# Treatment/control definition for official RQs:
+#   X = FASt status (>= 12 transferable credits applied at matriculation)
+#   Control = non-FASt (0–11 credits)
+TREATMENT_VAR <- "x_FASt"
 
 
 DO_PSW       <- TRUE
@@ -29,7 +61,7 @@ DO_PSW       <- TRUE
 # -------------------------
 # When TRUE, uses tiny bootstraps + percentile CIs and disables bootstrap parallelism.
 # Intended only to verify the pipeline runs and tables can be built.
-TABLE_CHECK_MODE <- FALSE
+TABLE_CHECK_MODE <- env_flag("TABLE_CHECK_MODE", FALSE)
 
 # -------------------------
 # BOOTSTRAP + CI SETTINGS
@@ -48,6 +80,33 @@ BOOT_CI_TYPE_SERIAL <- "perc"
 BOOT_CI_TYPE_MG     <- "none"
 BOOT_CI_TYPE_RACE   <- "none"
 
+# Allow env overrides for bootstrap settings (e.g., B=2000 runs)
+boot_int_env <- function(name, current) {
+  if (!has_env(name)) return(current)
+  v <- suppressWarnings(as.integer(Sys.getenv(name)))
+  if (is.na(v) || v < 0) return(current)
+  v
+}
+
+boot_chr_env <- function(name, current) {
+  if (!has_env(name)) return(current)
+  v <- Sys.getenv(name)
+  if (!nzchar(v)) return(current)
+  v
+}
+
+B_BOOT_MAIN   <- boot_int_env("B_BOOT_MAIN",   B_BOOT_MAIN)
+B_BOOT_TOTAL  <- boot_int_env("B_BOOT_TOTAL",  B_BOOT_TOTAL)
+B_BOOT_SERIAL <- boot_int_env("B_BOOT_SERIAL", B_BOOT_SERIAL)
+B_BOOT_MG     <- boot_int_env("B_BOOT_MG",     B_BOOT_MG)
+B_BOOT_RACE   <- boot_int_env("B_BOOT_RACE",   B_BOOT_RACE)
+
+BOOT_CI_TYPE_MAIN   <- boot_chr_env("BOOT_CI_TYPE_MAIN",   BOOT_CI_TYPE_MAIN)
+BOOT_CI_TYPE_TOTAL  <- boot_chr_env("BOOT_CI_TYPE_TOTAL",  BOOT_CI_TYPE_TOTAL)
+BOOT_CI_TYPE_SERIAL <- boot_chr_env("BOOT_CI_TYPE_SERIAL", BOOT_CI_TYPE_SERIAL)
+BOOT_CI_TYPE_MG     <- boot_chr_env("BOOT_CI_TYPE_MG",     BOOT_CI_TYPE_MG)
+BOOT_CI_TYPE_RACE   <- boot_chr_env("BOOT_CI_TYPE_RACE",   BOOT_CI_TYPE_RACE)
+
 # Don’t bootstrap multi-group / race unless you truly need bootstrap CIs
 BOOTSTRAP_MG   <- FALSE
 BOOTSTRAP_RACE <- FALSE
@@ -55,6 +114,17 @@ BOOTSTRAP_RACE <- FALSE
 # Bootstrap parallelization for lavaan (only used when bootstrap > 0)
 BOOT_PARALLEL <- "multicore"
 BOOT_NCPUS    <- 6
+
+# Allow env overrides (useful for smoke/table-check runs)
+if (has_env("BOOT_PARALLEL")) {
+  BOOT_PARALLEL <- Sys.getenv("BOOT_PARALLEL")
+}
+if (has_env("BOOT_NCPUS")) {
+  n_env <- suppressWarnings(as.integer(Sys.getenv("BOOT_NCPUS")))
+  if (!is.na(n_env) && n_env >= 1) {
+    BOOT_NCPUS <- n_env
+  }
+}
 
 if (isTRUE(TABLE_CHECK_MODE)) {
   B_BOOT_MAIN <- 20
@@ -66,14 +136,20 @@ if (isTRUE(TABLE_CHECK_MODE)) {
 
   BOOTSTRAP_MG <- FALSE
 
-  BOOT_PARALLEL <- "no"
-  BOOT_NCPUS <- 1
+  # Default for table-check mode is serial (stable + minimal overhead),
+  # but allow users to keep multicore bootstrap parallelism via env vars.
+  if (!has_env("BOOT_PARALLEL")) BOOT_PARALLEL <- "no"
+  if (!has_env("BOOT_NCPUS")) BOOT_NCPUS <- 1
 }
 
 # Smoke mode: run only A0/A/A1 with a small bootstrap and cheap CIs, skip RUN B/C2/C
-SMOKE_ONLY_A <- FALSE
-SMOKE_B_BOOT <- 50
-SMOKE_BOOT_CI_TYPE <- "perc"
+SMOKE_ONLY_A <- env_flag("SMOKE_ONLY_A", FALSE)
+SMOKE_B_BOOT <- suppressWarnings(as.integer(Sys.getenv(
+  "SMOKE_B_BOOT",
+  unset = if (isTRUE(TABLE_CHECK_MODE)) "10" else "50"
+)))
+if (is.na(SMOKE_B_BOOT) || SMOKE_B_BOOT < 0) SMOKE_B_BOOT <- if (isTRUE(TABLE_CHECK_MODE)) 10 else 50
+SMOKE_BOOT_CI_TYPE <- Sys.getenv("SMOKE_BOOT_CI_TYPE", unset = "perc")
 
 if (isTRUE(SMOKE_ONLY_A)) {
   B_BOOT_MAIN <- SMOKE_B_BOOT
@@ -84,19 +160,40 @@ if (isTRUE(SMOKE_ONLY_A)) {
   BOOT_CI_TYPE_SERIAL <- SMOKE_BOOT_CI_TYPE
   BOOTSTRAP_MG <- FALSE
   BOOTSTRAP_RACE <- FALSE
+
+  # Default for smoke mode is serial (deterministic + minimal overhead),
+  # but allow multicore bootstrap parallelism via env vars.
+  if (!has_env("BOOT_PARALLEL")) BOOT_PARALLEL <- "no"
+  if (!has_env("BOOT_NCPUS")) BOOT_NCPUS <- 1
 }
 
- # RQ4 identity variables (each W separately for MEASUREMENT checks)
-W_VARS_MEAS  <- c("re_all", "firstgen", "pell", "sex", "living18")   # edit to match your columns
+# ============================================================
+# W MODERATOR VARIABLE DEFINITIONS (RQ4)
+# ============================================================
+# W1 = re_all      (race/ethnicity)
+# W2 = firstgen    (first-generation status: 0 = continuing-gen, 1 = first-gen)
+# W3 = pell        (Pell status: 0 = non-Pell, 1 = Pell)
+# W4 = sex         (sex/gender)
+# W5 = living18    (living arrangement at age 18)
+# ============================================================
 
-# RQ4 structural multi-group (each W separately)
-# W ordering defines W1..W5 for reporting in outputs:
-#   W1 (race): re_all
-#   W2 (first-gen): firstgen
-#   W3 (Pell): pell
-#   W4 (sex): sex
-#   W5 (living arrangement): living18
-W_VARS_STRUCT <- c("re_all", "firstgen", "pell", "sex", "living18")  # default mirrors W_VARS_MEAS
+# Formal W assignment (indexed W1..W5)
+W_DEFINITIONS <- list(
+  W1 = list(var = "re_all",   label = "Race/Ethnicity"),
+  W2 = list(var = "firstgen", label = "First-Generation Status"),
+  W3 = list(var = "pell",     label = "Pell Status"),
+  W4 = list(var = "sex",      label = "Sex/Gender"),
+  W5 = list(var = "living18", label = "Living Arrangement")
+)
+
+# Extract variable names for measurement and structural analyses
+W_VARS_MEAS   <- sapply(W_DEFINITIONS, function(x) x$var)   # c("re_all", "firstgen", ...)
+W_VARS_STRUCT <- W_VARS_MEAS  # Same variables for structural MG
+
+# Human-readable labels for output tables
+W_LABELS <- sapply(W_DEFINITIONS, function(x) x$label)
+names(W_LABELS) <- W_VARS_MEAS
+
 MIN_W_N_STRUCT <- 200
 HANDLE_SMALL_W_STRUCT <- "drop"   # "warn" | "drop" | "combine"
 OTHER_LABEL_W_STRUCT <- "Other"
@@ -105,10 +202,10 @@ OTHER_LABEL_W_STRUCT <- "Other"
 # Values must match labels in the data AFTER any recoding/cleaning.
 W_REF_LEVEL <- list(
   re_all   = "White",
-  firstgen = "Continuing-gen",
-  pell     = "Non-Pell",
-  sex      = "Female",
-  living18 = "Off campus"
+  firstgen = "0",           # 0 = continuing-gen (reference)
+  pell     = "0",           # 0 = non-Pell (reference)
+  sex      = "Woman",
+  living18 = "Off-campus (rent/apartment)"
 )
 
 # If TRUE, recompute overlap weights within each W-group before multi-group SEM.
@@ -116,7 +213,7 @@ W_REF_LEVEL <- list(
 PSW_WITHIN_GROUP_FOR_MG <- FALSE
 
 # RQ4 structural stratified-by-race (exploratory; NOT multi-group)
-RACE_VAR     <- "re_all"        # edit if your race column name differs
+RACE_VAR     <- "re_all"        # W1 variable name
 MIN_RACE_N   <- 200             # skip race cells smaller than this for structural run
 
 # Handling small W categories for measurement invariance
@@ -125,7 +222,8 @@ HANDLE_SMALL_W   <- "drop"      # "warn" | "drop" | "combine"
 OTHER_LABEL_W    <- "Other"
 
 # PSW overlap-weight covariates (edit only if your covariate table changes)
-PSW_COVARS <- c("hgrades_c","bparented_c","hapcl","hprecalc13","hchallenge_c","cSFcareer_c","cohort")
+# NOTE: Use hgrades (1..9) for PSW stage.
+PSW_COVARS <- c("hgrades","bparented_c","hapcl","hprecalc13","hchallenge_c","cSFcareer_c","cohort")
 
 # -------------------------
 # BASIC CHECKS
@@ -138,36 +236,301 @@ source(MODEL_FILE)
 
 dat <- read.csv(REP_DATA_CSV, stringsAsFactors = FALSE)
 
+# -------------------------
+# DATA PREP (authoritative, rebuilt each run)
+# - recompute derived columns (credit_dose, *_c centering, XZ)
+# - create explicit treatment/control flags and verify counts
+# -------------------------
+
+.as_num01 <- function(x) {
+  if (is.logical(x)) return(as.integer(x))
+  x <- as.character(x)
+  x <- trimws(x)
+  suppressWarnings(as.integer(x))
+}
+
+# Recode NSSE-style "Not applicable" to NA.
+# By convention this is commonly coded as 9 for many ordinal survey items.
+.recode_not_app_9_to_na <- function(d, exclude_vars = character(0)) {
+  changed <- data.frame(var = character(0), n_raw_9 = integer(0), stringsAsFactors = FALSE)
+  for (v in names(d)) {
+    if (v %in% exclude_vars) next
+
+    # Only attempt recode for numeric-ish columns.
+    if (is.character(d[[v]])) {
+      xnum <- suppressWarnings(as.numeric(d[[v]]))
+      if (all(is.na(xnum))) next
+      d[[v]] <- xnum
+    }
+    if (!is.numeric(d[[v]])) next
+
+    n9 <- sum(!is.na(d[[v]]) & d[[v]] == 9)
+    if (n9 > 0) {
+      d[[v]][d[[v]] == 9] <- NA
+      changed <- rbind(changed, data.frame(var = v, n_raw_9 = as.integer(n9), stringsAsFactors = FALSE))
+    }
+  }
+  list(dat = d, changed = changed)
+}
+
+
+.center_from <- function(d, base) {
+  as.numeric(scale(d[[base]], scale = FALSE))
+}
+
+.centering_report <- function(d, tol = 1e-10, only_vars = NULL) {
+  res <- data.frame(
+    var_c = character(0),
+    base = character(0),
+    rule = character(0),
+    status = character(0),
+    max_abs_diff = numeric(0),
+    stringsAsFactors = FALSE
+  )
+  cvars <- grep("_c$", names(d), value = TRUE)
+  if (!is.null(only_vars)) cvars <- intersect(cvars, only_vars)
+  for (vc in cvars) {
+    base <- sub("_c$", "", vc)
+
+    if (!(base %in% names(d))) {
+      res <- rbind(res, data.frame(var_c = vc, base = base, rule = "center(base)", status = "no_base", max_abs_diff = NA_real_))
+      next
+    }
+    if (!is.numeric(d[[base]]) || !is.numeric(d[[vc]])) {
+      res <- rbind(res, data.frame(var_c = vc, base = base, rule = "center(base)", status = "non_numeric", max_abs_diff = NA_real_))
+      next
+    }
+    target <- .center_from(d, base)
+    diffs <- abs(d[[vc]] - target)
+    mx <- suppressWarnings(max(diffs, na.rm = TRUE))
+    ok <- is.finite(mx) && mx <= tol
+    res <- rbind(res, data.frame(var_c = vc, base = base, rule = "center(base)", status = if (ok) "ok" else "mismatch", max_abs_diff = mx))
+  }
+  res
+}
+
+.fix_centering_in_place <- function(d, tol = 1e-10, only_vars = NULL) {
+  rep <- .centering_report(d, tol = tol, only_vars = only_vars)
+  for (i in seq_len(nrow(rep))) {
+    if (!identical(rep$status[[i]], "mismatch")) next
+    vc <- rep$var_c[[i]]
+    base <- rep$base[[i]]
+    if (base %in% names(d)) d[[vc]] <- .center_from(d, base)
+  }
+  list(dat = d, report = rep)
+}
+
 # Standardize sex labels for reporting/grouping
 if ("sex" %in% names(dat)) {
   dat$sex <- as.character(dat$sex)
-  dat$sex[trimws(dat$sex) == "Women"] <- "Female"
-  dat$sex[trimws(dat$sex) == "Men"] <- "Male"
+  sx_raw <- trimws(dat$sex)
+  sx_low <- tolower(sx_raw)
+
+  # Global recode: Man/Woman -> Male/Female (plus common variants)
+  dat$sex[sx_low %in% c("woman", "women", "female")] <- "Female"
+  dat$sex[sx_low %in% c("man", "men", "male")] <- "Male"
 }
+
 
 
 # -------------------------
-# Fix A: build DE exposure indicator (X) from de_participation
+# Single source-of-truth derived X/Z/moderation terms
 # -------------------------
-if (!(EXPOSURE_FLAG_COL %in% names(dat))) {
-  stop("Fix A requires exposure column not found in rep_data: ", EXPOSURE_FLAG_COL)
+
+# Confirm transfer credits exist (single source of truth for X and dose)
+if (!("trnsfr_cr" %in% names(dat))) stop("rep_data missing required column: trnsfr_cr")
+dat$trnsfr_cr <- suppressWarnings(as.numeric(dat$trnsfr_cr))
+if (all(is.na(dat$trnsfr_cr))) stop("trnsfr_cr could not be parsed as numeric")
+
+# (1) Derived treatment variable: x_FASt = 1(trnsfr_cr>=12)
+# Hard-overwrite to prevent stale/mis-coded inputs.
+dat[[TREATMENT_VAR]] <- as.integer(dat$trnsfr_cr >= 12)
+
+# (1) Hard-overwrite dose and interaction terms
+tol_derived <- 1e-10
+
+.mx_abs_diff <- function(a, b) {
+  if (length(a) != length(b)) return(Inf)
+  suppressWarnings(max(abs(a - b), na.rm = TRUE))
 }
 
-dat[[TREATMENT_VAR]] <- as.integer(dat[[EXPOSURE_FLAG_COL]] == 1)
-if (!all(na.omit(dat[[TREATMENT_VAR]]) %in% c(0, 1))) {
-  stop("x_DE must be coded 0/1 derived from ", EXPOSURE_FLAG_COL)
+# IMPORTANT: credit_dose must vary for BOTH FASt and non-FASt students.
+# If credit_dose is truncated to 0 for all controls, then with centering we get an exact linear dependence:
+#   credit_dose_c = (XZ_c - mean(XZ_c)) + m*(x_FASt - mean(x_FASt))
+# which makes the EM-estimated Sigma nearly singular and can trigger non-convergence.
+# Define dose as a shifted continuous measure so 0 corresponds to the FASt threshold and negatives exist for controls.
+calc_credit_dose <- (dat$trnsfr_cr - 12) / 10
+calc_credit_dose_c <- as.numeric(scale(calc_credit_dose, scale = FALSE))
+calc_XZ_c <- dat[[TREATMENT_VAR]] * calc_credit_dose_c
+
+# Guard: if alternate naming schemes exist, they must be identical to the computed truth
+guards <- list(
+  credit_dose_raw = list(present = "credit_dose_raw" %in% names(dat), expected = calc_credit_dose),
+  credit_dose     = list(present = "credit_dose" %in% names(dat),     expected = calc_credit_dose),
+  Z               = list(present = "Z" %in% names(dat),               expected = calc_credit_dose),
+  Z_c             = list(present = "Z_c" %in% names(dat),             expected = calc_credit_dose_c),
+  XZ              = list(present = "XZ" %in% names(dat),              expected = calc_XZ_c),
+  XZ_c            = list(present = "XZ_c" %in% names(dat),            expected = calc_XZ_c)
+)
+
+guard_mx <- data.frame(var = character(0), max_abs_diff = numeric(0), stringsAsFactors = FALSE)
+for (nm in names(guards)) {
+  if (!isTRUE(guards[[nm]]$present)) next
+  cur <- suppressWarnings(as.numeric(dat[[nm]]))
+  mx <- .mx_abs_diff(cur, guards[[nm]]$expected)
+  guard_mx <- rbind(guard_mx, data.frame(var = nm, max_abs_diff = mx, stringsAsFactors = FALSE))
 }
 
-# observed interaction term for moderation (overwrite any existing XZ so it matches Fix A)
-if (!("credit_dose_c" %in% names(dat))) {
-  stop("credit_dose_c not found in rep_data; cannot compute XZ")
-}
-dat$XZ <- dat[[TREATMENT_VAR]] * dat$credit_dose_c
+derived_mismatch <- guard_mx[is.finite(guard_mx$max_abs_diff) & guard_mx$max_abs_diff > tol_derived, , drop = FALSE]
 
+# Overwrite derived columns (single executed truth)
+dat$credit_dose <- calc_credit_dose
+dat$credit_dose_c <- calc_credit_dose_c
+dat$XZ_c <- calc_XZ_c
+
+# Drop alternate variants so downstream SEM cannot accidentally use them
+for (v in c("credit_dose_raw", "Z", "Z_c", "XZ")) {
+  if (v %in% names(dat)) dat[[v]] <- NULL
+}
+
+# Grades: use existing hgrades (1..9 scale) as a balanced covariate
+# for both PSW and SEM.
+if (!("hgrades" %in% names(dat))) stop("rep_data missing required column: hgrades")
+dat$hgrades <- suppressWarnings(as.numeric(dat$hgrades))
+
+# Ensure we only use hgrades (not hgrades_AF). If hgrades_AF is present, drop it.
+had_hgrades_af <- "hgrades_AF" %in% names(dat)
+if (had_hgrades_af) {
+  dat$hgrades_AF <- NULL
+}
+
+# MHW finance naming (executed SEM syntax uses MHWdfinancial)
+# Accept MHWdfinance as an upstream alias only if it is identical, then drop it.
+had_mhw_financial <- "MHWdfinancial" %in% names(dat)
+had_mhw_finance <- "MHWdfinance" %in% names(dat)
+if (!had_mhw_financial && had_mhw_finance) {
+  dat$MHWdfinancial <- dat$MHWdfinance
+  had_mhw_financial <- TRUE
+}
+if (had_mhw_financial && had_mhw_finance) {
+  mx_fin <- .mx_abs_diff(suppressWarnings(as.numeric(dat$MHWdfinancial)), suppressWarnings(as.numeric(dat$MHWdfinance)))
+  if (is.finite(mx_fin) && mx_fin > tol_derived) {
+    stop("Both MHWdfinancial and MHWdfinance are present but differ; refuse to pick one. max_abs_diff=", mx_fin)
+  }
+  dat$MHWdfinance <- NULL
+}
+
+# Controls/comparison groups (3-level credit band)
+dat$credit_band <- factor(
+  ifelse(dat$trnsfr_cr == 0, "non_DE",
+         ifelse(dat$trnsfr_cr >= 1 & dat$trnsfr_cr <= 11, "non_FASt_1_11",
+                ifelse(dat$trnsfr_cr >= 12, "FASt_12plus", NA))),
+  levels = c("non_DE", "non_FASt_1_11", "FASt_12plus")
+)
+
+# Item recode integrity (range enforcement; no collapsing)
+.add_recode_counts <- function(out, var, bad_values, rule) {
+  if (length(bad_values) == 0) return(out)
+  tt <- table(bad_values)
+  data.frame(
+    var = rep(var, length(tt)),
+    value = names(tt),
+    n = as.integer(tt),
+    rule = rep(rule, length(tt)),
+    stringsAsFactors = FALSE
+  )
+}
+
+.enforce_range <- function(d, vars, allowed, rule_label, treat_9_as_na = FALSE) {
+  rep <- data.frame(var = character(0), value = character(0), n = integer(0), rule = character(0), stringsAsFactors = FALSE)
+  vars <- vars[vars %in% names(d)]
+  if (length(vars) == 0) return(list(dat = d, report = rep))
+  for (v in vars) {
+    x <- suppressWarnings(as.numeric(d[[v]]))
+    # 9 -> NA only when explicitly requested (MHW)
+    if (isTRUE(treat_9_as_na)) {
+      n9 <- sum(!is.na(x) & x == 9)
+      if (n9 > 0) {
+        rep <- rbind(rep, data.frame(var = v, value = "9", n = as.integer(n9), rule = "9->NA", stringsAsFactors = FALSE))
+        x[x == 9] <- NA
+      }
+    }
+    bad <- !is.na(x) & !(x %in% allowed)
+    if (any(bad)) {
+      rep <- rbind(rep, .add_recode_counts(rep, v, x[bad], rule_label))
+      x[bad] <- NA
+    }
+    d[[v]] <- x
+  }
+  list(dat = d, report = rep)
+}
+
+four_pt_items <- c(
+  "sbvalued", "sbmyself", "sbcommunity",
+  "pganalyze", "pgthink", "pgwork", "pgvalues", "pgprobsolve",
+  "SEacademic", "SEwellness", "SEnonacad", "SEactivities", "SEdiverse",
+  "evalexp", "sameinst"
+)
+mhw_items <- c("MHWdacad", "MHWdlonely", "MHWdmental", "MHWdexhaust", "MHWdsleep", "MHWdfinancial")
+qi_items  <- c("QIadmin", "QIstudent", "QIadvisor", "QIfaculty", "QIstaff")
+
+recode_all <- data.frame(var = character(0), value = character(0), n = integer(0), rule = character(0), stringsAsFactors = FALSE)
+tmp <- .enforce_range(dat, four_pt_items, allowed = 1:4, rule_label = "out_of_range_1_4", treat_9_as_na = FALSE)
+dat <- tmp$dat; recode_all <- rbind(recode_all, tmp$report)
+tmp <- .enforce_range(dat, mhw_items, allowed = 1:6, rule_label = "out_of_range_1_6", treat_9_as_na = TRUE)
+dat <- tmp$dat; recode_all <- rbind(recode_all, tmp$report)
+tmp <- .enforce_range(dat, qi_items, allowed = 1:7, rule_label = "out_of_range_1_7", treat_9_as_na = FALSE)
+dat <- tmp$dat; recode_all <- rbind(recode_all, tmp$report)
+
+recode_report_path <- file.path(OUT_BASE, "recode_report.tsv")
+if (nrow(recode_all) == 0) {
+  recode_all <- data.frame(var = character(0), value = character(0), n = integer(0), rule = character(0), stringsAsFactors = FALSE)
+}
+utils::write.table(recode_all, file = recode_report_path, sep = "\t", row.names = FALSE, quote = FALSE)
+
+# Keep a copy of raw MHW before NA recoding for distribution reports
+mhw_raw <- NULL
+mhw_present <- mhw_items[mhw_items %in% names(dat)]
+if (length(mhw_present) > 0) {
+  mhw_raw <- read.csv(REP_DATA_CSV, stringsAsFactors = FALSE)[, mhw_present, drop = FALSE]
+}
+
+# Centered controls (compute from base vars when available; otherwise verify existing)
+.ensure_centered <- function(d, base, centered) {
+  if (base %in% names(d)) {
+    d[[base]] <- suppressWarnings(as.numeric(d[[base]]))
+    d[[centered]] <- as.numeric(scale(d[[base]], scale = FALSE))
+    return(d)
+  }
+  if (centered %in% names(d)) {
+    d[[centered]] <- suppressWarnings(as.numeric(d[[centered]]))
+    return(d)
+  }
+  stop("Missing required control: need either ", base, " or ", centered)
+}
+
+dat <- .ensure_centered(dat, "hgrades", "hgrades_c")
+dat <- .ensure_centered(dat, "bparented", "bparented_c")
+dat <- .ensure_centered(dat, "hchallenge", "hchallenge_c")
+dat <- .ensure_centered(dat, "cSFcareer", "cSFcareer_c")
+
+# Verify mean-centering (stop on failure)
+center_vars <- c("hgrades_c", "bparented_c", "hchallenge_c", "cSFcareer_c", "credit_dose_c")
+cent_stats <- data.frame(
+  var = center_vars,
+  n_nonmiss = vapply(center_vars, function(v) sum(!is.na(dat[[v]])), integer(1)),
+  mean = vapply(center_vars, function(v) suppressWarnings(mean(dat[[v]], na.rm = TRUE)), numeric(1)),
+  stringsAsFactors = FALSE
+)
+cent_stats$abs_mean <- abs(cent_stats$mean)
+cent_ok <- all(cent_stats$n_nonmiss > 0) && all(is.finite(cent_stats$abs_mean) & cent_stats$abs_mean < tol_derived)
+if (!isTRUE(cent_ok)) {
+  stop("Centering verification failed (require abs(mean)<", tol_derived, ") for: ", paste0(cent_stats$var[!(cent_stats$n_nonmiss > 0 & is.finite(cent_stats$abs_mean) & cent_stats$abs_mean < tol_derived)], collapse = ", "))
+}
 
 req <- c(
-  "x_DE","credit_dose_c","cohort",
-  "hgrades_c","bparented_c","pell","hapcl","hprecalc13","hchallenge_c","cSFcareer_c",
+  "x_FASt","trnsfr_cr","credit_dose","credit_dose_c","XZ_c","credit_band","cohort",
+  "hgrades","hgrades_c","bparented_c","pell","hapcl","hprecalc13","hchallenge_c","cSFcareer_c",
   "sbvalued","sbmyself","sbcommunity",
   "pganalyze","pgthink","pgwork","pgvalues","pgprobsolve",
   "SEacademic","SEwellness","SEnonacad","SEactivities","SEdiverse",
@@ -178,10 +541,266 @@ req <- c(
 miss <- setdiff(req, names(dat))
 if (length(miss) > 0) stop("rep_data missing required columns: ", paste(miss, collapse = ", "))
 
-xvals <- unique(na.omit(dat[[TREATMENT_VAR]]))
-if (!all(xvals %in% c(0, 1))) stop("Treatment must be 0/1: ", TREATMENT_VAR)
-# Make XZ if absent
-if (!("XZ" %in% names(dat))) dat$XZ <- dat$x_DE * dat$credit_dose_c
+# Coerce binary covariates used in regressions to numeric 0/1 (robust to character/logic)
+for (v in c("pell","hapcl","hprecalc13")) {
+  if (v %in% names(dat)) dat[[v]] <- .as_num01(dat[[v]])
+}
+
+# Verify constructed interaction term (XZ_c) explicitly
+int_mx <- NA_real_
+if (all(c("x_FASt", "credit_dose_c", "XZ_c") %in% names(dat))) {
+  int_mx <- suppressWarnings(max(abs((dat$x_FASt * dat$credit_dose_c) - dat$XZ_c), na.rm = TRUE))
+}
+
+# -------------------------
+# Executed SEM syntax (single source) written to run folder
+# -------------------------
+meas_syntax_path <- file.path(OUT_BASE, "executed_measurement_syntax.lav")
+if (exists("get_measurement_syntax_official")) {
+  writeLines(get_measurement_syntax_official(), con = meas_syntax_path)
+}
+
+model_parallel_path <- file.path(OUT_BASE, "executed_sem_parallel.lav")
+model_total_path <- file.path(OUT_BASE, "executed_sem_total.lav")
+model_serial_path <- file.path(OUT_BASE, "executed_sem_serial.lav")
+if (exists("build_model_fast_treat_control")) {
+  writeLines(build_model_fast_treat_control(dat), con = model_parallel_path)
+}
+if (exists("build_model_total_effect")) {
+  writeLines(build_model_total_effect(dat), con = model_total_path)
+}
+if (exists("build_model_fast_treat_control_serial")) {
+  writeLines(build_model_fast_treat_control_serial(dat), con = model_serial_path)
+}
+
+# -------------------------
+# Verification checklist (written once at the top-level output directory)
+# -------------------------
+verif_path <- file.path(OUT_BASE, "verification_checklist.txt")
+con <- file(verif_path, open = "wt")
+on.exit(close(con), add = TRUE)
+cat("Verification checklist: run_all_RQs_official\n", file = con)
+cat("REP_DATA_CSV=", REP_DATA_CSV, "\n", sep = "", file = con, append = TRUE)
+cat("TREATMENT_VAR=", TREATMENT_VAR, "\n\n", sep = "", file = con, append = TRUE)
+
+cat("(0) Executed SEM syntax files\n", file = con, append = TRUE)
+cat("measurement_syntax=", meas_syntax_path, "\n", sep = "", file = con, append = TRUE)
+cat("sem_parallel=", model_parallel_path, "\n", sep = "", file = con, append = TRUE)
+cat("sem_total=", model_total_path, "\n", sep = "", file = con, append = TRUE)
+cat("sem_serial=", model_serial_path, "\n\n", sep = "", file = con, append = TRUE)
+
+cat("(6) Group counts (credit_band)\n", file = con, append = TRUE)
+tab_cb <- table(dat$credit_band, useNA = "ifany")
+cat(paste(capture.output(tab_cb), collapse = "\n"), "\n\n", file = con, append = TRUE)
+
+cat("Check: x_FASt vs 1(trnsfr_cr>=12)\n", file = con, append = TRUE)
+cmp <- as.integer(dat$trnsfr_cr >= 12)
+bad <- sum(!is.na(dat[[TREATMENT_VAR]]) & !is.na(cmp) & dat[[TREATMENT_VAR]] != cmp)
+cat("mismatches=", bad, "\n\n", sep = "", file = con, append = TRUE)
+
+cat("(1a) Derived-variable overwrite audit (pre-overwrite max_abs_diff vs computed truth)\n", file = con, append = TRUE)
+cat("tol=", format(tol_derived, digits = 12), "\n", sep = "", file = con, append = TRUE)
+if (exists("guard_mx") && is.data.frame(guard_mx) && nrow(guard_mx) > 0) {
+  cat(paste(capture.output(guard_mx[order(-guard_mx$max_abs_diff), , drop = FALSE]), collapse = "\n"), "\n", file = con, append = TRUE)
+} else {
+  cat("No derived-variable variants were present in the input (only computed columns used).\n", file = con, append = TRUE)
+}
+if (exists("derived_mismatch") && is.data.frame(derived_mismatch) && nrow(derived_mismatch) > 0) {
+  cat("NOTE: mismatches were detected and were overwritten by the runner.\n", file = con, append = TRUE)
+} else {
+  cat("No mismatches detected above tolerance (or no variants present).\n", file = con, append = TRUE)
+}
+cat("Dropped variants (if present): credit_dose_raw, Z, Z_c, XZ\n\n", file = con, append = TRUE)
+
+cat("(4) credit_dose formula check: credit_dose == (trnsfr_cr - 12)/10\n", file = con, append = TRUE)
+calc_cd <- (dat$trnsfr_cr - 12) / 10
+mx_cd <- max(abs(dat$credit_dose - calc_cd), na.rm = TRUE)
+cat("max_abs_diff=", format(mx_cd, digits = 12), "\n\n", sep = "", file = con, append = TRUE)
+
+cat("(2) hgrades value distribution (expected scale 1..9)\n", file = con, append = TRUE)
+cat(paste(capture.output(table(dat$hgrades, useNA = "ifany")), collapse = "\n"), "\n\n", file = con, append = TRUE)
+
+cat("(2a) Grades source check (use hgrades only)\n", file = con, append = TRUE)
+cat("hgrades present: ", "hgrades" %in% names(dat), "\n", sep = "", file = con, append = TRUE)
+cat("hgrades_AF present in input then removed: ", had_hgrades_af, "\n\n", sep = "", file = con, append = TRUE)
+
+cat("(2b) Item recode report (out-of-range -> NA; MHW 9->NA)\n", file = con, append = TRUE)
+cat("recode_report_path=", recode_report_path, "\n", sep = "", file = con, append = TRUE)
+if (exists("recode_all") && is.data.frame(recode_all) && nrow(recode_all) > 0) {
+  rec_sum <- aggregate(n ~ var + rule, data = recode_all, FUN = sum)
+  rec_sum <- rec_sum[order(-rec_sum$n, rec_sum$var, rec_sum$rule), , drop = FALSE]
+  cat("n_rows=", nrow(recode_all), "\n", sep = "", file = con, append = TRUE)
+  cat(paste(capture.output(utils::head(rec_sum, 50)), collapse = "\n"), "\n\n", file = con, append = TRUE)
+} else {
+  cat("No out-of-range values detected in enforced item sets.\n\n", file = con, append = TRUE)
+}
+
+cat("(2c) MHW finance naming check (executed SEM uses MHWdfinancial)\n", file = con, append = TRUE)
+cat("MHWdfinancial present: ", "MHWdfinancial" %in% names(dat), "\n", sep = "", file = con, append = TRUE)
+cat("MHWdfinance present (should be FALSE): ", "MHWdfinance" %in% names(dat), "\n\n", sep = "", file = con, append = TRUE)
+
+cat("(3) Centering verification (abs(mean) < tol)\n", file = con, append = TRUE)
+cat(paste(capture.output(cent_stats), collapse = "\n"), "\n\n", file = con, append = TRUE)
+
+cat("(3a) Interaction term check: XZ_c == x_FASt*credit_dose_c\n", file = con, append = TRUE)
+cat("max_abs_diff=", format(int_mx, digits = 12), "\n\n", sep = "", file = con, append = TRUE)
+
+# (3b) Exogenous collinearity / near-singularity check (quick sanity for the EM Sigma warning)
+exo_cols <- c("x_FASt", "credit_dose_c", "XZ_c")
+if (all(exo_cols %in% names(dat))) {
+  exo <- dat[, exo_cols, drop = FALSE]
+  exo <- exo[stats::complete.cases(exo), , drop = FALSE]
+  if (nrow(exo) >= 5) {
+    S <- stats::cov(exo)
+    ev <- suppressWarnings(eigen(S, symmetric = TRUE, only.values = TRUE)$values)
+    cat("(3b) Eigenvalues of cov(x_FASt, credit_dose_c, XZ_c) on complete cases\n", file = con, append = TRUE)
+    cat(paste(capture.output(ev), collapse = "\n"), "\n\n", file = con, append = TRUE)
+  }
+}
+
+# (8) MHW distribution report (raw 1..6 + 9=Not applicable)
+# Required for calibration checks; compares to two first-year anchor patterns.
+if (!is.null(mhw_raw) && ncol(mhw_raw) > 0) {
+  cat("(8) MHW distribution report (raw values; 9=Not applicable; analysis recodes 9->NA)\n", file = con, append = TRUE)
+
+  anchor_A <- c(`1` = 16, `2` = 12, `3` = 17, `4` = 24, `5` = 16, `6` = 13, `9` = 3)
+  anchor_B <- c(`1` = 21, `2` = 14, `3` = 17, `4` = 17, `5` = 11, `6` = 15, `9` = 6)
+  levs <- c(1:6, 9)
+
+  for (v in colnames(mhw_raw)) {
+    rawv <- suppressWarnings(as.numeric(mhw_raw[[v]]))
+    tab <- table(factor(rawv, levels = levs), useNA = "no")
+    pct <- if (sum(tab) > 0) (100 * as.numeric(tab) / sum(tab)) else rep(NA_real_, length(levs))
+    names(pct) <- as.character(levs)
+
+    devA <- suppressWarnings(max(abs(pct[names(anchor_A)] - anchor_A), na.rm = TRUE))
+    devB <- suppressWarnings(max(abs(pct[names(anchor_B)] - anchor_B), na.rm = TRUE))
+    best <- if (is.finite(devA) && is.finite(devB)) ifelse(devA <= devB, "A", "B") else NA_character_
+    best_dev <- if (identical(best, "A")) devA else if (identical(best, "B")) devB else NA_real_
+
+    rec <- dat[[v]]
+    mn <- suppressWarnings(min(rec, na.rm = TRUE))
+    mx <- suppressWarnings(max(rec, na.rm = TRUE))
+    n9 <- sum(rawv == 9, na.rm = TRUE)
+    nNA <- sum(is.na(rec))
+
+    cat("\n", v, "\n", sep = "", file = con, append = TRUE)
+    cat("counts (1..6,9):\n", file = con, append = TRUE)
+    cat(paste(capture.output(tab), collapse = "\n"), "\n", file = con, append = TRUE)
+    cat("percents (1..6,9):\n", file = con, append = TRUE)
+    pct_line <- paste0(names(pct), ":", sprintf("%.1f", pct), "%", collapse = "  ")
+    cat(pct_line, "\n", file = con, append = TRUE)
+    cat("min/max after recode(9->NA): ", mn, "/", mx, "\n", sep = "", file = con, append = TRUE)
+    cat("n_raw_9=", n9, "  n_analysis_NA=", nNA, "\n", sep = "", file = con, append = TRUE)
+    cat("max_abs_pp_dev_to_anchorA=", format(devA, digits = 4), "  max_abs_pp_dev_to_anchorB=", format(devB, digits = 4),
+        "  best=", best, " (", format(best_dev, digits = 4), ")\n", sep = "", file = con, append = TRUE)
+  }
+  cat("\n", file = con, append = TRUE)
+}
+
+# (7) Indicator directional alignment checks
+# Goal: Higher values should reflect "more of the construct".
+# This block prints observed ranges and flags likely reversed-coded items using within-construct Spearman correlations.
+.dir_check <- function(d, items, expected_min, expected_max, label) {
+  items <- items[items %in% names(d)]
+  if (length(items) == 0) {
+    return(list(items = character(0), range = data.frame(), corr = data.frame()))
+  }
+
+  rng <- data.frame(
+    item = items,
+    min = vapply(items, function(v) suppressWarnings(min(as.numeric(d[[v]]), na.rm = TRUE)), numeric(1)),
+    max = vapply(items, function(v) suppressWarnings(max(as.numeric(d[[v]]), na.rm = TRUE)), numeric(1)),
+    expected_min = expected_min,
+    expected_max = expected_max,
+    range_ok = vapply(items, function(v) {
+      mn <- suppressWarnings(min(as.numeric(d[[v]]), na.rm = TRUE))
+      mx <- suppressWarnings(max(as.numeric(d[[v]]), na.rm = TRUE))
+      is.finite(mn) && is.finite(mx) && mn >= expected_min && mx <= expected_max
+    }, logical(1)),
+    stringsAsFactors = FALSE
+  )
+
+  # Correlation-based reversal flag: within a construct, items should correlate positively.
+  corr <- data.frame(item = items, mean_spearman_to_others = NA_real_, flag = "", stringsAsFactors = FALSE)
+  if (length(items) >= 3) {
+    x <- d[, items, drop = FALSE]
+    for (j in seq_along(items)) {
+      vj <- as.numeric(x[[j]])
+      others <- setdiff(seq_along(items), j)
+      rs <- c()
+      for (k in others) {
+        vk <- as.numeric(x[[k]])
+        r <- suppressWarnings(stats::cor(vj, vk, use = "pairwise.complete.obs", method = "spearman"))
+        if (is.finite(r)) rs <- c(rs, r)
+      }
+      if (length(rs) > 0) {
+        corr$mean_spearman_to_others[j] <- mean(rs)
+        if (corr$mean_spearman_to_others[j] < 0) corr$flag[j] <- "likely_reversed"
+      }
+    }
+  }
+
+  list(range = rng, corr = corr)
+}
+
+cat("(7) Indicator directional alignment (higher = more of construct)\n", file = con, append = TRUE)
+cat("Belonging (SB): higher => more belonging (Strongly disagree=1 ... Strongly agree=4)\n", file = con, append = TRUE)
+chk <- .dir_check(dat, c("sbvalued","sbmyself","sbcommunity"), expected_min = 1, expected_max = 4, label = "Belong")
+cat(paste(capture.output(chk$range), collapse = "\n"), "\n", file = con, append = TRUE)
+cat(paste(capture.output(chk$corr), collapse = "\n"), "\n\n", file = con, append = TRUE)
+
+cat("Gains (PG): higher => more gains (Very little=1 ... Very much=4)\n", file = con, append = TRUE)
+chk <- .dir_check(dat, c("pganalyze","pgthink","pgwork","pgvalues","pgprobsolve"), expected_min = 1, expected_max = 4, label = "Gains")
+cat(paste(capture.output(chk$range), collapse = "\n"), "\n", file = con, append = TRUE)
+cat(paste(capture.output(chk$corr), collapse = "\n"), "\n\n", file = con, append = TRUE)
+
+cat("SupportEnv (SE): higher => more support (Very little=1 ... Very much=4)\n", file = con, append = TRUE)
+chk <- .dir_check(dat, c("SEacademic","SEwellness","SEnonacad","SEactivities","SEdiverse"), expected_min = 1, expected_max = 4, label = "SupportEnv")
+cat(paste(capture.output(chk$range), collapse = "\n"), "\n", file = con, append = TRUE)
+cat(paste(capture.output(chk$corr), collapse = "\n"), "\n\n", file = con, append = TRUE)
+
+cat("Satisf: higher => more satisfaction (evalexp: Poor=1..Excellent=4; sameinst: Def no=1..Def yes=4)\n", file = con, append = TRUE)
+chk <- .dir_check(dat, c("sameinst","evalexp"), expected_min = 1, expected_max = 4, label = "Satisf")
+cat(paste(capture.output(chk$range), collapse = "\n"), "\n", file = con, append = TRUE)
+cat(paste(capture.output(chk$corr), collapse = "\n"), "\n\n", file = con, append = TRUE)
+
+cat("EmoDiss (MHW difficulty): higher => more difficulty/distress (no collapsing in pipeline; expected raw scale up to 6)\n", file = con, append = TRUE)
+chk <- .dir_check(dat, c("MHWdacad","MHWdlonely","MHWdmental","MHWdexhaust","MHWdsleep","MHWdfinancial"), expected_min = 1, expected_max = 6, label = "EmoDiss")
+cat(paste(capture.output(chk$range), collapse = "\n"), "\n", file = con, append = TRUE)
+cat(paste(capture.output(chk$corr), collapse = "\n"), "\n\n", file = con, append = TRUE)
+
+cat("QualEngag (QI only): higher => better interactions (Poor=1..Excellent=7)\n", file = con, append = TRUE)
+chk <- .dir_check(dat, c("QIadmin","QIstudent","QIadvisor","QIfaculty","QIstaff"), expected_min = 1, expected_max = 7, label = "QualEngag")
+cat(paste(capture.output(chk$range), collapse = "\n"), "\n", file = con, append = TRUE)
+cat(paste(capture.output(chk$corr), collapse = "\n"), "\n\n", file = con, append = TRUE)
+
+cat("(1) Composite proxies rebuilt from raw items (not used in SEM)\n", file = con, append = TRUE)
+Belong_comp <- rowMeans(dat[, c("sbvalued","sbmyself","sbcommunity")], na.rm = TRUE)
+Gains_comp  <- rowMeans(dat[, c("pganalyze","pgthink","pgwork","pgvalues","pgprobsolve")], na.rm = TRUE)
+SupportEnv_comp <- rowMeans(dat[, c("SEacademic","SEwellness","SEnonacad","SEactivities","SEdiverse")], na.rm = TRUE)
+Satisf_comp <- rowMeans(dat[, c("sameinst","evalexp")], na.rm = TRUE)
+EmoDiss_comp <- rowMeans(dat[, c("MHWdacad","MHWdlonely","MHWdmental","MHWdexhaust","MHWdsleep","MHWdfinancial")], na.rm = TRUE)
+QualEngag_comp <- rowMeans(dat[, c("QIadmin","QIstudent","QIadvisor","QIfaculty","QIstaff")], na.rm = TRUE)
+DevAdj_comp <- rowMeans(cbind(Belong_comp, Gains_comp, SupportEnv_comp, Satisf_comp), na.rm = TRUE)
+
+
+for (nm in c("DevAdj","EmoDiss","QualEngag")) {
+  if (nm %in% names(dat)) {
+    ex <- suppressWarnings(as.numeric(dat[[nm]]))
+    cmpv <- switch(
+      nm,
+      DevAdj = DevAdj_comp,
+      EmoDiss = EmoDiss_comp,
+      QualEngag = QualEngag_comp
+    )
+    cc <- suppressWarnings(stats::cor(ex, cmpv, use = "pairwise.complete.obs"))
+    cat(nm, ": existing column present; corr(existing, rebuilt_proxy)=", format(cc, digits = 6), "\n", sep = "", file = con, append = TRUE)
+  }
+}
+cat("\n", file = con, append = TRUE)
+
+message("Wrote verification checklist: ", verif_path)
 
 # -------------------------
 # WEIGHTING HELPERS (PSW overlap weights) + balance check
@@ -200,7 +819,7 @@ smd <- function(x, g, w = NULL) {
   (m1 - m0) / sqrt((v0 + v1) / 2)
 }
 
-compute_psw_overlap <- function(d, x = "x_DE", covars, out_txt = NULL) {
+compute_psw_overlap <- function(d, x = "x_FASt", covars, out_txt = NULL) {
   dd <- d
   dd$psw <- NULL
 
@@ -208,7 +827,7 @@ compute_psw_overlap <- function(d, x = "x_DE", covars, out_txt = NULL) {
   ps_df <- dd[idx, c(x, covars), drop = FALSE]
 
   ps_df[[x]] <- as.numeric(ps_df[[x]])
-  if (!all(ps_df[[x]] %in% c(0, 1))) stop("x_DE must be 0/1 for PSW stage.")
+  if (!all(ps_df[[x]] %in% c(0, 1))) stop(x, " must be 0/1 for PSW stage.")
 
   f <- stats::as.formula(paste0(x, " ~ ", paste(covars, collapse = " + ")))
   ps_mod <- stats::glm(f, data = ps_df, family = stats::binomial())
@@ -233,7 +852,7 @@ compute_psw_overlap <- function(d, x = "x_DE", covars, out_txt = NULL) {
   dd
 }
 
-balance_table <- function(d, x = "x_DE", covars, wcol = "psw") {
+balance_table <- function(d, x = "x_FASt", covars, wcol = "psw") {
   g <- as.numeric(d[[x]])
   out <- data.frame(covariate = covars, smd_unweighted = NA_real_, smd_weighted = NA_real_)
   for (i in seq_along(covars)) {
@@ -253,11 +872,49 @@ dir.create(out_main, recursive = TRUE, showWarnings = FALSE)
 
 dat_main <- dat
 
-if (DO_PSW) {
-  dat_main <- compute_psw_overlap(dat_main, covars = PSW_COVARS, out_txt = file.path(out_main, "psw_stage_report.txt"))
-  bal <- balance_table(dat_main, covars = PSW_COVARS)
-  write.table(bal, file.path(out_main, "psw_balance_smd.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
-  write.csv(dat_main, file.path(out_main, "rep_data_with_psw.csv"), row.names = FALSE)
+# PSW is always computed and used in the official pipeline.
+dat_main <- compute_psw_overlap(dat_main, x = TREATMENT_VAR, covars = PSW_COVARS, out_txt = file.path(out_main, "psw_stage_report.txt"))
+bal <- balance_table(dat_main, x = TREATMENT_VAR, covars = PSW_COVARS)
+write.table(bal, file.path(out_main, "psw_balance_smd.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
+write.csv(dat_main, file.path(out_main, "rep_data_with_psw.csv"), row.names = FALSE)
+
+# -------------------------
+# Recode grouping vars early (labels only; used for invariance + MG)
+# IMPORTANT: do this AFTER PSW so the PS model uses the original numeric coding.
+# -------------------------
+.recode_01_to_factor <- function(x, labels01, varname) {
+  x_num <- suppressWarnings(as.integer(as.character(x)))
+  if (all(is.na(x_num))) stop("Could not parse ", varname, " as 0/1")
+  ok <- is.na(x_num) | x_num %in% c(0L, 1L)
+  if (!all(ok)) {
+    bad_vals <- sort(unique(x_num[!ok]))
+    stop("Expected ", varname, " to be 0/1 (or NA); found: ", paste(bad_vals, collapse = ", "))
+  }
+  factor(x_num, levels = c(0L, 1L), labels = labels01)
+}
+
+if ("firstgen" %in% names(dat_main)) {
+  dat_main$firstgen <- .recode_01_to_factor(dat_main$firstgen, c("Continuing-gen", "First-gen"), "firstgen")
+}
+if ("pell" %in% names(dat_main)) {
+  dat_main$pell <- .recode_01_to_factor(dat_main$pell, c("Non-Pell", "Pell"), "pell")
+}
+
+# Confirm living18 reference exists (print levels + auto-pick if needed)
+if ("living18" %in% names(dat_main)) {
+  lv_raw <- as.character(dat_main$living18)
+  lv_raw <- trimws(lv_raw)
+  lv_raw[lv_raw == ""] <- NA
+  levs <- sort(unique(na.omit(lv_raw)))
+  message("[living18] levels after cleaning: ", paste(levs, collapse = ", "))
+  if (length(levs) > 0 && !(W_REF_LEVEL$living18 %in% levs)) {
+    if ("Off-campus (rent/apartment)" %in% levs) {
+      W_REF_LEVEL$living18 <- "Off-campus (rent/apartment)"
+    } else {
+      W_REF_LEVEL$living18 <- levs[[1]]
+    }
+    message("[living18] W_REF_LEVEL updated to: ", W_REF_LEVEL$living18)
+  }
 }
 
 # -------------------------
@@ -270,10 +927,10 @@ fit_total <- fit_mg_fast_vs_nonfast_with_outputs(
   dat = dat_main,
   out_dir = file.path(out_total, "structural"),
   model_type = "total",
-  estimator = "MLR",
+  estimator = "ML",
   missing = "fiml",
-  fixed.x = FALSE,
-  weight_var = if (DO_PSW) "psw" else NULL,
+  fixed.x = TRUE,
+  weight_var = "psw",
   bootstrap = B_BOOT_TOTAL,
   boot_ci_type = BOOT_CI_TYPE_TOTAL,
   parallel = if (B_BOOT_TOTAL > 0) BOOT_PARALLEL else "no",
@@ -284,14 +941,33 @@ fit_main <- fit_mg_fast_vs_nonfast_with_outputs(
   dat = dat_main,
   out_dir = file.path(out_main, "structural"),
   model_type = "parallel",
-  estimator = "MLR",
+  estimator = "ML",
   missing = "fiml",
-  fixed.x = FALSE,
-  weight_var = if (DO_PSW) "psw" else NULL,
+  fixed.x = TRUE,
+  weight_var = "psw",
   bootstrap = B_BOOT_MAIN,
   boot_ci_type = BOOT_CI_TYPE_MAIN,
   parallel = if (B_BOOT_MAIN > 0) BOOT_PARALLEL else "no",
   ncpus = if (B_BOOT_MAIN > 0) BOOT_NCPUS else 1
+)
+
+# -------------------------
+# Sensitivity: unweighted parallel fit (for Table 12)
+# -------------------------
+out_sens <- file.path(OUT_BASE, "sensitivity_unweighted_parallel")
+dir.create(out_sens, recursive = TRUE, showWarnings = FALSE)
+fit_sens <- fit_mg_fast_vs_nonfast_with_outputs(
+  dat = dat_main,
+  out_dir = file.path(out_sens, "structural"),
+  model_type = "parallel",
+  estimator = "ML",
+  missing = "fiml",
+  fixed.x = TRUE,
+  weight_var = NULL,
+  bootstrap = 0,
+  boot_ci_type = "none",
+  parallel = "no",
+  ncpus = 1
 )
 
 # -------------------------
@@ -304,10 +980,10 @@ fit_serial <- fit_mg_fast_vs_nonfast_with_outputs(
   dat = dat_main,
   out_dir = file.path(out_serial, "structural"),
   model_type = "serial",
-  estimator = "MLR",
+  estimator = "ML",
   missing = "fiml",
-  fixed.x = FALSE,
-  weight_var = if (DO_PSW) "psw" else NULL,
+  fixed.x = TRUE,
+  weight_var = "psw",
   bootstrap = B_BOOT_SERIAL,
   boot_ci_type = BOOT_CI_TYPE_SERIAL,
   parallel = if (B_BOOT_SERIAL > 0) BOOT_PARALLEL else "no",
@@ -326,8 +1002,8 @@ if (isTRUE(SMOKE_ONLY_A)) {
 out_meas <- file.path(OUT_BASE, "RQ4_measurement")
 dir.create(out_meas, recursive = TRUE, showWarnings = FALSE)
 
-# Use the weighted dataset (if created) so measurement checks match the analysis sample
-dat_meas <- if (DO_PSW) dat_main else dat
+# Use the weighted dataset so measurement checks match the analysis sample
+dat_meas <- dat_main
 
 W_VARS_MEAS_OK <- W_VARS_MEAS[W_VARS_MEAS %in% names(dat_meas)]
 if (length(W_VARS_MEAS_OK) > 0) {
@@ -335,10 +1011,10 @@ if (length(W_VARS_MEAS_OK) > 0) {
     dat = dat_meas,
     W_vars = W_VARS_MEAS_OK,
     base_out_dir = out_meas,
-    estimator = "MLR",
+    estimator = "ML",
     missing = "fiml",
-    fixed.x = FALSE,
-    weight_var = if (DO_PSW) "psw" else NULL,
+    fixed.x = TRUE,
+    weight_var = "psw",
     min_group_n = MIN_W_N_MEAS,
     handle_small = HANDLE_SMALL_W,
     other_label = OTHER_LABEL_W
@@ -357,7 +1033,7 @@ out_mg <- file.path(OUT_BASE, "RQ4_structural_MG")
 dir.create(out_mg, recursive = TRUE, showWarnings = FALSE)
 
 # Use the same weighted data as main model
-dat_mg_base <- if (DO_PSW) dat_main else dat
+dat_mg_base <- dat_main
 
 W_VARS_STRUCT_OK <- W_VARS_STRUCT[W_VARS_STRUCT %in% names(dat_mg_base)]
 
@@ -459,20 +1135,63 @@ for (i in seq_along(W_VARS_STRUCT_OK)) {
   )
 
   # Fit MG structural model
-  fit_mg_fast_vs_nonfast_with_outputs(
-    dat = dW,
-    group = wvar,
-    w_label = paste0("W", i),
-    out_dir = file.path(out_w, "structural"),
-    estimator = "MLR",
-    missing = "fiml",
-    fixed.x = FALSE,
-    weight_var = if (DO_PSW) "psw" else NULL,
-    bootstrap = MG_BOOT,
-    boot_ci_type = MG_CI,
-    parallel = if (MG_BOOT > 0) BOOT_PARALLEL else "no",
-    ncpus = if (MG_BOOT > 0) BOOT_NCPUS else 1
-  )
+  if (identical(wvar, "pell")) {
+    # Special-case: when grouping by pell, pell is constant within each group.
+    # So the MG-by-pell model must omit pell from within-group regressions.
+    # Note: build_model_fast_treat_control_mg() automatically excludes group_var from covars.
+
+    # Build a MG model syntax (pell auto-excluded as covariate since it's the group_var)
+    model_mg <- build_model_fast_treat_control_mg(
+      dW,
+      group_var = wvar,
+      w_label = paste0("W", i)
+    )
+
+    writeLines(model_mg, con = file.path(out_w, "executed_model_mg.lav"))
+
+    se_arg <- if (MG_BOOT > 0) "bootstrap" else "standard"
+    boot_arg <- if (MG_BOOT > 0) MG_BOOT else NULL
+
+    fit <- lavaan::sem(
+      model = model_mg,
+      data = dW,
+      group = wvar,
+      estimator = "ML",
+      missing = "fiml",
+      fixed.x = TRUE,
+      sampling.weights = "psw",
+      se = se_arg,
+      bootstrap = boot_arg,
+      check.lv.names = FALSE,
+      meanstructure = TRUE,
+      check.gradient = FALSE,
+      control = list(iter.max = 20000),
+      parallel = if (MG_BOOT > 0) BOOT_PARALLEL else "no",
+      ncpus = if (MG_BOOT > 0) BOOT_NCPUS else 1
+    )
+
+    out_struct <- file.path(out_w, "structural")
+    dir.create(out_struct, recursive = TRUE, showWarnings = FALSE)
+    writeLines(paste0("group = ", wvar), con = file.path(out_struct, "group_var.txt"))
+    writeLines(paste0("w_label = W", i), con = file.path(out_struct, "w_label.txt"))
+    write_lavaan_txt_tables(fit, out_struct, "structural", boot_ci_type = MG_CI)
+    run_wald_tests_fast_vs_nonfast(fit, out_dir = file.path(out_struct, "wald"), prefix = "wald")
+  } else {
+    fit_mg_fast_vs_nonfast_with_outputs(
+      dat = dW,
+      group = wvar,
+      w_label = paste0("W", i),
+      out_dir = file.path(out_w, "structural"),
+      estimator = "ML",
+      missing = "fiml",
+      fixed.x = TRUE,
+      weight_var = "psw",
+      bootstrap = MG_BOOT,
+      boot_ci_type = MG_CI,
+      parallel = if (MG_BOOT > 0) BOOT_PARALLEL else "no",
+      ncpus = if (MG_BOOT > 0) BOOT_NCPUS else 1
+    )
+  }
 }
 
 # -------------------------
@@ -483,7 +1202,7 @@ for (i in seq_along(W_VARS_STRUCT_OK)) {
 out_race <- file.path(OUT_BASE, paste0("RQ4_structural_by_", RACE_VAR))
 dir.create(out_race, recursive = TRUE, showWarnings = FALSE)
 
-dat_race_base <- if (DO_PSW) dat_main else dat
+dat_race_base <- dat_main
 
 RACE_BOOT <- if (isTRUE(BOOTSTRAP_RACE)) B_BOOT_RACE else 0
 RACE_CI   <- if (RACE_BOOT > 0) BOOT_CI_TYPE_RACE else "none"
@@ -528,10 +1247,10 @@ if (!(RACE_VAR %in% names(dat_race_base))) {
         dat = dsub,
         out_dir = file.path(out_level, "structural"),
         model_type = "parallel",
-        estimator = "MLR",
+        estimator = "ML",
         missing = "fiml",
-        fixed.x = FALSE,
-        weight_var = if (DO_PSW) "psw" else NULL,
+        fixed.x = TRUE,
+        weight_var = "psw",
         bootstrap = RACE_BOOT,
         boot_ci_type = RACE_CI,
         parallel = if (RACE_BOOT > 0) BOOT_PARALLEL else "no",
@@ -548,7 +1267,6 @@ cat("Run complete\n")
 cat("MODEL_FILE: ", MODEL_FILE, "\n", sep = "")
 cat("REP_DATA_CSV: ", REP_DATA_CSV, "\n", sep = "")
 cat("OUT_BASE: ", OUT_BASE, "\n", sep = "")
-cat("EXPOSURE_FLAG_COL: ", EXPOSURE_FLAG_COL, "\n", sep = "")
 cat("TREATMENT_VAR: ", TREATMENT_VAR, "\n", sep = "")
 cat("DO_PSW: ", DO_PSW, "\n", sep = "")
 cat("TABLE_CHECK_MODE: ", TABLE_CHECK_MODE, "\n", sep = "")
@@ -573,5 +1291,35 @@ cat("MIN_RACE_N: ", MIN_RACE_N, "\n\n", sep = "")
 cat("sessionInfo():\n")
 print(sessionInfo())
 sink()
+
+# =============================================================================
+# Generate Standards Compliance Visualizations
+# =============================================================================
+message("\n=== Generating Standards Compliance Visualizations ===")
+viz_cmd <- sprintf(
+  "python3 scripts/plot_standards_comparison.py --out '%s'",
+  OUT_BASE
+)
+viz_result <- system(viz_cmd, intern = FALSE)
+if (viz_result == 0) {
+  message("Standards visualizations saved to: ", OUT_BASE)
+} else {
+  warning("Standards visualization script failed (exit code ", viz_result, ")")
+}
+
+# =============================================================================
+# Build Bootstrap Tables (DOCX)
+# =============================================================================
+message("\n=== Building Bootstrap Tables ===")
+tables_cmd <- sprintf(
+ "python3 scripts/build_bootstrap_tables.py --results_dir '%s'",
+  OUT_BASE
+)
+tables_result <- system(tables_cmd, intern = FALSE)
+if (tables_result == 0) {
+  message("Bootstrap tables saved to: ", OUT_BASE)
+} else {
+  warning("Bootstrap tables script failed (exit code ", tables_result, ")")
+}
 
 message("ALL RQs run complete. Outputs under: ", OUT_BASE)
