@@ -1,329 +1,250 @@
 #!/usr/bin/env python3
-"""Build publication-ready Word tables from bootstrap v3 results.
+"""
+Build APA 7 Bootstrap Tables (called by R pipeline)
 
-This script creates formatted tables from the corrected model bootstrap results
-(without credit_dose_c main effect).
+Generates Tables 10-12 for structural results:
+- Table 10: Structural path coefficients
+- Table 11: Direct, indirect, and total effects
+- Table 12: Conditional indirect effects and IMM
+
+APA 7 Table Formatting:
+- Table number: Bold
+- Title: Italic, title case
+- Stub column (first): Left-aligned (row labels)
+- Data columns: Right-aligned (numeric values)
+- Borders: Top, below header, bottom only (no vertical lines)
+- Notes: "Note." in italics, then regular text
 
 Usage:
-    python scripts/build_bootstrap_tables.py [--results_dir DIR]
-
-Output: <results_dir>/Bootstrap_Tables_v3.docx
+    python scripts/build_bootstrap_tables.py --csv <path> --B <int> --ci_type <str>
 """
 
 import argparse
 from pathlib import Path
 import pandas as pd
 from docx import Document
-from docx.shared import Inches, Pt
+from docx.shared import Pt, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
+from docx.oxml.ns import nsdecls
+from docx.oxml import parse_xml
 
 
-def fmt_num(x, nd=3):
-    """Format number to specified decimal places."""
+def fmt(x, nd=3):
     try:
-        v = float(x)
-        if abs(v) < 0.001:
-            return f"{v:.{nd}f}"
-        return f"{v:.{nd}f}"
+        return f"{float(x):.{nd}f}" if pd.notna(x) else "—"
     except:
-        return str(x)
+        return str(x) if pd.notna(x) else "—"
 
 
 def fmt_ci(lo, hi, nd=3):
-    """Format confidence interval."""
-    return f"[{fmt_num(lo, nd)}, {fmt_num(hi, nd)}]"
+    return f"[{fmt(lo, nd)}, {fmt(hi, nd)}]"
 
 
-def add_table_page(doc, table_num, caption, df, note=None):
-    """Add a table with caption to the document."""
-    # Caption
+def set_apa_borders(table):
+    tbl = table._tbl
+    tblPr = tbl.tblPr or parse_xml(r'<w:tblPr %s/>' % nsdecls('w'))
+    borders = parse_xml(
+        r'<w:tblBorders %s>'
+        r'<w:top w:val="single" w:sz="4" w:color="000000"/>'
+        r'<w:bottom w:val="single" w:sz="4" w:color="000000"/>'
+        r'<w:insideH w:val="nil"/><w:insideV w:val="nil"/>'
+        r'<w:left w:val="nil"/><w:right w:val="nil"/>'
+        r'</w:tblBorders>' % nsdecls('w'))
+    tblPr.append(borders)
+
+
+def header_border(row):
+    for cell in row.cells:
+        tcPr = cell._tc.get_or_add_tcPr()
+        tcPr.append(parse_xml(r'<w:tcBorders %s><w:bottom w:val="single" w:sz="4" w:color="000000"/></w:tcBorders>' % nsdecls('w')))
+
+
+def set_cell_border_bottom(cell):
+    """Add bottom border to a single cell (for category-length spanner borders)."""
+    tcPr = cell._tc.get_or_add_tcPr()
+    tcPr.append(parse_xml(r'<w:tcBorders %s><w:bottom w:val="single" w:sz="4" w:color="000000"/></w:tcBorders>' % nsdecls('w')))
+
+
+def add_table(doc, num, title, df, note, note_p=None, column_spanners=None):
+    # Number (bold)
     p = doc.add_paragraph()
-    run = p.add_run(f"Table {table_num}. ")
+    p.paragraph_format.space_before = Pt(12)
+    p.paragraph_format.space_after = Pt(0)
+    run = p.add_run(f"Table {num}")
     run.bold = True
-    run.font.size = Pt(11)
-    run = p.add_run(caption)
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(12)
+    
+    # Title (italic)
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(0)
+    p.paragraph_format.space_after = Pt(6)
+    run = p.add_run(title)
     run.italic = True
-    run.font.size = Pt(11)
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(12)
     
     if df is not None and not df.empty:
-        # Create table
-        tbl = doc.add_table(rows=1, cols=len(df.columns))
-        tbl.style = 'Table Grid'
+        # Add extra row for column spanners if provided
+        num_header_rows = 2 if column_spanners else 1
+        tbl = doc.add_table(rows=len(df) + num_header_rows, cols=len(df.columns))
+        tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
+        set_apa_borders(tbl)
+        
+        current_row = 0
+        
+        # Column spanners row (if provided)
+        if column_spanners:
+            spanner_row = tbl.rows[current_row]
+            for i in range(len(df.columns)):
+                spanner_row.cells[i].text = ""
+            
+            for spanner_text, start_col, end_col in column_spanners:
+                if end_col > start_col:
+                    # Merge cells
+                    start_cell = spanner_row.cells[start_col]
+                    for col in range(start_col + 1, end_col + 1):
+                        start_cell.merge(spanner_row.cells[col])
+                # Set text and add category-length border
+                spanner_row.cells[start_col].text = spanner_text
+                spanner_row.cells[start_col].vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+                spanner_row.cells[start_col].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                for r in spanner_row.cells[start_col].paragraphs[0].runs:
+                    r.font.name = 'Times New Roman'
+                    r.font.size = Pt(11)
+                set_cell_border_bottom(spanner_row.cells[start_col])
+            current_row += 1
         
         # Header row
-        hdr = tbl.rows[0].cells
+        hdr = tbl.rows[current_row]
         for i, col in enumerate(df.columns):
-            hdr[i].text = col
-            hdr[i].paragraphs[0].runs[0].bold = True
-            hdr[i].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            hdr.cells[i].text = str(col)
+            hdr.cells[i].vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+            hdr.cells[i].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            for r in hdr.cells[i].paragraphs[0].runs:
+                r.font.name = 'Times New Roman'
+                r.font.size = Pt(11)
+        header_border(hdr)
+        current_row += 1
         
         # Data rows
-        for _, row in df.iterrows():
-            cells = tbl.add_row().cells
-            for i, val in enumerate(row):
-                cells[i].text = str(val)
-                # Right-align numeric columns
-                if i > 0:
-                    cells[i].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        for ri, (_, row) in enumerate(df.iterrows()):
+            for ci, val in enumerate(row):
+                cell = tbl.rows[current_row + ri].cells[ci]
+                cell.text = str(val) if pd.notna(val) else ''
+                cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
+                cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT if ci == 0 else WD_ALIGN_PARAGRAPH.RIGHT
+                for r in cell.paragraphs[0].runs:
+                    r.font.name = 'Times New Roman'
+                    r.font.size = Pt(11)
     
     # Note
-    if note:
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(6)
+    run = p.add_run("Note. ")
+    run.italic = True
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(10)
+    run = p.add_run(note)
+    run.font.name = 'Times New Roman'
+    run.font.size = Pt(10)
+    
+    if note_p:
         p = doc.add_paragraph()
-        run = p.add_run("Note. ")
-        run.italic = True
-        run.font.size = Pt(10)
-        run = p.add_run(note)
+        p.paragraph_format.space_before = Pt(0)
+        run = p.add_run(note_p)
+        run.font.name = 'Times New Roman'
         run.font.size = Pt(10)
     
     doc.add_page_break()
-    return table_num + 1
+    return num + 1
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Build bootstrap result tables (DOCX)')
-    parser.add_argument('--results_dir', type=str, 
-                        default='results/fast_treat_control/official_all_RQs',
-                        help='Directory containing bootstrap results')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--csv', required=True)
+    parser.add_argument('--B', type=int, default=2000)
+    parser.add_argument('--ci_type', default='perc')
     args = parser.parse_args()
     
-    base_dir = Path(args.results_dir)
-    boot_csv = base_dir / "bootstrap_v3" / "bootstrap_results.csv"
-    out_docx = base_dir / "Bootstrap_Tables_v3.docx"
+    csv_path = Path(args.csv)
+    if not csv_path.exists():
+        print(f"ERROR: {csv_path} not found")
+        return
     
-    if not boot_csv.exists():
-        # Also check for bootstrap_pipeline subdirectory
-        alt_csv = base_dir / "bootstrap_pipeline" / "bootstrap_results.csv"
-        if alt_csv.exists():
-            boot_csv = alt_csv
-        else:
-            print(f"ERROR: {boot_csv} not found")
-            return
+    df = pd.read_csv(csv_path)
+    if 'se' in df.columns and 'boot_se' not in df.columns:
+        df['boot_se'] = df['se']
     
-    # Load bootstrap results
-    df = pd.read_csv(boot_csv)
+    B = args.B
+    ci = {'bca': 'BCa', 'perc': 'percentile', 'norm': 'normal'}.get(args.ci_type.lower(), args.ci_type)
     
     doc = Document()
+    doc.styles['Normal'].font.name = 'Times New Roman'
+    doc.styles['Normal'].font.size = Pt(12)
     
-    # Title page
-    title = doc.add_heading("Bootstrap Results: Corrected Conditional Process Model", level=0)
-    doc.add_paragraph(
-        "Model specification: Parallel mediation with first-stage moderation.\n"
-        "Collinearity fix: credit_dose_c main effect removed (only varies for FASt=1).\n"
-        "Bootstrap replicates: 500 | Convergence: 100%\n"
-        "CI method: BCa (bias-corrected accelerated)"
-    )
-    doc.add_page_break()
+    num = 1
     
-    table_num = 1
+    # Column spanners for B/SE grouping (columns: Path/Effect=0, B=1, SE=2, 95% CI=3, Sig=4)
+    estimate_spanner = [("Estimate", 1, 2)]
     
-    # Table 1: Structural path coefficients
-    paths = df[df['parameter'].isin(['a1', 'a1z', 'a2', 'a2z', 'b1', 'b2', 'c', 'cz'])].copy()
-    paths['Parameter'] = paths['parameter'].map({
-        'a1': 'FASt → Emotional Distress (a₁)',
-        'a1z': 'FASt × Dose → Emotional Distress (a₁ᵢₙₜ)',
-        'a2': 'FASt → Quality of Engagement (a₂)',
-        'a2z': 'FASt × Dose → Quality of Engagement (a₂ᵢₙₜ)',
-        'b1': 'Emotional Distress → Developmental Adjustment (b₁)',
-        'b2': 'Quality of Engagement → Developmental Adjustment (b₂)',
-        'c': "FASt → Developmental Adjustment (c')",
-        'cz': "FASt × Dose → Developmental Adjustment (c'ᵢₙₜ)"
-    })
-    paths['Estimate'] = paths['est'].apply(lambda x: fmt_num(x))
-    paths['SE'] = paths['boot_se'].apply(lambda x: fmt_num(x))
-    paths['95% CI'] = paths.apply(lambda r: fmt_ci(r['ci_lower'], r['ci_upper']), axis=1)
-    paths['Sig'] = paths['sig'].map({True: '*', False: ''})
+    # Table 1: Structural paths
+    struct = df[df['parameter'].isin(['a1','a1z','a2','a2z','b1','b2','c','cz'])].copy()
+    if not struct.empty:
+        labels = {'a1':'a₁ (X → M₁)','a1z':'a₁z (X×Z → M₁)','a2':'a₂ (X → M₂)','a2z':'a₂z (X×Z → M₂)',
+                  'b1':'b₁ (M₁ → Y)','b2':'b₂ (M₂ → Y)','c':"c′ (X → Y)",'cz':"c′z (X×Z → Y)"}
+        struct['Path'] = struct['parameter'].map(labels)
+        struct['B'] = struct['est'].apply(lambda x: fmt(x))
+        struct['SE'] = struct['boot_se'].apply(lambda x: fmt(x))
+        struct['95% CI'] = struct.apply(lambda r: fmt_ci(r['ci_lower'], r['ci_upper']), axis=1)
+        struct['Sig'] = struct['sig'].apply(lambda x: '*' if x else '')
+        tbl = struct[['Path','B','SE','95% CI','Sig']].reset_index(drop=True)
+        num = add_table(doc, num, "Structural Path Coefficients From Bootstrap Analysis", tbl,
+                       "X = FASt status; Z = credit dose (centered); M₁ = Emotional Distress; M₂ = Quality of Engagement; Y = Developmental Adjustment.",
+                       f"*95% {ci} CI excludes zero. Bootstrap B = {B:,}.",
+                       column_spanners=estimate_spanner)
     
-    tbl1 = paths[['Parameter', 'Estimate', 'SE', '95% CI', 'Sig']].reset_index(drop=True)
+    # Table 2: Direct/indirect/total
+    rows = []
+    for p, lbl in [('c',"Direct effect (c′)"), ('ind_EmoDiss_z_mid','Indirect via EmoDiss'), 
+                   ('ind_QualEngag_z_mid','Indirect via QualEngag'), ('total_z_mid','Total effect')]:
+        r = df[df['parameter']==p]
+        if not r.empty:
+            r = r.iloc[0]
+            rows.append([lbl, fmt(r['est']), fmt(r['boot_se']), fmt_ci(r['ci_lower'],r['ci_upper']), '*' if r['sig'] else ''])
+    if rows:
+        tbl = pd.DataFrame(rows, columns=['Effect','B','SE','95% CI','Sig'])
+        num = add_table(doc, num, "Direct, Indirect, and Total Effects at Mean Credit Dose", tbl,
+                       "Effects at mean credit dose (Z = 0). Indirect = a × b.",
+                       f"*95% {ci} CI excludes zero. B = {B:,}.",
+                       column_spanners=estimate_spanner)
     
-    table_num = add_table_page(
-        doc, table_num,
-        "Structural path coefficients from bootstrap-then-weight analysis.",
-        tbl1,
-        "FASt = accelerated dual credit status (≥12 transferable units at matriculation); "
-        "Dose = credit_dose (mean-centered units beyond threshold); "
-        "FASt × Dose = interaction term. "
-        "* p < .05 based on bootstrap CI excluding zero. B = 500 replicates, 100% convergence."
-    )
+    # Table 3: Conditional indirect + IMM
+    rows = []
+    for med, med_lbl in [('EmoDiss','EmoDiss'), ('QualEngag','QualEngag')]:
+        for lv, lv_lbl in [('low','−1 SD'),('mid','Mean'),('high','+1 SD')]:
+            r = df[df['parameter']==f'ind_{med}_z_{lv}']
+            if not r.empty:
+                r = r.iloc[0]
+                rows.append([f'Indirect via {med_lbl} at {lv_lbl}', fmt(r['est']), fmt(r['boot_se']), 
+                            fmt_ci(r['ci_lower'],r['ci_upper']), '*' if r['sig'] else ''])
+        imm = df[df['parameter']==f'index_MM_{med}']
+        if not imm.empty:
+            r = imm.iloc[0]
+            rows.append([f'IMM ({med_lbl})', fmt(r['est']), fmt(r['boot_se']),
+                        fmt_ci(r['ci_lower'],r['ci_upper']), '*' if r['sig'] else ''])
+    if rows:
+        tbl = pd.DataFrame(rows, columns=['Effect','B','SE','95% CI','Sig'])
+        num = add_table(doc, num, "Conditional Indirect Effects and Index of Moderated Mediation", tbl,
+                       "Conditional effects at −1 SD, mean, +1 SD of credit dose. IMM = a₁z × b (rate of change in indirect per unit Z).",
+                       f"*95% {ci} CI excludes zero. B = {B:,}.",
+                       column_spanners=estimate_spanner)
     
-    # Table 2: Conditional a-paths (X → Mediators at different Z levels)
-    cond_a = df[df['parameter'].str.match(r'a[12]_z_(low|mid|high)')].copy()
-    cond_a['Effect'] = cond_a['parameter'].apply(
-        lambda x: 'FASt → Emotional Distress' if 'a1' in x else 'FASt → Quality of Engagement'
-    )
-    cond_a['Credit Dose'] = cond_a['parameter'].apply(lambda x: x.split('_')[-1].title())
-    cond_a['Estimate'] = cond_a['est'].apply(lambda x: fmt_num(x))
-    cond_a['SE'] = cond_a['boot_se'].apply(lambda x: fmt_num(x))
-    cond_a['95% CI'] = cond_a.apply(lambda r: fmt_ci(r['ci_lower'], r['ci_upper']), axis=1)
-    cond_a['Sig'] = cond_a['sig'].map({True: '*', False: ''})
-    
-    # Sort by effect and Z level
-    z_order = {'Low': 0, 'Mid': 1, 'High': 2}
-    cond_a['z_sort'] = cond_a['Credit Dose'].map(z_order)
-    cond_a = cond_a.sort_values(['Effect', 'z_sort']).reset_index(drop=True)
-    
-    tbl2 = cond_a[['Effect', 'Credit Dose', 'Estimate', 'SE', '95% CI', 'Sig']]
-    
-    table_num = add_table_page(
-        doc, table_num,
-        "Conditional effects of FASt status on mediators at low, mean, and high credit dose.",
-        tbl2,
-        "Low = −1 SD below mean; Mid = at the mean; High = +1 SD above mean credit dose. "
-        "* p < .05 based on bootstrap CI excluding zero."
-    )
-    
-    # Table 3: Conditional direct effects
-    dir_eff = df[df['parameter'].str.startswith('dir_z')].copy()
-    dir_eff['Credit Dose'] = dir_eff['parameter'].apply(lambda x: x.split('_')[-1].title())
-    dir_eff['Estimate'] = dir_eff['est'].apply(lambda x: fmt_num(x))
-    dir_eff['SE'] = dir_eff['boot_se'].apply(lambda x: fmt_num(x))
-    dir_eff['95% CI'] = dir_eff.apply(lambda r: fmt_ci(r['ci_lower'], r['ci_upper']), axis=1)
-    dir_eff['Sig'] = dir_eff['sig'].map({True: '*', False: ''})
-    
-    z_order = {'Low': 0, 'Mid': 1, 'High': 2}
-    dir_eff['z_sort'] = dir_eff['Credit Dose'].map(z_order)
-    dir_eff = dir_eff.sort_values('z_sort').reset_index(drop=True)
-    
-    tbl3 = dir_eff[['Credit Dose', 'Estimate', 'SE', '95% CI', 'Sig']]
-    
-    table_num = add_table_page(
-        doc, table_num,
-        "Conditional direct effects of FASt status on Developmental Adjustment.",
-        tbl3,
-        "Low = −1 SD; Mid = mean; High = +1 SD of credit dose. "
-        "* p < .05 based on bootstrap CI excluding zero. "
-        "Direct effects are non-significant at all dose levels."
-    )
-    
-    # Table 4: Conditional indirect effects
-    ind_eff = df[df['parameter'].str.startswith('ind_')].copy()
-    ind_eff['Mediator'] = ind_eff['parameter'].apply(
-        lambda x: 'Emotional Distress' if 'EmoDiss' in x else 'Quality of Engagement'
-    )
-    ind_eff['Credit Dose'] = ind_eff['parameter'].apply(lambda x: x.split('_')[-1].title())
-    ind_eff['Estimate'] = ind_eff['est'].apply(lambda x: fmt_num(x))
-    ind_eff['SE'] = ind_eff['boot_se'].apply(lambda x: fmt_num(x))
-    ind_eff['95% CI'] = ind_eff.apply(lambda r: fmt_ci(r['ci_lower'], r['ci_upper']), axis=1)
-    ind_eff['Sig'] = ind_eff['sig'].map({True: '*', False: ''})
-    
-    z_order = {'Low': 0, 'Mid': 1, 'High': 2}
-    ind_eff['z_sort'] = ind_eff['Credit Dose'].map(z_order)
-    ind_eff = ind_eff.sort_values(['Mediator', 'z_sort']).reset_index(drop=True)
-    
-    tbl4 = ind_eff[['Mediator', 'Credit Dose', 'Estimate', 'SE', '95% CI', 'Sig']]
-    
-    table_num = add_table_page(
-        doc, table_num,
-        "Conditional indirect effects of FASt status on Developmental Adjustment.",
-        tbl4,
-        "Low = −1 SD; Mid = mean; High = +1 SD of credit dose. "
-        "* p < .05 based on bootstrap CI excluding zero. "
-        "Via Emotional Distress: significant at all dose levels (negative). "
-        "Via Quality of Engagement: significant at mean and high dose (negative)."
-    )
-    
-    # Table 5: Conditional total effects
-    tot_eff = df[df['parameter'].str.startswith('total_z')].copy()
-    tot_eff['Credit Dose'] = tot_eff['parameter'].apply(lambda x: x.split('_')[-1].title())
-    tot_eff['Estimate'] = tot_eff['est'].apply(lambda x: fmt_num(x))
-    tot_eff['SE'] = tot_eff['boot_se'].apply(lambda x: fmt_num(x))
-    tot_eff['95% CI'] = tot_eff.apply(lambda r: fmt_ci(r['ci_lower'], r['ci_upper']), axis=1)
-    tot_eff['Sig'] = tot_eff['sig'].map({True: '*', False: ''})
-    
-    z_order = {'Low': 0, 'Mid': 1, 'High': 2}
-    tot_eff['z_sort'] = tot_eff['Credit Dose'].map(z_order)
-    tot_eff = tot_eff.sort_values('z_sort').reset_index(drop=True)
-    
-    tbl5 = tot_eff[['Credit Dose', 'Estimate', 'SE', '95% CI', 'Sig']]
-    
-    table_num = add_table_page(
-        doc, table_num,
-        "Conditional total effects of FASt status on Developmental Adjustment.",
-        tbl5,
-        "Low = −1 SD; Mid = mean; High = +1 SD of credit dose. "
-        "* p < .05 based on bootstrap CI excluding zero. "
-        "Total effects significant at mean and high dose levels."
-    )
-    
-    # Table 6: Indices of moderated mediation
-    imm = df[df['parameter'].str.startswith('index_MM')].copy()
-    imm['Mediator Pathway'] = imm['parameter'].apply(
-        lambda x: 'via Emotional Distress' if 'EmoDiss' in x else 'via Quality of Engagement'
-    )
-    imm['Estimate'] = imm['est'].apply(lambda x: fmt_num(x))
-    imm['SE'] = imm['boot_se'].apply(lambda x: fmt_num(x))
-    imm['95% CI'] = imm.apply(lambda r: fmt_ci(r['ci_lower'], r['ci_upper']), axis=1)
-    imm['Sig'] = imm['sig'].map({True: '*', False: ''})
-    
-    tbl6 = imm[['Mediator Pathway', 'Estimate', 'SE', '95% CI', 'Sig']].reset_index(drop=True)
-    
-    table_num = add_table_page(
-        doc, table_num,
-        "Index of Moderated Mediation (IMM) for each indirect pathway.",
-        tbl6,
-        "IMM = a × b interaction effect: (FASt × Dose → Mediator) × (Mediator → Outcome). "
-        "A significant IMM indicates that the indirect effect varies linearly with credit dose. "
-        "* p < .05 based on bootstrap CI excluding zero. "
-        "Both pathways show significant moderated mediation."
-    )
-    
-    # Table 7: Summary interpretation
-    summary_data = [
-        ['Research Question', 'Finding', 'Support'],
-        ['RQ1: Direct effect of FASt', 'FASt → Developmental Adjustment not significant', 'No'],
-        ['RQ2a: Mediation via Emotional Distress', 'FASt increases distress → lower adjustment', 'Yes'],
-        ['RQ2b: Mediation via Quality of Engagement', 'FASt decreases engagement → lower adjustment', 'Yes'],
-        ['RQ3a: Dose moderates distress pathway', 'Higher credit dose amplifies harm via distress', 'Yes'],
-        ['RQ3b: Dose moderates engagement pathway', 'Higher credit dose amplifies harm via engagement', 'Yes'],
-    ]
-    summary_df = pd.DataFrame(summary_data[1:], columns=summary_data[0])
-    
-    table_num = add_table_page(
-        doc, table_num,
-        "Summary of research question support from bootstrap analysis.",
-        summary_df,
-        "Based on B = 500 bootstrap replicates with 100% convergence. "
-        "Support determined by 95% BCa bootstrap CI excluding zero."
-    )
-    
-    # Table 8: Total Generalizability Evidence
-    gen_data = [
-        ['Evidence Domain', 'Method', 'Result', 'Strength'],
-        ['Statistical Inference', 'BCa Bootstrap (B=500)', '100% convergence; stable SEs', 'Strong'],
-        ['Causal Identification', 'Propensity Score Weighting', 'ATO overlap weights; SMD < 0.1', 'Strong'],
-        ['Direct Effect (c′)', 'Conditional at Low/Mid/High dose', 'Non-significant at all levels', 'Consistent null'],
-        ['Indirect via Distress', 'Conditional at Low/Mid/High dose', 'Significant negative at all levels', 'Strong'],
-        ['Indirect via Engagement', 'Conditional at Low/Mid/High dose', 'Significant negative at Mid/High', 'Moderate'],
-        ['Total Effect', 'Conditional at Low/Mid/High dose', 'Significant negative at Mid/High', 'Moderate'],
-        ['Moderated Mediation (Distress)', 'Index of Moderated Mediation', 'IMM = −0.034, CI excludes 0', 'Strong'],
-        ['Moderated Mediation (Engagement)', 'Index of Moderated Mediation', 'IMM = −0.046, CI excludes 0', 'Strong'],
-        ['Effect Direction', 'All significant paths', 'Consistent negative (harmful)', 'Strong'],
-        ['Dose-Response Pattern', 'Slope of conditional effects', 'Monotonic: more credits → worse', 'Strong'],
-    ]
-    gen_df = pd.DataFrame(gen_data[1:], columns=gen_data[0])
-    
-    table_num = add_table_page(
-        doc, table_num,
-        "Summary of evidence for generalizability and robustness of findings.",
-        gen_df,
-        "Primary evidence from bootstrap-then-weight analysis with propensity score overlap weighting. "
-        "Strength ratings: Strong = consistent across all conditions; Moderate = present in most conditions; "
-        "Consistent null = reliably non-significant across conditions."
-    )
-    
-    # Save
-    out_docx.parent.mkdir(parents=True, exist_ok=True)
-    doc.save(str(out_docx))
-    print(f"Wrote: {out_docx}")
-    print(f"\nTables created:")
-    print("  1. Structural path coefficients")
-    print("  2. Conditional a-paths (X → Mediators)")
-    print("  3. Conditional direct effects")
-    print("  4. Conditional indirect effects")
-    print("  5. Conditional total effects")
-    print("  6. Index of Moderated Mediation")
-    print("  7. Summary of research question support")
-    print("  8. Total generalizability evidence")
+    out = csv_path.parent / "Bootstrap_Tables.docx"
+    doc.save(str(out))
+    print(f"Wrote: {out}")
+    print(f"Tables: {num-1} | B = {B:,} | CI = {ci}")
 
 
 if __name__ == "__main__":

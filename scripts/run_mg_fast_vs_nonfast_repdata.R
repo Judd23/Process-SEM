@@ -63,7 +63,7 @@ fit_args <- list(
   group = "x_FASt",
   estimator = ESTIMATOR,
   missing = MISSING,
-  fixed.x = FALSE,
+  fixed.x = TRUE,
   check.lv.names = FALSE
 )
 

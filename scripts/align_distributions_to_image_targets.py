@@ -3,24 +3,23 @@
 
 Targets (from user-supplied table):
 
-SB items (Likert 1-5 in this dataset):
+SB items:
 - sbmyself: Agree/Strongly Agree ~90%
 - sbvalued: Agree/Strongly Agree ~81%
 
 Interpretation used here:
-- Agree/Strongly Agree := values >= 4
-- Other := values <= 3
+- We enforce a 4-point SB scale (1..4). If the input uses 1..5, we collapse 4/5 -> 4.
+- Agree/Strongly Agree := values >= 3 (i.e., categories 3–4)
+- Other := values <= 2
 
-MHW difficulty items (coded 1-6 in this dataset):
-Target table is 4 categories:
-  1 Not at all difficult
-  2 Slightly difficult
-  3 Moderately difficult
-  4 Very/Extremely difficult
+MHW difficulty items (NSSE 2024):
+- Responses are 1–6 (Not at all difficult=1 … Very difficult=6)
+- 9 = Not applicable
 
 Interpretation used here:
-- Collapse original 1-6 responses to 1-4 by mapping 1->1, 2->2, 3->3, 4/5/6->4
-- Then adjust marginal counts to match target percentages.
+- Do NOT collapse 1–6 into 1–4
+- Rewrite MHWd* items to match anchor marginals (1–6 + 9)
+- Induce correlation across items via a shared latent factor (EmoDiss_true)
 
 This script edits only the listed columns.
 It makes a timestamped backup before overwriting the input when --inplace is used.
@@ -155,12 +154,40 @@ def _adjust_agree_threshold(
     return out, int(need)
 
 
-def _collapse_mhw_to_4(s: pd.Series) -> pd.Series:
-    s2 = s.astype(int).copy()
-    # Map 1->1, 2->2, 3->3, 4/5/6->4
-    s2 = s2.clip(lower=1)
-    s2 = s2.where(s2 <= 4, 4)
-    return s2
+def _collapse_sb_to_4(s: pd.Series) -> pd.Series:
+    """Collapse SB items to a 1..4 scale.
+
+    If input is 1..5, map 4/5 -> 4.
+    """
+    out = s.astype(int).copy()
+    out = out.clip(lower=1)
+    out = out.where(out <= 4, 4)
+    return out
+
+
+def _zscore(x: np.ndarray) -> np.ndarray:
+    x = np.asarray(x, dtype=float)
+    mu = np.nanmean(x)
+    sd = np.nanstd(x)
+    if not np.isfinite(sd) or sd <= 0:
+        return x * 0.0
+    return (x - mu) / sd
+
+
+def _ordinal_from_quantiles(eta: np.ndarray, probs: np.ndarray) -> np.ndarray:
+    """Assign ordinal categories 1..K based on quantile thresholds.
+
+    probs must be length K and sum to 1 (will be normalized defensively).
+    """
+    probs = np.asarray(probs, dtype=float)
+    probs = np.clip(probs, 0, None)
+    if probs.sum() <= 0:
+        probs = np.ones_like(probs) / len(probs)
+    probs = probs / probs.sum()
+
+    cum = np.cumsum(probs)[:-1]
+    cuts = np.quantile(eta, cum)
+    return (np.digitize(eta, cuts, right=True) + 1).astype(int)
 
 
 def _before_after_props(s: pd.Series, levels: List[int]) -> Dict[int, float]:
@@ -189,67 +216,188 @@ def main() -> int:
         "sbvalued": 0.81,
     }
 
+    # Anchor distributions (unconditional; includes NA coded 9)
+    anchor_a = {1: 0.16, 2: 0.12, 3: 0.17, 4: 0.24, 5: 0.16, 6: 0.13, 9: 0.03}
+    anchor_b = {1: 0.21, 2: 0.14, 3: 0.17, 4: 0.17, 5: 0.11, 6: 0.15, 9: 0.06}
+
+    def _make_target(
+        base: Dict[int, float],
+        pna: float,
+        shift: Dict[int, float] | None = None,
+        jitter_sd: float = 0.004,
+    ) -> Dict[int, float]:
+        """Return unconditional probs for categories 1..6 and 9."""
+        shift = shift or {}
+        pna = float(pna)
+        pna = min(max(pna, 0.0), 0.20)
+
+        base16 = np.array([base.get(k, 0.0) for k in [1, 2, 3, 4, 5, 6]], dtype=float)
+        base16 = np.clip(base16, 0.0, None)
+        if base16.sum() <= 0:
+            base16 = np.ones(6) / 6
+        base16 = base16 / base16.sum()
+
+        delta = np.zeros(6)
+        for k, v in shift.items():
+            if k in [1, 2, 3, 4, 5, 6]:
+                delta[[1, 2, 3, 4, 5, 6].index(k)] = float(v)
+
+        p16 = base16 + delta
+        if jitter_sd and jitter_sd > 0:
+            p16 = p16 + rng.normal(0.0, float(jitter_sd), size=6)
+
+        p16 = np.clip(p16, 0.005, None)
+        p16 = p16 / p16.sum()
+        mass = 1.0 - pna
+
+        out: Dict[int, float] = {k: float(p16[i] * mass) for i, k in enumerate([1, 2, 3, 4, 5, 6])}
+        out[9] = float(pna)
+        # Normalize guard
+        tot = sum(out.values())
+        out = {k: float(v) / tot for k, v in out.items()}
+        return out
+
+    # Item targets: close to anchors, with modest theory-aligned item variation.
     mhw_targets: Dict[str, Dict[int, float]] = {
-        "MHWdacad": {1: 0.18, 2: 0.34, 3: 0.28, 4: 0.20},
-        "MHWdlonely": {1: 0.30, 2: 0.33, 3: 0.22, 4: 0.15},
-        "MHWdmental": {1: 0.22, 2: 0.32, 3: 0.26, 4: 0.20},
-        "MHWdexhaust": {1: 0.12, 2: 0.28, 3: 0.33, 4: 0.27},
-        "MHWdsleep": {1: 0.10, 2: 0.26, 3: 0.34, 4: 0.30},
-        "MHWdfinancial": {1: 0.20, 2: 0.30, 3: 0.28, 4: 0.22},
+        "MHWdmental": _make_target(anchor_a, pna=0.04),
+        "MHWdacad": _make_target(anchor_a, pna=0.03, shift={1: +0.010, 2: +0.010, 4: -0.010, 6: -0.010}),
+        "MHWdexhaust": _make_target(anchor_a, pna=0.04, shift={1: -0.010, 4: +0.010, 5: +0.010, 6: -0.010}),
+        "MHWdsleep": _make_target(anchor_a, pna=0.05, shift={1: -0.008, 4: +0.008, 5: +0.010, 6: -0.010}),
+        "MHWdlonely": _make_target(anchor_b, pna=0.06, shift={1: -0.010, 2: -0.008, 5: +0.008, 6: +0.010}),
+        # Canonical codebook naming
+        "MHWdfinance": _make_target(anchor_b, pna=0.05, shift={1: -0.010, 2: -0.006, 5: +0.006, 6: +0.010}),
     }
 
     notes: List[str] = []
     notes.append(f"Input: {csv_path}")
     notes.append(f"Rows: {len(df)}")
-    notes.append("SB agree definition: value >= 4")
-    notes.append("MHW collapse: 1->1, 2->2, 3->3, 4/5/6->4")
+    notes.append("SB: enforce 1–4 scale (4/5->4); agree definition: value >= 3")
+    notes.append("MHW: keep 1–6; code 9 for Not applicable")
 
     summary_rows: List[Dict[str, object]] = []
+
+    # Ensure all SB items are on the required 1..4 scale (some source data may be 1..5).
+    for col in [c for c in df.columns if c.startswith("sb")]:
+        try:
+            df[col] = _collapse_sb_to_4(df[col])
+        except Exception:
+            # If a column is non-numeric, skip rather than fail.
+            notes.append(f"SKIP: could not coerce SB column to int: {col}")
 
     # Adjust SB items
     for col, targ in sb_targets.items():
         if col not in df.columns:
             notes.append(f"SKIP: missing column {col}")
             continue
-        before = df[col].astype(int)
-        before_agree = float((before >= 4).mean())
-        after, changed = _adjust_agree_threshold(before, target_agree=targ, agree_threshold=4, rng=rng)
-        after_agree = float((after >= 4).mean())
+        before_raw = df[col].astype(int)
+        before = _collapse_sb_to_4(before_raw)
+        df[col] = before
+        before_agree = float((before >= 3).mean())
+        after, changed = _adjust_agree_threshold(before, target_agree=targ, agree_threshold=3, rng=rng)
+        after_agree = float((after >= 3).mean())
         df[col] = after
         summary_rows.append({
             "column": col,
-            "type": "agree>=4",
+            "type": "agree>=3",
             "target": targ,
             "before": before_agree,
             "after": after_agree,
             "rows_changed": changed,
         })
 
-    # Adjust MHW items
-    for col, probs in mhw_targets.items():
-        if col not in df.columns:
-            notes.append(f"SKIP: missing column {col}")
-            continue
-        before_raw = df[col].astype(int)
-        before = _collapse_mhw_to_4(before_raw)
-        # Apply collapse first so we can hit 4-category targets
-        df[col] = before
+    # Adjust / rewrite MHW items (1..6 + 9).
+    # Canonicalize finance name if older datasets used MHWdfinancial.
+    if "MHWdfinancial" in df.columns and "MHWdfinance" not in df.columns:
+        df["MHWdfinance"] = df["MHWdfinancial"]
 
-        levels = [1, 2, 3, 4]
-        before_props = _before_after_props(before, levels)
-        after, changed = _adjust_discrete_min_change(before, probs, rng=rng)
-        after_props = _before_after_props(after, levels)
-        df[col] = after
+    # Shared latent driver (EmoDiss_true): prefer existing composite EmoDiss if available.
+    if "EmoDiss" in df.columns:
+        base_lat = np.asarray(pd.to_numeric(df["EmoDiss"], errors="coerce"), dtype=float)
+    else:
+        mhw_existing = [c for c in df.columns if c.startswith("MHWd")]
+        if mhw_existing:
+            tmp = df[mhw_existing].apply(pd.to_numeric, errors="coerce")
+            base_lat = np.asarray(tmp.mean(axis=1, skipna=True), dtype=float)
+        else:
+            base_lat = rng.normal(0.0, 1.0, size=len(df))
 
-        for lvl in levels:
-            summary_rows.append({
-                "column": col,
-                "type": f"prop[{lvl}]",
-                "target": probs[lvl],
-                "before": before_props[lvl],
-                "after": after_props[lvl],
-                "rows_changed": changed,
-            })
+    emo = _zscore(base_lat)
+    if "pell" in df.columns:
+        pell = np.asarray(pd.to_numeric(pd.Series(df["pell"]), errors="coerce"), dtype=float)
+        pell = np.nan_to_num(pell, nan=0.0)
+    else:
+        pell = np.zeros(len(df), dtype=float)
+
+    if "firstgen" in df.columns:
+        firstgen = np.asarray(pd.to_numeric(pd.Series(df["firstgen"]), errors="coerce"), dtype=float)
+        firstgen = np.nan_to_num(firstgen, nan=0.0)
+    else:
+        firstgen = np.zeros(len(df), dtype=float)
+    re_all = df.get("re_all", pd.Series([""] * len(df))).astype(str)
+    race_shift = re_all.isin([
+        "Black/African American",
+        "Hispanic/Latino",
+        "Hispanic/Latino/a",
+        "Hispanic/Latino/x",
+    ]).to_numpy(dtype=float)
+    emo_true = emo + 0.10 * pell + 0.06 * firstgen + 0.06 * race_shift
+
+    loading = 0.85
+    noise_sd = 0.60
+    levels = [1, 2, 3, 4, 5, 6, 9]
+
+    for col, probs_uncond in mhw_targets.items():
+        pna = float(probs_uncond.get(9, 0.0))
+        pna = min(max(pna, 0.0), 0.20)
+        is_na = rng.random(len(df)) < pna
+
+        p16 = np.array([probs_uncond.get(k, 0.0) for k in [1, 2, 3, 4, 5, 6]], dtype=float)
+        p16 = np.clip(p16, 0.0, None)
+        if p16.sum() <= 0:
+            p16 = np.ones(6) / 6
+        p16 = p16 / p16.sum()
+
+        eta = loading * emo_true + rng.normal(0.0, noise_sd, size=len(df))
+
+        out = np.full(len(df), 9, dtype=int)
+        idx = np.where(~is_na)[0]
+        out[idx] = _ordinal_from_quantiles(eta[idx], probs=p16)
+        df[col] = out
+
+        after_props = _before_after_props(pd.Series(df[col]), levels)
+        after_pct = {k: 100.0 * after_props.get(k, 0.0) for k in levels}
+        dev_a = max(abs(after_pct[k] - 100.0 * anchor_a.get(k, 0.0)) for k in levels)
+        dev_b = max(abs(after_pct[k] - 100.0 * anchor_b.get(k, 0.0)) for k in levels)
+        best = "A" if dev_a <= dev_b else "B"
+
+        summary_rows.append({
+            "column": col,
+            "type": "mhw_max_abs_pp_dev_anchorA",
+            "target": "anchorA",
+            "before": float("nan"),
+            "after": float(dev_a),
+            "rows_changed": int(len(df)),
+        })
+        summary_rows.append({
+            "column": col,
+            "type": "mhw_max_abs_pp_dev_anchorB",
+            "target": "anchorB",
+            "before": float("nan"),
+            "after": float(dev_b),
+            "rows_changed": int(len(df)),
+        })
+        summary_rows.append({
+            "column": col,
+            "type": "mhw_best_anchor",
+            "target": best,
+            "before": float("nan"),
+            "after": float(min(dev_a, dev_b)),
+            "rows_changed": int(len(df)),
+        })
+
+    # Drop legacy finance name if present
+    if "MHWdfinancial" in df.columns:
+        df = df.drop(columns=["MHWdfinancial"])
 
     _ensure_dir(OUTDIR)
     summary_path = OUTDIR / "image_targets_summary.csv"

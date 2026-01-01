@@ -95,7 +95,7 @@ add_row(
   "latent",
   construct_code = "M1",
   code_name = "EmoDiss",
-  stat_equation = "EmoDiss =~ MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial"
+  stat_equation = "EmoDiss =~ MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinance"
 )
 add_row(
   NA,
@@ -210,7 +210,7 @@ m1_labels <- c(
   MHWdmental = "EmoDiss: Mental health distress",
   MHWdexhaust = "EmoDiss: Exhaustion",
   MHWdsleep = "EmoDiss: Sleep difficulties",
-  MHWdfinancial = "EmoDiss: Financial stress"
+  MHWdfinance = "EmoDiss: Financial stress"
 )
 for (v in names(m1_labels)) {
   add_row(

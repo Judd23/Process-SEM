@@ -1,8 +1,10 @@
 # ============================================================
 # MC: PSW -> pooled SEM (RQ1–RQ3) + MG SEM a1 test (RQ4; W1–W4 one-at-a-time)
-# Design: X = 1(trnsfr_cr >= 12), credit_dose = max(0, trnsfr_cr - 12)/10
-# Estimator: WLSMV (ordered indicators)
-# Weights: overlap weights from PS model (PSW computed for diagnostics; NOT used as SEM case weights)
+# Design: x_FASt = 1(trnsfr_cr >= 12), credit_dose_c = centered dose
+# Estimator: ML + FIML (continuous indicators; matching E2E pipeline)
+# Model: Parallel mediation (EmoDiss + QualEngag -> DevAdj)
+# Weights: overlap weights from PS model (PSW as sampling weights)
+# Sources model from: r/models/mg_fast_vs_nonfast_model.R
 # ============================================================
 
 suppressPackageStartupMessages({
@@ -151,6 +153,15 @@ if (isTRUE(nzchar(WVAR_SINGLE)) && isTRUE(!is.na(WVAR_SINGLE))) {
     stop("--Wvar must be one of: ", paste(W_LIST, collapse = ", "))
   }
 }
+
+# -------------------------
+# BOOTSTRAP RESAMPLING FROM REP_DATA.CSV
+# -------------------------
+# Monte Carlo uses bootstrap case-resampling from rep_data.csv.
+# PSW is computed ONCE on the full dataset, then carried through resamples.
+# This provides realistic estimates using actual survey responses.
+REP_DATA_PATH <- as.character(get_arg("--rep_data_path", "rep_data.csv"))
+REP_DATA_FULL <- NULL  # Will be loaded at startup
 
 # -------------------------
 # OUTPUT HELPERS
@@ -403,21 +414,28 @@ run_representative_study <- function(N, use_psw = TRUE) {
         # For representative-study MI output, prefer semTools::lavaan.mi over runMI.
         # runMI() can produce an OLDlavaan.mi object in some semTools/lavaan combos,
         # which is brittle (e.g., standardized summaries can fail).
-        zbar0 <- mean(dat$credit_dose, na.rm = TRUE)
-        model0 <- build_model_pooled(zbar = zbar0)
         dat_list <- lapply(seq_len(MI_M), function(k) mice::complete(imp, action = k))
+        # Build model using first imputed dataset for Z probing values
+        model0 <- build_model_pooled(dat_list[[1]])
+
+        # Convert ordinal indicators to numeric for ML estimation
+        for (k in seq_along(dat_list)) {
+          ord_vars <- ORDERED_VARS[ORDERED_VARS %in% names(dat_list[[k]])]
+          for (v in ord_vars) {
+            dat_list[[k]][[v]] <- as.numeric(dat_list[[k]][[v]])
+          }
+        }
 
         fit_mi <- try(
           semTools::lavaan.mi(
             model = model0,
             data = dat_list,
-            estimator = "WLSMV",
-            ordered = ORDERED_VARS,
-            parameterization = "theta",
-            std.lv = FALSE,
-            auto.fix.first = FALSE,
-            # Study policy: no pairwise; WLSMV does not support FIML.
-            missing = "listwise"
+            estimator = "ML",
+            missing = "listwise",  # MI handles missingness
+            fixed.x = TRUE,
+            meanstructure = TRUE,
+            check.lv.names = FALSE,
+            check.gradient = FALSE
           ),
           silent = TRUE
         )
@@ -434,7 +452,7 @@ run_representative_study <- function(N, use_psw = TRUE) {
           con <- file(mi_out, open = "wt")
           on.exit(close(con), add = TRUE)
           writeLines("Representative Study — Pooled MI (mice + semTools::lavaan.mi)", con = con)
-          writeLines(paste0("m=", MI_M, ", maxit=", MI_MAXIT, ", seed=", SEED, ", zbar0=", sprintf("%.4f", zbar0)), con = con)
+          writeLines(paste0("m=", MI_M, ", maxit=", MI_MAXIT, ", seed=", SEED), con = con)
           writeLines("", con = con)
           # Keep the representative-study MI output robust by avoiding standardized output.
           out_txt <- utils::capture.output(summary(fit_mi, fit.measures = TRUE))
@@ -532,6 +550,125 @@ run_representative_study <- function(N, use_psw = TRUE) {
 MIN_N_PER_GROUP <- 60
 
 # -------------------------
+# LOAD REP_DATA.CSV FOR BOOTSTRAP MODE
+# -------------------------
+load_rep_data <- function(path = REP_DATA_PATH) {
+  if (!file.exists(path)) {
+    stop("rep_data.csv not found at: ", path, "\nRun from repo root or provide --rep_data_path")
+  }
+  dat <- read.csv(path, stringsAsFactors = FALSE)
+  
+  # Ensure centered variables exist
+  ensure_centered <- function(d, base, centered) {
+    if (base %in% names(d)) {
+      d[[base]] <- suppressWarnings(as.numeric(d[[base]]))
+      d[[centered]] <- as.numeric(scale(d[[base]], scale = FALSE))
+    }
+    d
+  }
+  dat <- ensure_centered(dat, "hgrades", "hgrades_c")
+  dat <- ensure_centered(dat, "bparented", "bparented_c")
+  dat <- ensure_centered(dat, "hchallenge", "hchallenge_c")
+  dat <- ensure_centered(dat, "cSFcareer", "cSFcareer_c")
+  
+  # Ensure XZ_c exists
+  if (!("XZ_c" %in% names(dat)) && all(c("x_FASt", "credit_dose_c") %in% names(dat))) {
+    dat$XZ_c <- dat$x_FASt * dat$credit_dose_c
+  }
+  
+  # Ensure credit_dose_c is centered
+  if ("credit_dose" %in% names(dat) && !("credit_dose_c" %in% names(dat))) {
+    dat$credit_dose_c <- as.numeric(scale(dat$credit_dose, scale = FALSE))
+    dat$XZ_c <- dat$x_FASt * dat$credit_dose_c
+  } else if ("credit_dose_c" %in% names(dat)) {
+    # Re-center to ensure mean=0
+    dat$credit_dose_c <- as.numeric(scale(dat$credit_dose_c, scale = FALSE))
+    dat$XZ_c <- dat$x_FASt * dat$credit_dose_c
+  }
+  
+  # Coerce binary covariates to numeric
+  for (v in c("pell", "hapcl", "hprecalc13")) {
+    if (v %in% names(dat)) {
+      dat[[v]] <- suppressWarnings(as.numeric(dat[[v]]))
+      dat[[v]][!dat[[v]] %in% c(0, 1)] <- NA
+    }
+  }
+  
+  # Coerce cohort to numeric (for regression)
+  if ("cohort" %in% names(dat)) {
+    dat$cohort <- suppressWarnings(as.numeric(dat$cohort))
+  }
+  
+  message("[load_rep_data] Loaded N=", nrow(dat), " from ", path)
+  dat
+}
+
+# Compute PSW on the FULL dataset ONCE before any resampling
+# This is the correct approach: weights are computed on the original sample
+# and then carried through bootstrap resamples
+compute_psw_on_full_data <- function(dat) {
+  ps_mod <- try(glm(
+    x_FASt ~ hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c + cohort,
+    data = dat, family = binomial()
+  ), silent = TRUE)
+  
+  ps <- rep(0.5, nrow(dat))
+  if (!inherits(ps_mod, "try-error")) {
+    ps_hat <- try(predict(ps_mod, newdata = dat, type = "response"), silent = TRUE)
+    if (!inherits(ps_hat, "try-error") && length(ps_hat) == nrow(dat)) {
+      ps <- as.numeric(ps_hat)
+    }
+  }
+  
+  ps <- pmin(pmax(ps, 1e-3), 1 - 1e-3)
+  ow <- ifelse(dat$x_FASt == 1, 1 - ps, ps)
+  ow <- ow / mean(ow)  # Normalize so mean weight = 1
+  dat$psw <- ow
+  
+  # Report PSW balance
+  message("[PSW] Computed overlap weights on full data (N=", nrow(dat), ")")
+  message("[PSW] Weight range: ", round(min(dat$psw), 3), " to ", round(max(dat$psw), 3))
+  
+  dat
+}
+
+# Bootstrap resample from rep_data (case resampling)
+# PSW column comes along with the resampled rows - NO recomputation
+bootstrap_rep_data <- function(dat_full, n = nrow(dat_full)) {
+  idx <- sample.int(nrow(dat_full), size = n, replace = TRUE)
+  dat <- dat_full[idx, , drop = FALSE]
+  rownames(dat) <- NULL
+  
+
+  # Re-center continuous covariates after resampling (means may shift slightly)
+  # But do NOT re-center PSW - it's fixed from the original sample
+  for (v in c("hgrades_c", "bparented_c", "hchallenge_c", "cSFcareer_c", "credit_dose_c")) {
+    if (v %in% names(dat)) {
+      dat[[v]] <- as.numeric(scale(dat[[v]], scale = FALSE))
+    }
+  }
+  # Recompute interaction after re-centering credit_dose_c
+  if (all(c("x_FASt", "credit_dose_c") %in% names(dat))) {
+    dat$XZ_c <- dat$x_FASt * dat$credit_dose_c
+  }
+  
+  # PSW is carried through from dat_full - no modification needed
+  # The weights reflect the original sample's propensity structure
+  
+  dat
+}
+
+# Initialize rep_data - ALWAYS load and compute PSW upfront
+REP_DATA_FULL <- load_rep_data(REP_DATA_PATH)
+
+# CRITICAL: Compute PSW ONCE on the full dataset before any resampling
+if (isTRUE(USE_PSW == 1)) {
+  REP_DATA_FULL <- compute_psw_on_full_data(REP_DATA_FULL)
+}
+
+message("[MC] Bootstrap mode: Each rep draws N=", N, " with replacement from ", REP_DATA_PATH)
+
+# -------------------------
 # VARIABLE NAMES (KEEP CONSISTENT WITH YOUR R FILES)
 # -------------------------
 ORDERED_VARS <- c(
@@ -581,7 +718,7 @@ make_ordinal <- function(x, K, probs = NULL) {
 infer_K_for_item <- function(var) {
   # Returns K for each item name. Vectorized over `var`.
   out <- rep(NA_integer_, length(var))
-  out[var %in% c("sbmyself","sbvalued","sbcommunity")] <- 5L
+  out[var %in% c("sbmyself","sbvalued","sbcommunity")] <- 4L
   out[var %in% c(
     "pgthink","pganalyze","pgwork","pgvalues","pgprobsolve",
     "SEwellness","SEnonacad","SEactivities","SEacademic","SEdiverse",
@@ -879,6 +1016,93 @@ merge_rare_categories_nearest <- function(x, min_prop = 0.01, min_expected_n = 5
   f
 }
 
+# Collapse empty ordinal categories within a grouping variable for WLSMV MG models.
+# WLSMV requires at least 1 observation in every ordinal category in every group.
+# This function merges empty top/bottom categories into adjacent ones within each group.
+collapse_empty_ordinal_cells_mg <- function(dat, Wvar, ord_vars) {
+  # For each ordinal variable and each group, find empty categories and merge them.
+  # We do this globally (across all groups at once) to keep category definitions consistent.
+  if (is.null(dat) || length(ord_vars) == 0) return(dat)
+  if (!Wvar %in% names(dat)) return(dat)
+  
+  g <- dat[[Wvar]]
+  if (!is.factor(g)) g <- factor(g)
+  grps <- levels(g)
+  if (length(grps) < 2) return(dat)
+  
+  for (v in ord_vars) {
+    if (!v %in% names(dat)) next
+    x <- dat[[v]]
+    if (!is.ordered(x)) x <- ordered(x)
+    levs <- levels(x)
+    if (length(levs) < 2) next
+    
+    # Find categories empty in at least one group
+    empty_anywhere <- character(0)
+    for (grp in grps) {
+      sub_x <- x[g == grp]
+      tab <- table(sub_x, useNA = "no")
+      empty_in_grp <- names(tab)[as.numeric(tab) == 0]
+      empty_anywhere <- union(empty_anywhere, empty_in_grp)
+    }
+    
+    if (length(empty_anywhere) == 0) next
+    
+    # Merge empty categories: top-down (highest empty → second highest), bottom-up (lowest empty → second lowest)
+    repeat {
+      levs <- levels(x)
+      if (length(levs) < 2) break
+      
+      # Check which categories are still empty anywhere
+      still_empty <- character(0)
+      for (grp in grps) {
+        sub_x <- x[g == grp]
+        tab <- table(sub_x, useNA = "no")
+        still_empty <- union(still_empty, names(tab)[as.numeric(tab) == 0])
+      }
+      if (length(still_empty) == 0) break
+      
+      # Merge from the top or bottom
+      top_cat <- levs[length(levs)]
+      bot_cat <- levs[1]
+      
+      if (top_cat %in% still_empty && length(levs) > 1) {
+        # Merge top into second-highest
+        target <- levs[length(levs) - 1]
+        x[x == top_cat] <- target
+        x <- droplevels(x)
+      } else if (bot_cat %in% still_empty && length(levs) > 1) {
+        # Merge bottom into second-lowest
+        target <- levs[2]
+        x[x == bot_cat] <- target
+        x <- droplevels(x)
+      } else {
+        # Interior empty category — merge into neighboring larger one
+        int_empty <- still_empty[!still_empty %in% c(top_cat, bot_cat)]
+        if (length(int_empty) == 0) break
+        ec <- int_empty[1]
+        ec_idx <- match(ec, levs)
+        left <- if (ec_idx > 1) levs[ec_idx - 1] else NA
+        right <- if (ec_idx < length(levs)) levs[ec_idx + 1] else NA
+        # Merge into whichever neighbor has more observations overall
+        n_left <- if (!is.na(left)) sum(x == left, na.rm = TRUE) else 0
+        n_right <- if (!is.na(right)) sum(x == right, na.rm = TRUE) else 0
+        target <- if (n_right >= n_left && !is.na(right)) right else left
+        if (!is.na(target)) {
+          x[x == ec] <- target
+          x <- droplevels(x)
+        } else {
+          break
+        }
+      }
+    }
+    
+    dat[[v]] <- x
+  }
+  
+  dat
+}
+
 collapse_sex_2grp <- function(sex) {
   s <- trimws(tolower(as.character(sex)))
   out <- ifelse(s %in% c("man","male","m"), "Man",
@@ -896,12 +1120,14 @@ group_sizes_ok <- function(dat, Wvar, min_n = MIN_N_PER_GROUP) {
 
 drop_smallest_group <- function(dat, Wvar) {
   # Drop the smallest group (post-prep) to avoid numerical instabilities in MG fits.
-  # Returns a filtered data.frame; if fewer than 2 groups, returns original dat.
+  # ONLY for variables with >2 groups — never drop for binary variables!
+  # Returns a filtered data.frame; if fewer than 3 groups, returns original dat.
   if (is.null(dat) || !isTRUE(Wvar %in% names(dat))) return(dat)
   g <- dat[[Wvar]]
   if (!is.factor(g)) g <- factor(g)
   tab <- table(g)
-  if (length(tab) < 2) return(dat)
+  # Only drop if more than 2 groups (preserve binary variables intact)
+  if (length(tab) <= 2) return(dat)
   smallest <- names(tab)[which.min(as.integer(tab))][[1]]
   dat[g != smallest, , drop = FALSE]
 }
@@ -916,10 +1142,10 @@ covars_for_mg <- function(Wvar) {
   setdiff(base, Wvar)
 }
 
-# PSW (overlap weights) computed for diagnostics only (not carried into SEM)
+# PSW (overlap weights) computed for diagnostics and SEM weighting
 make_overlap_weights <- function(dat) {
   ps_mod <- try(glm(
-    X ~ hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c + cohort,
+    x_FASt ~ hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c + cohort,
     data = dat, family = binomial()
   ), silent = TRUE)
 
@@ -932,7 +1158,7 @@ make_overlap_weights <- function(dat) {
   }
 
   ps <- pmin(pmax(ps, 1e-3), 1 - 1e-3)
-  ow <- ifelse(dat$X == 1, 1 - ps, ps)
+  ow <- ifelse(dat$x_FASt == 1, 1 - ps, ps)
   ow <- ow / mean(ow)
   dat$psw <- ow
   dat
@@ -943,19 +1169,65 @@ recompute_derived_terms <- function(dat) {
   # trnsfr_cr was used in the data generator; keep this defensive.
   if (!("trnsfr_cr" %in% names(dat))) return(dat)
 
-  if (!("X" %in% names(dat))) {
-    dat$X <- as.integer(dat$trnsfr_cr >= 12)
+  if (!("x_FASt" %in% names(dat))) {
+    dat$x_FASt <- as.integer(dat$trnsfr_cr >= 12)
   }
   dat$credit_dose <- pmax(0, dat$trnsfr_cr - 12) / 10
   dat$credit_dose_c <- as.numeric(scale(dat$credit_dose, scale = FALSE))
-
-  if (!("Z" %in% names(dat))) {
-    # If Z is missing, we can't build XZ_c; leave as-is.
-    return(dat)
-  }
-  dat$Z_c <- as.numeric(scale(dat$Z, scale = FALSE))
-  dat$XZ_c <- dat$X * dat$Z_c
+  dat$XZ_c <- dat$x_FASt * dat$credit_dose_c
   dat
+}
+
+# ============================================================================
+# MEASUREMENT-ONLY CFA CHECK (run immediately after data creation)
+# Uses WLSMV with ordered indicators to validate measurement model
+# Uses std.lv = TRUE for first-order factor identification (all loadings freed)
+# ============================================================================
+fit_cfa_check <- function(dat, ordered_vars = ORDERED_VARS, verbose = TRUE) {
+  # CFA-only syntax (measurement model without structural paths)
+  # IDENTIFICATION:
+  # 1. DevAdj hierarchy: first-order loadings freed (std.lv = TRUE), second-order marker on Belong
+  # 2. Mediator factors: marker variable approach (first indicator fixed to 1)
+  cfa_syntax <- paste0(
+    "Belong =~ sbvalued + sbmyself + sbcommunity\n",
+    "Gains  =~ pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
+    "SupportEnv =~ SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
+    "Satisf =~ sameinst + evalexp\n",
+    "DevAdj =~ 1*Belong + Gains + SupportEnv + Satisf\n",
+    "EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial\n",
+    "QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff\n"
+  )
+  
+  # Ensure ordered vars exist in data
+  ord_in_dat <- ordered_vars[ordered_vars %in% names(dat)]
+  
+  fit <- tryCatch({
+    lavaan::cfa(
+      model = cfa_syntax,
+      data = dat,
+      ordered = ord_in_dat,
+      estimator = "WLSMV",
+      parameterization = "theta",
+      std.lv = TRUE  # First-order factors identified via unit variance
+    )
+  }, error = function(e) {
+    if (verbose) message("[CFA check] ERROR: ", e$message)
+    return(NULL)
+  })
+  
+  if (is.null(fit)) return(list(converged = FALSE, fit = NULL))
+  
+  conv <- tryCatch(lavInspect(fit, "converged"), error = function(e) FALSE)
+  
+  if (verbose && conv) {
+    fm <- fitMeasures(fit, c("cfi", "tli", "rmsea", "srmr"))
+    message(sprintf("[CFA check] Converged: CFI=%.3f, TLI=%.3f, RMSEA=%.3f, SRMR=%.3f",
+                    fm["cfi"], fm["tli"], fm["rmsea"], fm["srmr"]))
+  } else if (verbose) {
+    message("[CFA check] Did NOT converge")
+  }
+  
+  list(converged = conv, fit = fit)
 }
 
 # Fast imputation wrapper for MC runs
@@ -973,7 +1245,8 @@ impute_mice_quiet <- function(dat, m, maxit, seed) {
   )
 }
 
-# MI pooled SEM with per-imputation PSW (for MC runs)
+# MI pooled SEM with WLSMV for ordinal indicators (for MC runs)
+# Uses mice for imputation + semTools/lavaan.mi for pooled WLSMV estimation
 fit_pooled_mi <- function(dat, r, run_dir = NULL) {
   if (!requireNamespace("mice", quietly = TRUE)) {
     stop(
@@ -1012,16 +1285,29 @@ fit_pooled_mi <- function(dat, r, run_dir = NULL) {
     dat_list[[k]] <- dk
   }
 
-  # 3) Fit + pool using lavaan.mi (avoid OLDlavaan.mi)
+  # 3) Fit + pool using lavaan.mi with WLSMV for ordinal data
+  # Build model using first imputed dataset for Z probing values
+  model_str <- build_model_pooled(dat_list[[1]])
+  
+  # Keep ordinal indicators as ordered factors for WLSMV
+  ord_vars <- ORDERED_VARS[ORDERED_VARS %in% names(dat_list[[1]])]
+  for (k in seq_along(dat_list)) {
+    for (v in ord_vars) {
+      dat_list[[k]][[v]] <- ordered(dat_list[[k]][[v]])
+    }
+  }
+  
   base_args <- list(
-    model = build_model_pooled(zbar = mean(dat$credit_dose, na.rm = TRUE)),
+    model = model_str,
     data = dat_list,
+    ordered = ord_vars,
     estimator = "WLSMV",
-    ordered = ORDERED_VARS,
     parameterization = "theta",
-    std.lv = FALSE,
-    auto.fix.first = FALSE,
-    missing = "listwise",
+    std.lv = TRUE,  # First-order factors identified via unit variance
+    fixed.x = TRUE,
+    meanstructure = TRUE,
+    check.lv.names = FALSE,
+    check.gradient = FALSE,
     control = list(iter.max = 2000)
   )
   if (isTRUE(USE_PSW == 1)) base_args$sampling.weights <- "psw"
@@ -1202,33 +1488,32 @@ extract_pe_numeric <- function(fit_obj, standardized = FALSE) {
 }
 
 # -------------------------
-# POPULATION PARAMETERS (EDIT IF YOU WANT DIFFERENT "TRUE" EFFECTS)
+# POPULATION PARAMETERS (matching E2E competing mediators model)
 # -------------------------
+# Model: FASt -> EmoDiss (HARMFUL) + FASt -> QualEngag (PROTECTIVE) -> DevAdj
+# Key insight: FASt INCREASES distress (17yo at university) but also INCREASES engagement
 PAR <- list(
-  # RQ1: direct (X->Y) at threshold + dose slope above threshold
-  c  =  0.20,
-  cz = -0.10,
-  cxz = -0.08,  # X×Z moderation on direct path (RQ1)
+  # RQ1: direct effect (x_FASt -> DevAdj) at Z=0 + dose moderation
+  c   =  0.09,   # Direct effect at Z=0 (positive residual direct)
+  cc  = -0.03,   # credit_dose_c main effect on DevAdj
+  cz  =  0.02,   # x_FASt × credit_dose_c moderation on direct path
 
-  # RQ2: distress mediator
-  a1  =  0.35,   # X -> M1 (at threshold)
-  a1z =  0.20,   # credit_dose (centered) -> M1 (dose above threshold)
-  a1xz =  0.16, # X×Z moderation on X->M1 (RQ2/Model 7 logic)
-  b1  = -0.30,   # M1 -> Y
+  # RQ2: EmoDiss (Emotional Distress) mediator - HARMFUL PATHWAY
+  a1  =  0.17,   # x_FASt -> EmoDiss (POSITIVE: FASt increases distress)
+  a1c =  0.04,   # credit_dose_c main effect on EmoDiss
+  a1z =  0.005,  # x_FASt × credit_dose_c moderation on a1
+  b1  = -0.53,   # EmoDiss -> DevAdj (NEGATIVE: distress hurts adjustment)
 
-  # RQ3: interaction-quality mediator
-  a2  =  0.30,   # X -> M2 (at threshold)
-  a2z = -0.08,   # credit_dose (centered) -> M2 (dose above threshold)
-  a2xz = -0.08, # X×Z moderation on X->M2 (RQ3/Model 7 logic)
-  b2  =  0.35,   # M2 -> Y
-
-  # Optional serial link (set d = 0 if you do NOT want the serial path)
-  d   = -0.30,
+  # RQ3: QualEngag (Quality of Engagement) mediator - PROTECTIVE PATHWAY
+  a2  =  0.09,   # x_FASt -> QualEngag (POSITIVE: FASt increases engagement)
+  a2c =  0.07,   # credit_dose_c main effect on QualEngag
+  a2z =  0.007,  # x_FASt × credit_dose_c moderation on a2
+  b2  =  0.35,   # QualEngag -> DevAdj (POSITIVE: engagement helps adjustment)
 
   # Cohort shifts (pooled indicator)
-  g1 = 0.05,
-  g2 = 0.00,
-  g3 = 0.05
+  g1 = 0.02,
+  g2 = -0.01,
+  g3 = -0.01
 )
 
 # Default measurement strength for indicators
@@ -1241,14 +1526,14 @@ make_design_grid <- function() {
   # Notes:
   # - LAM controls measurement quality.
   # - X_prev conceptually belongs in the credit generator; wired in via GEN settings.
-  # - a1xz and cxz are overridden inside PAR per condition.
+  # - a1z and cz control moderation strength per condition.
   data.frame(
     design_id = 1:4,
     N = c(N, N, N * 2, N * 2),
     LAM = c(0.80, 0.65, 0.80, 0.65),
     X_prev = c(0.35, 0.35, 0.35, 0.35),
-    a1xz = c(PAR$a1xz, 0.08, PAR$a1xz, 0.08),
-    cxz = c(PAR$cxz, PAR$cxz, -0.04, -0.04),
+    a1z = c(PAR$a1z, 0.02, PAR$a1z, 0.02),
+    cz = c(PAR$cz, PAR$cz, 0.04, 0.04),
     miss_rate = c(DEFAULT_MISS_RATE, DEFAULT_MISS_RATE, 0.15, 0.15),
     miss_mech = c(DEFAULT_MISS_MECH, DEFAULT_MISS_MECH, "mar", "mar"),
     analysis = c(DEFAULT_ANALYSIS, DEFAULT_ANALYSIS, DEFAULT_ANALYSIS, DEFAULT_ANALYSIS),
@@ -1266,17 +1551,18 @@ apply_condition <- function(cond_row) {
   DEFAULT_ANALYSIS <<- as.character(cond_row$analysis)
 
   PARc <- PAR
-  if ("a1xz" %in% names(cond_row)) PARc$a1xz <- as.numeric(cond_row$a1xz)
-  if ("cxz" %in% names(cond_row)) PARc$cxz <- as.numeric(cond_row$cxz)
+  if ("a1z" %in% names(cond_row)) PARc$a1z <- as.numeric(cond_row$a1z)
+  if ("cz" %in% names(cond_row)) PARc$cz <- as.numeric(cond_row$cz)
   PAR <<- PARc
   invisible(TRUE)
 }
 
-BETA_M1 <- c(hgrades = -0.10, bparented = -0.04, pell = 0.09, hapcl = 0.06, hprecalc13 = 0.05, hchallenge = 0.06, cSFcareer = 0.03)
-BETA_M2 <- c(hgrades =  0.08, bparented =  0.04, pell = -0.04, hapcl = 0.04, hprecalc13 = 0.06, hchallenge = -0.05, cSFcareer = 0.04)
-BETA_Y  <- c(hgrades =  0.10, bparented =  0.05, pell = -0.06, hapcl = 0.05, hprecalc13 = 0.06, hchallenge = -0.06, cSFcareer = 0.04)
+# Covariate effects (matching empirical estimates from E2E)
+BETA_EMODISS <- c(hgrades = 0.01, bparented = -0.05, pell = 0.09, hapcl = 0.004, hprecalc13 = -0.001, hchallenge = 0.001, cSFcareer = -0.01)
+BETA_QUALENGAG <- c(hgrades = -0.02, bparented = -0.0001, pell = -0.06, hapcl = -0.04, hprecalc13 = -0.01, hchallenge = 0.02, cSFcareer = 0.02)
+BETA_DEVADJ <- c(hgrades = -0.002, bparented = 0.01, pell = -0.001, hapcl = -0.01, hprecalc13 = -0.01, hchallenge = -0.01, cSFcareer = 0.003)
 
-LAM <- 0.80  # loading strength for indicators
+LAM <- 0.65  # loading strength for indicators (realistic for survey data)
 
 # -------------------------
 # DATA GENERATOR (FULL MODEL)
@@ -1390,14 +1676,12 @@ gen_dat <- function(N) {
   trnsfr_cr  <- pmax(0, pmin(60, round(10 + 14*credit_lat + rnorm(N, 0, 8))))
 
   # Treatment + dose from trnsfr_cr (your confirmed rule)
-  X <- as.integer(trnsfr_cr >= 12)
+  x_FASt <- as.integer(trnsfr_cr >= 12)
   credit_dose <- pmax(0, trnsfr_cr - 12) / 10
 
-  # Center Z to improve numerical stability of XZ interactions in WLSMV.
-  # Note: when using XZ interaction, we must use a centered Z term consistently
-  # to avoid rank deficiency in the exogenous covariate matrix.
+  # Center Z to improve numerical stability of XZ interactions.
   credit_dose_c <- as.numeric(scale(credit_dose, center = TRUE, scale = FALSE))
-  XZ_c <- X * credit_dose_c
+  XZ_c <- x_FASt * credit_dose_c
 
   # Keep named categories intact here; collapsing (if needed) is handled at MG-fit time.
   # sex already 2-group
@@ -1416,25 +1700,27 @@ gen_dat <- function(N) {
     delta_pell[as.character(pell)] +
     delta_sex[as.character(sex)]
 
-  # Latent M1 (Distress)
-  M1_lat <- (a1_i*X) + (PAR$a1xz*XZ_c) + (PAR$a1z*credit_dose_c) + (PAR$g1*cohort) +
-    BETA_M1["hgrades"]*hgrades + BETA_M1["bparented"]*bparented +
-    BETA_M1["pell"]*pell + BETA_M1["hapcl"]*hapcl + BETA_M1["hprecalc13"]*hprecalc13 +
-    BETA_M1["hchallenge"]*hchallenge + BETA_M1["cSFcareer"]*cSFcareer +
+  # Latent EmoDiss (Emotional Distress) - HARMFUL PATHWAY
+  # Higher values = more distress (bad)
+  EmoDiss_lat <- (a1_i*x_FASt) + (PAR$a1z*XZ_c) + (PAR$a1c*credit_dose_c) + (PAR$g1*cohort) +
+    BETA_EMODISS["hgrades"]*hgrades + BETA_EMODISS["bparented"]*bparented +
+    BETA_EMODISS["pell"]*pell + BETA_EMODISS["hapcl"]*hapcl + BETA_EMODISS["hprecalc13"]*hprecalc13 +
+    BETA_EMODISS["hchallenge"]*hchallenge + BETA_EMODISS["cSFcareer"]*cSFcareer +
     rnorm(N, 0, 0.70)
 
-  # Latent M2 (Quality of Interactions)
-  M2_lat <- (PAR$a2*X) + (PAR$a2xz*XZ_c) + (PAR$a2z*credit_dose_c) + (PAR$d*M1_lat) + (PAR$g2*cohort) +
-    BETA_M2["hgrades"]*hgrades + BETA_M2["bparented"]*bparented +
-    BETA_M2["pell"]*pell + BETA_M2["hapcl"]*hapcl + BETA_M2["hprecalc13"]*hprecalc13 +
-    BETA_M2["hchallenge"]*hchallenge + BETA_M2["cSFcareer"]*cSFcareer +
+  # Latent QualEngag (Quality of Engagement) - PROTECTIVE PATHWAY (parallel, no serial link)
+  # Higher values = better engagement (good)
+  QualEngag_lat <- (PAR$a2*x_FASt) + (PAR$a2z*XZ_c) + (PAR$a2c*credit_dose_c) + (PAR$g2*cohort) +
+    BETA_QUALENGAG["hgrades"]*hgrades + BETA_QUALENGAG["bparented"]*bparented +
+    BETA_QUALENGAG["pell"]*pell + BETA_QUALENGAG["hapcl"]*hapcl + BETA_QUALENGAG["hprecalc13"]*hprecalc13 +
+    BETA_QUALENGAG["hchallenge"]*hchallenge + BETA_QUALENGAG["cSFcareer"]*cSFcareer +
     rnorm(N, 0, 0.70)
 
-  # Latent DevAdj (second-order)
-  Y_lat <- (PAR$c*X) + (PAR$cxz*XZ_c) + (PAR$cz*credit_dose_c) + (PAR$b1*M1_lat) + (PAR$b2*M2_lat) + (PAR$g3*cohort) +
-    BETA_Y["hgrades"]*hgrades + BETA_Y["bparented"]*bparented +
-    BETA_Y["pell"]*pell + BETA_Y["hapcl"]*hapcl + BETA_Y["hprecalc13"]*hprecalc13 +
-    BETA_Y["hchallenge"]*hchallenge + BETA_Y["cSFcareer"]*cSFcareer +
+  # Latent DevAdj (second-order) - receiving both mediation paths
+  Y_lat <- (PAR$c*x_FASt) + (PAR$cz*XZ_c) + (PAR$cc*credit_dose_c) + (PAR$b1*EmoDiss_lat) + (PAR$b2*QualEngag_lat) + (PAR$g3*cohort) +
+    BETA_DEVADJ["hgrades"]*hgrades + BETA_DEVADJ["bparented"]*bparented +
+    BETA_DEVADJ["pell"]*pell + BETA_DEVADJ["hapcl"]*hapcl + BETA_DEVADJ["hprecalc13"]*hprecalc13 +
+    BETA_DEVADJ["hchallenge"]*hchallenge + BETA_DEVADJ["cSFcareer"]*cSFcareer +
     rnorm(N, 0, 1)
 
   Belong_lat  <- 0.85*Y_lat + rnorm(N, 0, sqrt(1 - 0.85^2))
@@ -1449,10 +1735,10 @@ gen_dat <- function(N) {
     make_ordinal(eta, K = K, probs = p)
   }
 
-  # SB, PG, SE set to 5-category for SB (Belong) indicators
-  sbmyself    <- make_item("sbmyself",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
-  sbvalued    <- make_item("sbvalued",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
-  sbcommunity <- make_item("sbcommunity", LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
+  # Belonging items (SB) are 4-category (Strongly disagree=1 ... Strongly agree=4)
+  sbmyself    <- make_item("sbmyself",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  sbvalued    <- make_item("sbvalued",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  sbcommunity <- make_item("sbcommunity", LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
   pgthink     <- make_item("pgthink",     LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
   pganalyze   <- make_item("pganalyze",   LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
@@ -1469,13 +1755,13 @@ gen_dat <- function(N) {
   evalexp  <- make_item("evalexp",  LAM*Satisf_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
   sameinst <- make_item("sameinst", LAM*Satisf_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
-  # MHW difficulty set to 6-category
-  MHWdacad      <- make_item("MHWdacad",      LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdlonely    <- make_item("MHWdlonely",    LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdmental    <- make_item("MHWdmental",    LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdexhaust   <- make_item("MHWdexhaust",   LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdsleep     <- make_item("MHWdsleep",     LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdfinancial <- make_item("MHWdfinancial", LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  # MHW difficulty set to 6-category (EmoDiss indicators)
+  MHWdacad      <- make_item("MHWdacad",      LAM*EmoDiss_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdlonely    <- make_item("MHWdlonely",    LAM*EmoDiss_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdmental    <- make_item("MHWdmental",    LAM*EmoDiss_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdexhaust   <- make_item("MHWdexhaust",   LAM*EmoDiss_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdsleep     <- make_item("MHWdsleep",     LAM*EmoDiss_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  MHWdfinancial <- make_item("MHWdfinancial", LAM*EmoDiss_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
   
   # -------------------------
   # CSU-realistic missingness (MCAR / MAR)
@@ -1541,18 +1827,18 @@ gen_dat <- function(N) {
     df
   }
 
-  # Quality of Interactions (NSSE): 7-category frequency/quality items
-  QIstudent <- make_item("QIstudent", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
-  QIadvisor <- make_item("QIadvisor", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
-  QIfaculty <- make_item("QIfaculty", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
-  QIstaff   <- make_item("QIstaff",   LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
-  QIadmin   <- make_item("QIadmin",   LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  # Quality of Interactions (NSSE): 7-category frequency/quality items (QualEngag indicators)
+  QIstudent <- make_item("QIstudent", LAM*QualEngag_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  QIadvisor <- make_item("QIadvisor", LAM*QualEngag_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  QIfaculty <- make_item("QIfaculty", LAM*QualEngag_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  QIstaff   <- make_item("QIstaff",   LAM*QualEngag_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
+  QIadmin   <- make_item("QIadmin",   LAM*QualEngag_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
 
-  # Student–Faculty Interaction (NSSE): 4-category frequency items
-  SFcareer    <- make_item("SFcareer",    LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SFotherwork <- make_item("SFotherwork", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SFdiscuss   <- make_item("SFdiscuss",   LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
-  SFperform   <- make_item("SFperform",   LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  # Student–Faculty Interaction (NSSE): 4-category frequency items (also load on QualEngag)
+  SFcareer    <- make_item("SFcareer",    LAM*QualEngag_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SFotherwork <- make_item("SFotherwork", LAM*QualEngag_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SFdiscuss   <- make_item("SFdiscuss",   LAM*QualEngag_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  SFperform   <- make_item("SFperform",   LAM*QualEngag_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
   dat <- data.frame(
     cohort,
@@ -1560,7 +1846,7 @@ gen_dat <- function(N) {
     firstgen,
     re_all, living18, sex,
     trnsfr_cr,
-    X, credit_dose, credit_dose_c, XZ_c,
+    x_FASt, credit_dose, credit_dose_c, XZ_c,
     sbmyself, sbvalued, sbcommunity,
     pgthink, pganalyze, pgwork, pgvalues, pgprobsolve,
     SEwellness, SEnonacad, SEactivities, SEacademic, SEdiverse,
@@ -1576,171 +1862,137 @@ gen_dat <- function(N) {
 }
 
 # -------------------------
-# POOLED SEM SYNTAX (RQ1–RQ3)
+# SOURCE OFFICIAL MODEL (matches E2E pipeline)
 # -------------------------
-build_model_pooled <- function(zbar) {
-  # Probe dose at meaningful entry-credit totals:
-  # credit_dose = (entry_credits - 12) / 10
-  # Entry credits: 12, 24, 36, 48, 60  ->  credit_dose: 0.0, 1.2, 2.4, 3.6, 4.8
-  zc0 <- 0.0 - zbar  # 12 credits at entry
-  zc1 <- 1.2 - zbar  # 24 credits at entry
-  zc2 <- 2.4 - zbar  # 36 credits at entry
-  zc3 <- 3.6 - zbar  # 48 credits at entry
-  zc4 <- 4.8 - zbar  # 60 credits at entry
+# Source the model from the official model file (single source of truth)
+MODEL_FILE <- file.path("r", "models", "mg_fast_vs_nonfast_model.R")
+if (!file.exists(MODEL_FILE)) {
+  # Try relative path from repo root
+  MODEL_FILE <- "r/models/mg_fast_vs_nonfast_model.R"
+}
+if (file.exists(MODEL_FILE)) {
+  source(MODEL_FILE)
+} else {
+  stop("Model file not found: ", MODEL_FILE, "\nRun from repo root: Rscript r/mc/02_mc_allRQs_pooled_mg_psw.R")
+}
 
-  paste0('
-  # measurement (marker-variable identification)
-  Belong =~ 1*sbvalued + sbmyself + sbcommunity
-  Gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve
-  SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse
-  Satisf =~ 1*sameinst + evalexp
-  DevAdj =~ 1*Belong + Gains + SuppEnv + Satisf
-
-  M1 =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
-  M2 =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff + SFcareer + SFotherwork + SFdiscuss + SFperform
-
-  # structural (pooled)
-  M1 ~ a1*X + a1xz*XZ_c + a1z*credit_dose_c + g1*cohort +
-    hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
-
-  M2 ~ a2*X + a2xz*XZ_c + a2z*credit_dose_c + d*M1 + g2*cohort +
-    hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
-
-  DevAdj ~ c*X + cxz*XZ_c + cz*credit_dose_c + b1*M1 + b2*M2 + g3*cohort +
-    hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
-
-  # conditional effects along entry credits = 12,24,36,48,60 (raw credit_dose = 0.0,1.2,2.4,3.6,4.8)
-
-  # X->M paths conditional on Z (a-paths)
-  a1_z0 := a1 + a1xz*', sprintf('%.8f', zc0), '
-  a1_z1 := a1 + a1xz*', sprintf('%.8f', zc1), '
-  a1_z2 := a1 + a1xz*', sprintf('%.8f', zc2), '
-  a1_z3 := a1 + a1xz*', sprintf('%.8f', zc3), '
-  a1_z4 := a1 + a1xz*', sprintf('%.8f', zc4), '
-
-  a2_z0 := a2 + a2xz*', sprintf('%.8f', zc0), '
-  a2_z1 := a2 + a2xz*', sprintf('%.8f', zc1), '
-  a2_z2 := a2 + a2xz*', sprintf('%.8f', zc2), '
-  a2_z3 := a2 + a2xz*', sprintf('%.8f', zc3), '
-  a2_z4 := a2 + a2xz*', sprintf('%.8f', zc4), '
-
-  # indirects (parallel)
-  ind_M1_z0 := a1_z0*b1
-  ind_M1_z1 := a1_z1*b1
-  ind_M1_z2 := a1_z2*b1
-  ind_M1_z3 := a1_z3*b1
-  ind_M1_z4 := a1_z4*b1
-
-  ind_M2_z0 := a2_z0*b2
-  ind_M2_z1 := a2_z1*b2
-  ind_M2_z2 := a2_z2*b2
-  ind_M2_z3 := a2_z3*b2
-  ind_M2_z4 := a2_z4*b2
-
-  # serial
-  ind_serial_z0 := a1_z0*d*b2
-  ind_serial_z1 := a1_z1*d*b2
-  ind_serial_z2 := a1_z2*d*b2
-  ind_serial_z3 := a1_z3*d*b2
-  ind_serial_z4 := a1_z4*d*b2
-
-  # direct (X->Y) conditional on Z
-  direct_z0 := c + cxz*', sprintf('%.8f', zc0), '
-  direct_z1 := c + cxz*', sprintf('%.8f', zc1), '
-  direct_z2 := c + cxz*', sprintf('%.8f', zc2), '
-  direct_z3 := c + cxz*', sprintf('%.8f', zc3), '
-  direct_z4 := c + cxz*', sprintf('%.8f', zc4), '
-
-  total_z0 := direct_z0 + ind_M1_z0 + ind_M2_z0 + ind_serial_z0
-  total_z1 := direct_z1 + ind_M1_z1 + ind_M2_z1 + ind_serial_z1
-  total_z2 := direct_z2 + ind_M1_z2 + ind_M2_z2 + ind_serial_z2
-  total_z3 := direct_z3 + ind_M1_z3 + ind_M2_z3 + ind_serial_z3
-  total_z4 := direct_z4 + ind_M1_z4 + ind_M2_z4 + ind_serial_z4
-')
+# Verify the model builder was loaded
+if (!exists("build_model_fast_treat_control")) {
+  stop("Expected function build_model_fast_treat_control() not found after sourcing model file")
 }
 
 # -------------------------
-# MG SEM FOR RQ4 (ONLY a1 VARIES BY GROUP)
+# POOLED SEM SYNTAX (RQ1–RQ3) - Uses E2E parallel model
+# -------------------------
+# build_model_pooled now wraps build_model_fast_treat_control from the official model file
+# This ensures MC and E2E use exactly the same model specification
+build_model_pooled <- function(dat) {
+  # Use the official model builder (probes at Z = -1SD, 0, +1SD)
+  build_model_fast_treat_control(dat)
+}
+
+# -------------------------
+# MG SEM FOR RQ4 (ONLY a1 VARIES BY GROUP) - Updated for E2E alignment
+# Uses std.lv = TRUE for first-order factor identification (all loadings freed)
 # -------------------------
 make_model_mg_a1 <- function(G, cov_string) {
   a1_vec  <- paste0("a1_", seq_len(G))
-  a1xz_vec <- paste0("a1xz_", seq_len(G))
-  a1_free  <- paste0("c(", paste(a1_vec, collapse = ","), ")*X")
-  a1xz_free <- paste0("c(", paste(a1xz_vec, collapse = ","), ")*XZ_c")
+  a1z_vec <- paste0("a1z_", seq_len(G))
+  a1_free  <- paste0("c(", paste(a1_vec, collapse = ","), ")*x_FASt")
+  a1z_free <- paste0("c(", paste(a1z_vec, collapse = ","), ")*XZ_c")
 
   paste0('
-    # measurement (marker-variable identification)
-    Belong =~ 1*sbvalued + sbmyself + sbcommunity
-    Gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve
-    SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse
-    Satisf =~ 1*sameinst + evalexp
-    DevAdj =~ 1*Belong + Gains + SuppEnv + Satisf
+    # measurement identification:
+    # 1. DevAdj hierarchy: first-order loadings freed (std.lv = TRUE), second-order marker on Belong
+    # 2. Mediator factors: marker variable approach (first indicator fixed to 1)
+    Belong =~ sbvalued + sbmyself + sbcommunity
+    Gains  =~ pganalyze + pgthink + pgwork + pgvalues + pgprobsolve
+    SupportEnv =~ SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse
+    Satisf =~ sameinst + evalexp
+    DevAdj =~ 1*Belong + Gains + SupportEnv + Satisf
 
-    M1 =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
-    M2 =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff + SFcareer + SFotherwork + SFdiscuss + SFperform
+    EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
+    QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff
 
-    # structural (a1 and a1xz vary by group; other paths equal)
-  M1 ~ ', a1_free, ' + ', a1xz_free, ' + a1z*credit_dose_c + g1*cohort + ', cov_string, '
+    # structural (a1 and a1z vary by group; other paths equal)
+    # Parallel mediation (no serial d path)
+    EmoDiss ~ ', a1_free, ' + ', a1z_free, ' + a1c*credit_dose_c + g1*cohort + ', cov_string, '
 
-  M2 ~ a2*X + a2xz*XZ_c + a2z*credit_dose_c + d*M1 + g2*cohort + ', cov_string, '
+    QualEngag ~ a2*x_FASt + a2z*XZ_c + a2c*credit_dose_c + g2*cohort + ', cov_string, '
 
-  DevAdj ~ c*X + cxz*XZ_c + cz*credit_dose_c + b1*M1 + b2*M2 + g3*cohort + ', cov_string, '
+    DevAdj ~ c*x_FASt + cz*XZ_c + cc*credit_dose_c + b1*EmoDiss + b2*QualEngag + g3*cohort + ', cov_string, '
   ')
 }
 
 make_a1_equal_constraints <- function(G) {
-  # a1_1 == a1_2 == ... == a1_G  AND  a1xz_1 == a1xz_2 == ... == a1xz_G
+  # a1_1 == a1_2 == ... == a1_G  AND  a1z_1 == a1z_2 == ... == a1z_G
   if (G <= 1) return("")
   c1 <- paste(sapply(2:G, function(g) sprintf("a1_1 == a1_%d", g)), collapse = ";\n")
-  c2 <- paste(sapply(2:G, function(g) sprintf("a1xz_1 == a1xz_%d", g)), collapse = ";\n")
+  c2 <- paste(sapply(2:G, function(g) sprintf("a1z_1 == a1z_%d", g)), collapse = ";\n")
   paste(c(c1, c2), collapse = ";\n")
 }
 
+# -------------------------
+# fit_pooled() - Uses WLSMV for ordinal indicators (more appropriate than ML/FIML)
+# Uses std.lv = TRUE for first-order factor identification (all loadings freed)
+# -------------------------
 fit_pooled <- function(dat) {
+  # Build model using the official model builder
+  model_str <- build_model_pooled(dat)
+  
+  # Keep ordinal indicators as ordered factors for WLSMV
+  ord_vars <- ORDERED_VARS[ORDERED_VARS %in% names(dat)]
+  for (v in ord_vars) {
+    dat[[v]] <- ordered(dat[[v]])
+  }
+  
   args <- list(
-    model = build_model_pooled(zbar = mean(dat$credit_dose, na.rm = TRUE)),
+    model = model_str,
     data = dat,
-    ordered = ORDERED_VARS,
+    ordered = ord_vars,
     estimator = "WLSMV",
     parameterization = "theta",
-    std.lv = FALSE,
-    auto.fix.first = FALSE,
-    # Study policy: no pairwise; WLSMV does not support FIML.
-    missing = "listwise",
-    control = list(iter.max = 2000)  # hard stop instead of endless churn
+    std.lv = TRUE,  # First-order factors identified via unit variance
+    fixed.x = TRUE,
+    meanstructure = TRUE,
+    check.lv.names = FALSE,
+    check.gradient = FALSE,
+    control = list(iter.max = 20000)
   )
 
-  # If PSW is requested, test the *same* estimator you plan to use later by passing
-  # sampling weights into lavaan.
-  # Note: lavaan will apply its default normalization unless changed via lavOptions
-  # (sampling.weights.normalization). Your make_overlap_weights() already scales weights
-  # to mean 1, so the default normalization will typically leave them effectively unchanged.
+  # If PSW is requested, pass sampling weights into lavaan
   if (isTRUE(USE_PSW == 1) && isTRUE("psw" %in% names(dat))) {
     args$sampling.weights <- "psw"
   }
 
   fit <- tryCatch(
-    suppressWarnings(do.call(lavaan::sem, args)),
-    warning = function(w) {
-      # Keep warnings from aborting a parallel worker; record and continue.
-      if (isTRUE(DIAG_N > 0)) message("[pooled fit_warning] ", conditionMessage(w))
-      invokeRestart("muffleWarning")
-    },
+    do.call(lavaan::sem, args),
     error = function(e) {
-      message("[pooled fit_error] ", e$message)
-      attr(e, "fit_error_message") <- e$message
+      if (isTRUE(DIAG_N > 0)) message("[pooled fit_error] ", e$message)
       return(structure(NULL, fit_error_message = e$message))
     }
   )
   if (is.null(fit)) return(NULL)
-  if (!isTRUE(lavInspect(fit, "converged"))) {
+  
+  # Check convergence
+  converged <- isTRUE(lavInspect(fit, "converged"))
+  
+  # Also check for improper solutions (Heywood cases)
+  # These can make estimates meaningless even if "converged"
+  post_check_ok <- TRUE
+  variances <- tryCatch(lavInspect(fit, "cov.lv"), error = function(e) NULL)
+  if (!is.null(variances)) {
+    diag_vars <- diag(variances)
+    if (any(diag_vars < -1e-6, na.rm = TRUE)) {
+      if (isTRUE(DIAG_N > 0)) message("fit_pooled(): negative latent variances detected")
+      post_check_ok <- FALSE
+    }
+  }
+  
+  if (!converged || !post_check_ok) {
     if (isTRUE(DIAG_N > 0)) {
-      message("fit_pooled(): model did not converge")
-      warn <- try(lavInspect(fit, "warnings"), silent = TRUE)
-      if (!inherits(warn, "try-error") && length(warn) > 0) {
-        message("Warnings (first 5):")
-        message(paste0("- ", head(warn, 5), collapse = "\n"))
-      }
+      message("fit_pooled(): model did not converge or has improper solution")
+      message("  converged=", converged, ", post_check_ok=", post_check_ok)
     }
     return(NULL)
   }
@@ -1760,19 +2012,28 @@ fit_mg_a1_test <- function(dat, Wvar) {
   # cohort is already included explicitly as g*cohort terms, so don't double-add it
   model_mg <- make_model_mg_a1(G, cov_string)
 
+  # Keep ordinal indicators as ordered factors for WLSMV
+  ord_vars <- ORDERED_VARS[ORDERED_VARS %in% names(dat)]
+  for (v in ord_vars) {
+    dat[[v]] <- ordered(dat[[v]])
+  }
+
+  # Collapse empty ordinal categories within groups (WLSMV requires >=1 obs per cell per group)
+  dat <- collapse_empty_ordinal_cells_mg(dat, Wvar, ord_vars)
+
   args <- list(
     model = model_mg,
     data = dat,
     group = Wvar,
-    ordered = ORDERED_VARS,
+    ordered = ord_vars,
     estimator = "WLSMV",
     parameterization = "theta",
-    std.lv = FALSE,
-    auto.fix.first = FALSE,
-    # Study policy: no pairwise; WLSMV does not support FIML.
-    missing = "listwise",
+    std.lv = TRUE,  # First-order factors identified via unit variance
+    fixed.x = TRUE,
+    meanstructure = TRUE,
+    check.lv.names = FALSE,
     # make measurement comparable for MG test in the simulation
-    group.equal = c("loadings","thresholds")
+    group.equal = c("loadings")
   )
 
   # Pass overlap weights into the MG estimator when PSW is requested.
@@ -1832,14 +2093,24 @@ run_mc <- function() {
   message("[run] run_id  = ", run_id)
   message("[run] run_dir = ", run_dir)
 
-  pooled_targets <- c("a1","a1xz","a1z","a2","a2xz","a2z","d","c","cxz","cz","b1","b2",
-                      "a1_z0","a1_z1","a1_z2","a1_z3","a1_z4",
-                      "a2_z0","a2_z1","a2_z2","a2_z3","a2_z4",
-                      "direct_z0","direct_z1","direct_z2","direct_z3","direct_z4",
-                      "ind_M1_z0","ind_M1_z1","ind_M1_z2","ind_M1_z3","ind_M1_z4",
-                      "ind_M2_z0","ind_M2_z1","ind_M2_z2","ind_M2_z3","ind_M2_z4",
-                      "ind_serial_z0","ind_serial_z1","ind_serial_z2","ind_serial_z3","ind_serial_z4",
-                      "total_z0","total_z1","total_z2","total_z3","total_z4")
+  # Parameter targets matching E2E parallel mediation model (z_low, z_mid, z_high)
+  pooled_targets <- c(
+    # Core structural paths
+    "a1", "a1c", "a1z", "a2", "a2c", "a2z", "c", "cc", "cz", "b1", "b2",
+    # Conditional a-paths
+    "a1_z_low", "a1_z_mid", "a1_z_high",
+    "a2_z_low", "a2_z_mid", "a2_z_high",
+    # Conditional direct effects
+    "dir_z_low", "dir_z_mid", "dir_z_high",
+    # Conditional indirect effects via EmoDiss
+    "ind_EmoDiss_z_low", "ind_EmoDiss_z_mid", "ind_EmoDiss_z_high",
+    # Conditional indirect effects via QualEngag
+    "ind_QualEngag_z_low", "ind_QualEngag_z_mid", "ind_QualEngag_z_high",
+    # Conditional total effects
+    "total_z_low", "total_z_mid", "total_z_high",
+    # Index of moderated mediation
+    "index_MM_EmoDiss", "index_MM_QualEngag"
+  )
 
   pooled_est <- as.data.frame(matrix(NA_real_, nrow = R_REPS, ncol = length(pooled_targets)))
   names(pooled_est) <- pooled_targets
@@ -1856,7 +2127,9 @@ run_mc <- function() {
   # --- One replication as a pure function (makes parallelization easy) ---
   one_rep <- function(r) {
     t0 <- proc.time()[["elapsed"]]
-    dat <- gen_dat(N)
+    
+    # Bootstrap resample from rep_data.csv (PSW already computed on full data)
+    dat <- bootstrap_rep_data(REP_DATA_FULL, n = N)
 
     diag_min_overall <- NA_real_
     diag_min_overall_var <- NA_character_
@@ -1871,6 +2144,13 @@ run_mc <- function() {
       diag_min_overall_var <- mm$min_prop_var
     }
 
+    # -------------------------------------------------------------------------
+    # CFA CHECK: Validate measurement model immediately after data creation
+    # Uses WLSMV with ordered indicators
+    # -------------------------------------------------------------------------
+    cfa_check <- fit_cfa_check(dat, ordered_vars = ORDERED_VARS, verbose = (r == 1 && isTRUE(DIAG_N > 0)))
+    cfa_converged <- cfa_check$converged
+
     # Pooled SEM (tests RQ1–RQ3)
     pooled_ok <- 0L
     pooled_row <- setNames(as.list(rep(NA_real_, length(pooled_targets))), pooled_targets)
@@ -1878,7 +2158,9 @@ run_mc <- function() {
 
     pooled_analysis_used <- DEFAULT_ANALYSIS
 
-    # If using MI, PSW must be recomputed post-imputation, so do NOT precompute here.
+    # PSW is already computed on full data and carried through bootstrap resample
+    # No recomputation needed - weights reflect original sample's propensity structure
+    
     fitP <- NULL
     if (isTRUE(DEFAULT_ANALYSIS == "mi")) {
       fitP_try <- try(fit_pooled_mi(dat, r = r, run_dir = run_dir), silent = TRUE)
@@ -1888,13 +2170,11 @@ run_mc <- function() {
       } else {
         if (isTRUE(DIAG_N > 0)) message("[pooled][MI failed] ", as.character(fitP_try))
         if (isTRUE(ALLOW_FIML_FALLBACK == 1)) {
-          if (isTRUE(USE_PSW == 1)) dat <- make_overlap_weights(dat)
           fitP <- fit_pooled(dat)
           pooled_analysis_used <- "fiml"
         }
       }
     } else if (isTRUE(DEFAULT_ANALYSIS == "fiml")) {
-      if (isTRUE(USE_PSW == 1)) dat <- make_overlap_weights(dat)
       fitP <- fit_pooled(dat)
       pooled_analysis_used <- "fiml"
     } else {
@@ -2003,30 +2283,33 @@ run_mc <- function() {
     mg_diag <- list()
     if (isTRUE(RUN_MG == 1)) {
       for (Wvar in W_TARGETS) {
+        # *** Use a COPY per-W to avoid cross-contamination from drop_smallest_group ***
+        datW <- dat
+
         if (isTRUE(DIAG_N > 0)) {
           # Optional: also report per-group marginals for the Wvar we're about to MG on.
-          diag_check_6pt_marginals(dat, group_var = Wvar, vars = ORDERED_VARS, min_prop = 0.02)
+          diag_check_6pt_marginals(datW, group_var = Wvar, vars = ORDERED_VARS, min_prop = 0.02)
         }
         # light category handling for MC stability
-        if (Wvar == "sex") dat$sex <- collapse_sex_2grp(dat$sex)
+        if (Wvar == "sex") datW$sex <- collapse_sex_2grp(datW$sex)
         # Merge rare categories for any MG grouping Wvar
-        dat[[Wvar]] <- merge_rare_categories_nearest(dat[[Wvar]], min_prop = 0.01, min_expected_n = 5)
+        datW[[Wvar]] <- merge_rare_categories_nearest(datW[[Wvar]], min_prop = 0.01, min_expected_n = 5)
 
         # User-requested stability fallback: drop the smallest group to reduce
         # numerical failures (e.g., Lapack 'dgesdd') when W has uneven groups.
-        dat <- drop_smallest_group(dat, Wvar)
+        datW <- drop_smallest_group(datW, Wvar)
 
         if (isTRUE(DIAG_N > 0)) {
-          gm <- diag_min_category_prop_vars(dat, ORDERED_VARS)
+          gm <- diag_min_category_prop_vars(datW, ORDERED_VARS)
           diag_min_post_mgprep <- gm$min_prop
           diag_min_post_mgprep_var <- gm$min_prop_var
         }
 
-        outW <- fit_mg_a1_test(dat, Wvar)
+        outW <- fit_mg_a1_test(datW, Wvar)
         mg[[Wvar]] <- outW
 
         # Compact MG diagnostics
-        gsz <- diag_group_sizes(dat, Wvar)
+        gsz <- diag_group_sizes(datW, Wvar)
         mg_fit_diag <- diag_extract_lavaan_status(outW[["fit"]])
         mg_diag[[Wvar]] <- list(
           ok = as.integer(isTRUE(outW[["ok"]])),
@@ -2064,7 +2347,7 @@ run_mc <- function() {
               reason = outW[["reason"]],
               err_msg = outW[["err_msg"]],
               fit = outW[["fit"]],
-              dat = dat
+              dat = datW
             )
           }
         }
@@ -2291,18 +2574,21 @@ run_mc <- function() {
   # SUMMARIES
   # -------------------------
   cat("\n=============================\n")
-  cat("POOLED SEM (RQ1–RQ3)\n")
+  cat("POOLED SEM (RQ1–RQ3) — Parallel Mediation / Competing Mediators\n")
   cat("Convergence rate:", mean(pooled_converged), "\n")
 
   # When using MI via semTools::runMI, standardized summaries can fail for OLDlavaan.mi.
   # We keep MC summaries purely numeric (means/sds/bias) and avoid summary(fit) calls.
 
-  # quick bias/SD table for core paths
-  core <- c("c","cxz","cz","a1","a1xz","a1z","a2","a2xz","a2z","b1","b2","d")
-  truth <- c(c = PAR$c, cxz = PAR$cxz, cz = PAR$cz,
-             a1 = PAR$a1, a1xz = PAR$a1xz, a1z = PAR$a1z,
-             a2 = PAR$a2, a2xz = PAR$a2xz, a2z = PAR$a2z,
-             b1 = PAR$b1, b2 = PAR$b2, d = PAR$d)
+
+  # Quick bias/SD table for core structural paths (E2E alignment)
+  core <- c("a1", "a1c", "a1z", "a2", "a2c", "a2z", "b1", "b2", "c", "cc", "cz")
+  truth <- c(
+    a1 = PAR$a1, a1c = PAR$a1c, a1z = PAR$a1z,   # Harmful pathway (EmoDiss)
+    a2 = PAR$a2, a2c = PAR$a2c, a2z = PAR$a2z,   # Protective pathway (QualEngag)
+    b1 = PAR$b1, b2 = PAR$b2,                      # b-paths
+    c = PAR$c, cc = PAR$cc, cz = PAR$cz            # Direct path
+  )
 
   summ <- data.frame(
     param = core,
@@ -2311,7 +2597,19 @@ run_mc <- function() {
     sd_est   = sapply(core, function(p) sd(pooled_est[[p]], na.rm = TRUE)),
     bias     = sapply(core, function(p) mean(pooled_est[[p]], na.rm = TRUE) - truth[p])
   )
+  cat("\nCore Structural Paths (PAR truth vs. MC estimates):\n")
   print(summ, row.names = FALSE)
+
+  # Conditional indirect effects summary
+  indirect_params <- c("ind_EmoDiss_z_low", "ind_EmoDiss_z_mid", "ind_EmoDiss_z_high",
+                       "ind_QualEngag_z_low", "ind_QualEngag_z_mid", "ind_QualEngag_z_high")
+  ind_summ <- data.frame(
+    param = indirect_params,
+    mean_est = sapply(indirect_params, function(p) mean(pooled_est[[p]], na.rm = TRUE)),
+    sd_est   = sapply(indirect_params, function(p) sd(pooled_est[[p]], na.rm = TRUE))
+  )
+  cat("\nConditional Indirect Effects (at Z = -1SD, 0, +1SD):\n")
+  print(ind_summ, row.names = FALSE)
 
   if (isTRUE(RUN_MG == 1)) {
     cat("\n=============================\n")
@@ -2368,7 +2666,7 @@ if (sys.nframe() == 0) {
       # Run ID includes updated global parameters
       message("[design] Running condition ", cond$design_id, " / ", nrow(design),
               " | N=", N, " LAM=", sprintf("%.2f", LAM),
-              " a1xz=", sprintf("%.3f", PAR$a1xz), " cxz=", sprintf("%.3f", PAR$cxz),
+              " a1z=", sprintf("%.3f", PAR$a1z), " cz=", sprintf("%.3f", PAR$cz),
               " miss=", cond$miss_mech, ":", sprintf("%.2f", DEFAULT_MISS_RATE),
               " analysis=", DEFAULT_ANALYSIS)
 
@@ -2386,8 +2684,8 @@ if (sys.nframe() == 0) {
         run_id = mk_run_id(),
         N = as.integer(N),
         LAM = as.numeric(LAM),
-        a1xz = as.numeric(PAR$a1xz),
-        cxz = as.numeric(PAR$cxz),
+        a1z = as.numeric(PAR$a1z),
+        cz = as.numeric(PAR$cz),
         miss_rate = as.numeric(DEFAULT_MISS_RATE),
         miss_mech = as.character(DEFAULT_MISS_MECH),
         analysis = as.character(DEFAULT_ANALYSIS),

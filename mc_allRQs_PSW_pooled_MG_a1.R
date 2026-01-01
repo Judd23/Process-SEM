@@ -575,7 +575,7 @@ make_ordinal <- function(x, K, probs = NULL) {
 infer_K_for_item <- function(var) {
   # Returns K for each item name. Vectorized over `var`.
   out <- rep(NA_integer_, length(var))
-  out[var %in% c("sbmyself","sbvalued","sbcommunity")] <- 5L
+  out[var %in% c("sbmyself","sbvalued","sbcommunity")] <- 4L
   out[var %in% c(
     "pgthink","pganalyze","pgwork","pgvalues","pgprobsolve",
     "SEwellness","SEnonacad","SEactivities","SEacademic","SEdiverse",
@@ -1264,10 +1264,10 @@ gen_dat <- function(N) {
     make_ordinal(eta, K = K, probs = p)
   }
 
-  # SB, PG, SE set to 5-category for SB (Belong) indicators
-  sbmyself    <- make_item("sbmyself",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
-  sbvalued    <- make_item("sbvalued",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
-  sbcommunity <- make_item("sbcommunity", LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
+  # SB is 4-category (Strongly disagree=1 ... Strongly agree=4)
+  sbmyself    <- make_item("sbmyself",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  sbvalued    <- make_item("sbvalued",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  sbcommunity <- make_item("sbcommunity", LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
   pgthink     <- make_item("pgthink",     LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
   pganalyze   <- make_item("pganalyze",   LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)

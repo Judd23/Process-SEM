@@ -35,6 +35,7 @@ get_chr <- function(flag, default) as.character(get_arg(flag, default))
 
 SMOKE <- get_int("--smoke", 0)
 SEED  <- get_int("--seed", 20251223)
+ONLY_DATA <- get_int("--only_data", 0)
 
 # defaults (full run)
 N  <- get_int("--N", 3000)
@@ -114,7 +115,7 @@ RE_ALL_LEVELS <- c("Hispanic/Latino","White","Asian","Black/African American","O
 RE_ALL_PROBS  <- c(0.50, 0.26, 0.15, 0.08, 0.01)
 
 # Sex split: not pinned to CSU in the cited sources above; kept as a reasonable default.
-SEX_LEVELS <- c("Woman","Man")
+SEX_LEVELS <- c("Female","Male")
 SEX_PROBS  <- c(0.56, 0.44)
 
 # Living situation: no hard CSU-wide value cited here; kept as a plausible default.
@@ -140,7 +141,7 @@ ORDERED_VARS <- c(
 
 infer_K_for_item <- function(var) {
   out <- rep(NA_integer_, length(var))
-  out[var %in% c("sbmyself","sbvalued","sbcommunity")] <- 5L
+  out[var %in% c("sbmyself","sbvalued","sbcommunity")] <- 4L
   out[var %in% c(
     "pgthink","pganalyze","pgwork","pgvalues","pgprobsolve",
     "SEwellness","SEnonacad","SEactivities","SEacademic","SEdiverse",
@@ -174,6 +175,66 @@ make_ordinal <- function(x, K, probs = NULL) {
 }
 
 # -------------------------
+# MHW difficulty generation (NSSE 2024 codebook scale)
+# - Responses: 1..6 (Not at all difficult..Very difficult)
+# - Not applicable: coded 9 (must be recoded to NA in analysis dataset)
+#
+# We calibrate marginal distributions near two first-year anchors (A/B) and
+# induce correlation via the shared latent M1_lat (EmoDiss_true).
+# -------------------------
+mhw_anchor_A <- list(p = c(`1` = 0.16, `2` = 0.12, `3` = 0.17, `4` = 0.24, `5` = 0.16, `6` = 0.13), pNA = 0.03)
+mhw_anchor_B <- list(p = c(`1` = 0.21, `2` = 0.14, `3` = 0.17, `4` = 0.17, `5` = 0.11, `6` = 0.15), pNA = 0.06)
+
+.mhw_get_anchor <- function(which = c("A", "B")) {
+  which <- match.arg(which)
+  if (identical(which, "A")) return(mhw_anchor_A)
+  mhw_anchor_B
+}
+
+.mhw_prob_sanitize <- function(p, floor = 0.005) {
+  p <- as.numeric(p)
+  p[!is.finite(p)] <- 0
+  p <- pmax(p, 0)
+  if (sum(p) <= 0) p <- rep(1 / length(p), length(p))
+  p <- pmax(p, floor)
+  p / sum(p)
+}
+
+.mhw_apply_shift <- function(p, shift6) {
+  if (is.null(shift6)) return(.mhw_prob_sanitize(p))
+  shift6 <- as.numeric(shift6)
+  if (length(shift6) != 6) return(.mhw_prob_sanitize(p))
+  .mhw_prob_sanitize(p + shift6)
+}
+
+.mhw_add_jitter <- function(p, jitter_sd = 0.004) {
+  if (!is.finite(jitter_sd) || jitter_sd <= 0) return(.mhw_prob_sanitize(p))
+  eps <- rnorm(length(p), 0, jitter_sd)
+  .mhw_prob_sanitize(p + eps)
+}
+
+make_mhw_item <- function(var, eta, anchor = c("A", "B"),
+                          pNA = NULL,
+                          shift6 = NULL,
+                          jitter_sd = 0.004) {
+  anc <- .mhw_get_anchor(match.arg(anchor))
+  # Use anchor shape over 1..6; NA handled separately.
+  p_cond <- .mhw_prob_sanitize(anc$p)
+  p_cond <- .mhw_apply_shift(p_cond, shift6)
+  p_cond <- .mhw_add_jitter(p_cond, jitter_sd = jitter_sd)
+
+  # Generate ordinal 1..6 by quantile-thresholding the continuous tendency.
+  y <- as.integer(make_ordinal(eta, K = 6L, probs = p_cond))
+
+  # NA ("Not applicable") coded as 9 in the raw dataset.
+  if (is.null(pNA) || !is.finite(pNA)) pNA <- anc$pNA
+  pNA <- min(max(as.numeric(pNA), 0), 0.20)
+  is_na <- stats::rbinom(length(y), 1L, pNA) == 1L
+  y[is_na] <- 9L
+  y
+}
+
+# -------------------------
 # Population parameters (match your dissertation model intent)
 # -------------------------
 PAR <- list(
@@ -191,7 +252,8 @@ PAR <- list(
   a2xz = -0.08,
   b2  =  0.35,
 
-  d   = -0.30,
+  # d = 0 for parallel mediation (no EmoDiss -> QualEngag path)
+  d   = 0.00,
 
   g1 = 0.05,
   g2 = 0.00,
@@ -289,10 +351,9 @@ gen_rep_data <- function(N) {
   # x_FASt = FASt status at entry
   # Coding: 0 = not FASt (<12 entry credits); 1 = FASt (>=12 entry credits)
   # credit_dose = centered-at-threshold entry credit dose (in 10-credit units)
-  # Definition (matches dissertation syntax comments): credit_dose = (trnsfr_cr - 12) / 10
-  # Note: this can be negative for students entering with <12 credits.
+  # Definition (official rule): credit_dose = max(0, trnsfr_cr - 12) / 10
   x_FASt <- as.integer(trnsfr_cr >= 12)
-  credit_dose <- (trnsfr_cr - 12) / 10
+  credit_dose <- pmax(0, trnsfr_cr - 12) / 10
 
   credit_dose_c <- as.numeric(scale(credit_dose, center = TRUE, scale = FALSE))
   XZ_c <- x_FASt * credit_dose_c
@@ -317,9 +378,9 @@ gen_rep_data <- function(N) {
     rnorm(N, 0, 1)
 
   # Observed scores for the representative-study bootstrap.
-  # We keep names aligned to the process model.
-  M1 <- as.numeric(scale(M1_lat, center = TRUE, scale = TRUE))
-  M2 <- as.numeric(scale(M2_lat, center = TRUE, scale = TRUE))
+  # Names aligned to official process model (EmoDiss, QualEngag, DevAdj)
+  EmoDiss <- as.numeric(scale(M1_lat, center = TRUE, scale = TRUE))
+  QualEngag <- as.numeric(scale(M2_lat, center = TRUE, scale = TRUE))
   DevAdj <- as.numeric(scale(Y_lat, center = TRUE, scale = TRUE))
 
   Belong_lat  <- 0.85*Y_lat + rnorm(N, 0, sqrt(1 - 0.85^2))
@@ -329,9 +390,9 @@ gen_rep_data <- function(N) {
 
   make_item <- function(var, eta, K) make_ordinal(eta, K = K, probs = NULL)
 
-  sbmyself    <- make_item("sbmyself",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
-  sbvalued    <- make_item("sbvalued",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
-  sbcommunity <- make_item("sbcommunity", LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 5)
+  sbmyself    <- make_item("sbmyself",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  sbvalued    <- make_item("sbvalued",    LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
+  sbcommunity <- make_item("sbcommunity", LAM*Belong_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
   pgthink     <- make_item("pgthink",     LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
   pganalyze   <- make_item("pganalyze",   LAM*Gains_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
@@ -348,12 +409,24 @@ gen_rep_data <- function(N) {
   evalexp  <- make_item("evalexp",  LAM*Satisf_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
   sameinst <- make_item("sameinst", LAM*Satisf_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 4)
 
-  MHWdacad      <- make_item("MHWdacad",      LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdlonely    <- make_item("MHWdlonely",    LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdmental    <- make_item("MHWdmental",    LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdexhaust   <- make_item("MHWdexhaust",   LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdsleep     <- make_item("MHWdsleep",     LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
-  MHWdfinancial <- make_item("MHWdfinancial", LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 6)
+  # MHW difficulty items (1..6; Not applicable coded 9)
+  # Base anchors: choose A/B per item with mild, theory-aligned variations.
+  mhw_eta <- LAM*M1_lat + rnorm(N, 0, sqrt(1 - LAM^2))
+
+  MHWdmental  <- make_mhw_item("MHWdmental",  mhw_eta + rnorm(N, 0, 0.15), anchor = "A", pNA = 0.04)
+  # Academic: slightly lower difficulty than mental (shift toward 1..3)
+  MHWdacad    <- make_mhw_item("MHWdacad",    mhw_eta + rnorm(N, 0, 0.15), anchor = "A", pNA = 0.03,
+                              shift6 = c(+0.010, +0.010, +0.005, -0.010, -0.007, -0.008))
+  # Exhaust/Sleep: more mass around 4–5 (reduce extremes)
+  MHWdexhaust <- make_mhw_item("MHWdexhaust", mhw_eta + rnorm(N, 0, 0.15), anchor = "A", pNA = 0.04,
+                              shift6 = c(-0.010, -0.005, 0.000, +0.010, +0.010, -0.005))
+  MHWdsleep   <- make_mhw_item("MHWdsleep",   mhw_eta + rnorm(N, 0, 0.15), anchor = "A", pNA = 0.05,
+                              shift6 = c(-0.008, -0.005, 0.000, +0.008, +0.010, -0.005))
+  # Lonely/Finance: slightly higher difficulty (more 4–6) than mental
+  MHWdlonely  <- make_mhw_item("MHWdlonely",  mhw_eta + rnorm(N, 0, 0.15), anchor = "B", pNA = 0.06,
+                              shift6 = c(-0.010, -0.008, 0.000, +0.005, +0.006, +0.007))
+  MHWdfinancial <- make_mhw_item("MHWdfinancial", mhw_eta + rnorm(N, 0, 0.15), anchor = "B", pNA = 0.05,
+                              shift6 = c(-0.010, -0.006, 0.000, +0.004, +0.006, +0.006))
 
   QIstudent <- make_item("QIstudent", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
   QIadvisor <- make_item("QIadvisor", LAM*M2_lat + rnorm(N, 0, sqrt(1 - LAM^2)), K = 7)
@@ -377,7 +450,7 @@ gen_rep_data <- function(N) {
     re_all, living18, sex,
     trnsfr_cr,
     x_FASt, credit_dose, credit_dose_c, XZ_c,
-    M1, M2, DevAdj,
+    EmoDiss, QualEngag, DevAdj,
     sbmyself, sbvalued, sbcommunity,
     pgthink, pganalyze, pgwork, pgvalues, pgprobsolve,
     SEwellness, SEnonacad, SEactivities, SEacademic, SEdiverse,
@@ -390,7 +463,8 @@ gen_rep_data <- function(N) {
 }
 
 # -------------------------
-# Pooled SEM syntax (rep study uses the same measurement/structure)
+# Pooled SEM syntax (aligned with official parallel mediation model)
+# Uses std.lv = TRUE for first-order factor identification (all loadings freed)
 # -------------------------
 build_model_pooled <- function(zbar) {
   # Probe dose at meaningful entry-credit totals:
@@ -403,24 +477,28 @@ build_model_pooled <- function(zbar) {
   zc4 <- 4.8 - zbar  # 60 credits at entry
 
   paste0('
-  # measurement (marker-variable identification)
-  Belong =~ 1*sbvalued + sbmyself + sbcommunity
-  Gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve
-  SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse
-  Satisf =~ 1*sameinst + evalexp
-  DevAdj =~ 1*Belong + Gains + SuppEnv + Satisf
+  # measurement model identification:
+  # 1. DevAdj hierarchy: first-order loadings freely estimated (std.lv = TRUE)
+  #    Second-order: marker on Belong (1*), others freely estimated
+  # 2. Mediator factors: marker variable approach (single-factor models)
+  #    First indicator fixed to 1, others freely estimated
+  Belong =~ sbvalued + sbmyself + sbcommunity
+  Gains  =~ pganalyze + pgthink + pgwork + pgvalues + pgprobsolve
+  SupportEnv =~ SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse
+  Satisf =~ sameinst + evalexp
+  DevAdj =~ 1*Belong + Gains + SupportEnv + Satisf
 
-  M1 =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
-  M2 =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff + SFcareer + SFotherwork + SFdiscuss + SFperform
+  EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
+  QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff
 
-  # structural (pooled)
-  M1 ~ a1*x_FASt + a1xz*XZ_c + a1z*credit_dose_c + g1*cohort +
+  # structural (PARALLEL mediation - no serial d path)
+  EmoDiss ~ a1*x_FASt + a1xz*XZ_c + a1z*credit_dose_c + g1*cohort +
     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
-  M2 ~ a2*x_FASt + a2xz*XZ_c + a2z*credit_dose_c + d*M1 + g2*cohort +
+  QualEngag ~ a2*x_FASt + a2xz*XZ_c + a2z*credit_dose_c + g2*cohort +
     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
-  DevAdj ~ c*x_FASt + cxz*XZ_c + cz*credit_dose_c + b1*M1 + b2*M2 + g3*cohort +
+  DevAdj ~ c*x_FASt + cxz*XZ_c + cz*credit_dose_c + b1*EmoDiss + b2*QualEngag + g3*cohort +
     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
   # conditional effects along entry credits = 12,24,36,48,60 (raw credit_dose = 0.0,1.2,2.4,3.6,4.8)
@@ -438,25 +516,18 @@ build_model_pooled <- function(zbar) {
   a2_z3 := a2 + a2xz*', sprintf('%.8f', zc3), '
   a2_z4 := a2 + a2xz*', sprintf('%.8f', zc4), '
 
-  # indirects (parallel)
-  ind_M1_z0 := a1_z0*b1
-  ind_M1_z1 := a1_z1*b1
-  ind_M1_z2 := a1_z2*b1
-  ind_M1_z3 := a1_z3*b1
-  ind_M1_z4 := a1_z4*b1
+  # indirects (parallel only - no serial)
+  ind_EmoDiss_z0 := a1_z0*b1
+  ind_EmoDiss_z1 := a1_z1*b1
+  ind_EmoDiss_z2 := a1_z2*b1
+  ind_EmoDiss_z3 := a1_z3*b1
+  ind_EmoDiss_z4 := a1_z4*b1
 
-  ind_M2_z0 := a2_z0*b2
-  ind_M2_z1 := a2_z1*b2
-  ind_M2_z2 := a2_z2*b2
-  ind_M2_z3 := a2_z3*b2
-  ind_M2_z4 := a2_z4*b2
-
-  # serial
-  ind_serial_z0 := a1_z0*d*b2
-  ind_serial_z1 := a1_z1*d*b2
-  ind_serial_z2 := a1_z2*d*b2
-  ind_serial_z3 := a1_z3*d*b2
-  ind_serial_z4 := a1_z4*d*b2
+  ind_QualEngag_z0 := a2_z0*b2
+  ind_QualEngag_z1 := a2_z1*b2
+  ind_QualEngag_z2 := a2_z2*b2
+  ind_QualEngag_z3 := a2_z3*b2
+  ind_QualEngag_z4 := a2_z4*b2
 
   # direct (X->Y) conditional on Z
   direct_z0 := c + cxz*', sprintf('%.8f', zc0), '
@@ -465,19 +536,25 @@ build_model_pooled <- function(zbar) {
   direct_z3 := c + cxz*', sprintf('%.8f', zc3), '
   direct_z4 := c + cxz*', sprintf('%.8f', zc4), '
 
-  total_z0 := direct_z0 + ind_M1_z0 + ind_M2_z0 + ind_serial_z0
-  total_z1 := direct_z1 + ind_M1_z1 + ind_M2_z1 + ind_serial_z1
-  total_z2 := direct_z2 + ind_M1_z2 + ind_M2_z2 + ind_serial_z2
-  total_z3 := direct_z3 + ind_M1_z3 + ind_M2_z3 + ind_serial_z3
-  total_z4 := direct_z4 + ind_M1_z4 + ind_M2_z4 + ind_serial_z4
+  # total effects (parallel only)
+  total_z0 := direct_z0 + ind_EmoDiss_z0 + ind_QualEngag_z0
+  total_z1 := direct_z1 + ind_EmoDiss_z1 + ind_QualEngag_z1
+  total_z2 := direct_z2 + ind_EmoDiss_z2 + ind_QualEngag_z2
+  total_z3 := direct_z3 + ind_EmoDiss_z3 + ind_QualEngag_z3
+  total_z4 := direct_z4 + ind_EmoDiss_z4 + ind_QualEngag_z4
+
+  # indices of moderated mediation
+  index_MM_EmoDiss := a1xz*b1
+  index_MM_QualEngag := a2xz*b2
 ')
 }
 
 # -------------------------
 # Bootstrap model (observed-variable process model)
-# -------------------------
 # For ML+FIML+bootstrap stability, we fit the conditional process model on
-# observed scores M1/M2/DevAdj generated above.
+# observed scores EmoDiss/QualEngag/DevAdj generated above.
+# Uses PARALLEL mediation (no serial d path) - aligned with official model
+# -------------------------
 build_model_bootstrap <- function(zbar) {
   zc0 <- 0.0 - zbar
   zc1 <- 1.2 - zbar
@@ -486,14 +563,14 @@ build_model_bootstrap <- function(zbar) {
   zc4 <- 4.8 - zbar
 
   paste0('
-  # structural (observed)
-  M1 ~ a1*x_FASt + a1xz*XZ_c + a1z*credit_dose_c + g1*cohort +
+  # structural (observed) - PARALLEL mediation
+  EmoDiss ~ a1*x_FASt + a1xz*XZ_c + a1z*credit_dose_c + g1*cohort +
     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
-  M2 ~ a2*x_FASt + a2xz*XZ_c + a2z*credit_dose_c + d*M1 + g2*cohort +
+  QualEngag ~ a2*x_FASt + a2xz*XZ_c + a2z*credit_dose_c + g2*cohort +
     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
-  DevAdj ~ c*x_FASt + cxz*XZ_c + cz*credit_dose_c + b1*M1 + b2*M2 + g3*cohort +
+  DevAdj ~ c*x_FASt + cxz*XZ_c + cz*credit_dose_c + b1*EmoDiss + b2*QualEngag + g3*cohort +
     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
   # conditional effects along entry credits = 12,24,36,48,60 (raw credit_dose = 0.0,1.2,2.4,3.6,4.8)
@@ -509,23 +586,17 @@ build_model_bootstrap <- function(zbar) {
   a2_z3 := a2 + a2xz*', sprintf('%.8f', zc3), '
   a2_z4 := a2 + a2xz*', sprintf('%.8f', zc4), '
 
-  ind_M1_z0 := a1_z0*b1
-  ind_M1_z1 := a1_z1*b1
-  ind_M1_z2 := a1_z2*b1
-  ind_M1_z3 := a1_z3*b1
-  ind_M1_z4 := a1_z4*b1
+  ind_EmoDiss_z0 := a1_z0*b1
+  ind_EmoDiss_z1 := a1_z1*b1
+  ind_EmoDiss_z2 := a1_z2*b1
+  ind_EmoDiss_z3 := a1_z3*b1
+  ind_EmoDiss_z4 := a1_z4*b1
 
-  ind_M2_z0 := a2_z0*b2
-  ind_M2_z1 := a2_z1*b2
-  ind_M2_z2 := a2_z2*b2
-  ind_M2_z3 := a2_z3*b2
-  ind_M2_z4 := a2_z4*b2
-
-  ind_serial_z0 := a1_z0*d*b2
-  ind_serial_z1 := a1_z1*d*b2
-  ind_serial_z2 := a1_z2*d*b2
-  ind_serial_z3 := a1_z3*d*b2
-  ind_serial_z4 := a1_z4*d*b2
+  ind_QualEngag_z0 := a2_z0*b2
+  ind_QualEngag_z1 := a2_z1*b2
+  ind_QualEngag_z2 := a2_z2*b2
+  ind_QualEngag_z3 := a2_z3*b2
+  ind_QualEngag_z4 := a2_z4*b2
 
   direct_z0 := c + cxz*', sprintf('%.8f', zc0), '
   direct_z1 := c + cxz*', sprintf('%.8f', zc1), '
@@ -533,11 +604,15 @@ build_model_bootstrap <- function(zbar) {
   direct_z3 := c + cxz*', sprintf('%.8f', zc3), '
   direct_z4 := c + cxz*', sprintf('%.8f', zc4), '
 
-  total_z0 := direct_z0 + ind_M1_z0 + ind_M2_z0 + ind_serial_z0
-  total_z1 := direct_z1 + ind_M1_z1 + ind_M2_z1 + ind_serial_z1
-  total_z2 := direct_z2 + ind_M1_z2 + ind_M2_z2 + ind_serial_z2
-  total_z3 := direct_z3 + ind_M1_z3 + ind_M2_z3 + ind_serial_z3
-  total_z4 := direct_z4 + ind_M1_z4 + ind_M2_z4 + ind_serial_z4
+  total_z0 := direct_z0 + ind_EmoDiss_z0 + ind_QualEngag_z0
+  total_z1 := direct_z1 + ind_EmoDiss_z1 + ind_QualEngag_z1
+  total_z2 := direct_z2 + ind_EmoDiss_z2 + ind_QualEngag_z2
+  total_z3 := direct_z3 + ind_EmoDiss_z3 + ind_QualEngag_z3
+  total_z4 := direct_z4 + ind_EmoDiss_z4 + ind_QualEngag_z4
+
+  # indices of moderated mediation
+  index_MM_EmoDiss := a1xz*b1
+  index_MM_QualEngag := a2xz*b2
 ')
 }
 
@@ -599,12 +674,17 @@ writeLines(core_summary, file.path(RUN_DIR, "repstudy_core_identifiers_summary.t
 
 write.csv(dat, file.path(RUN_DIR, "rep_data.csv"), row.names = FALSE)
 
+if (isTRUE(ONLY_DATA == 1)) {
+  message("[only_data] Wrote rep_data.csv to: ", file.path(RUN_DIR, "rep_data.csv"))
+  quit(save = "no", status = 0)
+}
+
 # -------------------------
 # Pre-fit numerical sanity checks
 # -------------------------
 precheck_txt <- character(0)
 vars <- c(
-  "DevAdj", "M1", "M2", "x_FASt", "credit_dose_c", "XZ_c",
+  "DevAdj", "EmoDiss", "QualEngag", "x_FASt", "credit_dose_c", "XZ_c",
   "cohort", "hgrades_c", "bparented_c", "pell", "hapcl", "hprecalc13", "hchallenge_c", "cSFcareer_c"
 )
 vars_missing <- setdiff(vars, names(dat))
@@ -650,18 +730,19 @@ writeLines(precheck_txt, file.path(RUN_DIR, "repstudy_prefit_cov_sd.txt"))
 model_syntax <- build_model_bootstrap(zbar = mean(dat$credit_dose, na.rm = TRUE))
 
 effects_keep <- c(
-  # key structural paths
-  "a1", "a1z", "a1xz", "a2", "a2z", "a2xz", "b1", "b2", "c", "cz", "cxz", "d",
+  # key structural paths (parallel mediation - no d path)
+  "a1", "a1z", "a1xz", "a2", "a2z", "a2xz", "b1", "b2", "c", "cz", "cxz",
   # conditional a-paths
   paste0("a1_z", 0:4),
   paste0("a2_z", 0:4),
-  # conditional indirects
-  paste0("ind_M1_z", 0:4),
-  paste0("ind_M2_z", 0:4),
-  paste0("ind_serial_z", 0:4),
+  # conditional indirects (parallel only)
+  paste0("ind_EmoDiss_z", 0:4),
+  paste0("ind_QualEngag_z", 0:4),
   # conditional direct + total
   paste0("direct_z", 0:4),
-  paste0("total_z", 0:4)
+  paste0("total_z", 0:4),
+  # indices of moderated mediation
+  "index_MM_EmoDiss", "index_MM_QualEngag"
 )
 
 fit_once <- function(data_in) {

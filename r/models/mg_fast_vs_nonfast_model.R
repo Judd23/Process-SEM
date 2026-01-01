@@ -1,8 +1,445 @@
 
 # ==============================
 # OFFICIAL (TREATMENT/CONTROL) SEM
-# X = DE exposure (x_DE), Z = credit_dose_c, moderator = XZ
+# X = x_FASt (0/1), Z = credit_dose_c, moderator = XZ_c
 # ==============================
+
+# ============================================================
+# W MODERATOR VARIABLE DEFINITIONS (RQ4)
+# ============================================================
+# W1 = re_all      (race/ethnicity)
+# W2 = firstgen    (first-generation status: 0 = continuing-gen, 1 = first-gen)
+# W3 = pell        (Pell status: 0 = non-Pell, 1 = Pell)
+# W4 = sex         (sex/gender)
+# W5 = living18    (living arrangement at age 18)
+#
+# These W variables are used for:
+# - RQ4 Measurement Invariance: Configural → Metric → Scalar testing by W
+# - RQ4 Structural MG: Multi-group SEM with structural paths free across W groups
+# ============================================================
+
+# ============================================================
+# MEASUREMENT MODEL SPECIFICATION
+# ============================================================
+#
+# IDENTIFICATION STRATEGY:
+# 1. First-order loadings: ALL FREELY ESTIMATED (use std.lv = TRUE)
+#    - Factor variances standardized to 1 for identification
+#    - No marker variables on first-order factors
+# 2. Second-order loadings: marker on most well-behaved factor (Belong)
+#    - Belong (marker, loading = 1)
+#    - Gains, SupportEnv, Satisf: freely estimated
+# 3. Satisf is a proper first-order factor (sameinst, evalexp)
+#
+# DISTURBANCE TERMS:
+# - EmoDiss, QualEngag, DevAdj have implicit disturbances (lavaan default)
+# - For serial mediation: EmoDiss → QualEngag → DevAdj
+#   The d path (EmoDiss → QualEngag) allows serial indirect effects
+#
+# IMPORTANT: Use std.lv = TRUE when fitting to identify first-order factors
+# ============================================================
+
+# Single shared measurement syntax (used for CFA/invariance and SEM).
+# NOTE: scripts/e2e_integration_test_fa_st_pipeline.R validates this EXACTLY.
+# REQUIRES: std.lv = TRUE for first-order factor identification in the DevAdj hierarchy
+#
+# IDENTIFICATION STRATEGY:
+# 1. DevAdj hierarchy (second-order factor model):
+#    - First-order loadings (Belong, Gains, SupportEnv, Satisf): ALL freely estimated
+#      Identified via std.lv = TRUE (factor variances = 1)
+#    - Second-order loadings: Marker variable approach
+#      Belong fixed to 1, Gains/SupportEnv/Satisf freely estimated
+#
+# 2. Mediator factors (standalone single-factor models):
+#    - Marker variable approach: first indicator loading fixed to 1, others free
+#    - EmoDiss: marker on MHWdacad (most reliable indicator)
+#    - QualEngag: marker on QIadmin (most reliable indicator)
+#
+MEASUREMENT_SYNTAX <- paste0(
+  # DevAdj hierarchy: first-order loadings freely estimated (std.lv = TRUE identifies)
+  "Belong =~ sbvalued + sbmyself + sbcommunity\n",
+  "Gains  =~ pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
+  "SupportEnv =~ SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
+  "Satisf =~ sameinst + evalexp\n",
+  # Second-order factor: Belong is marker (loading = 1), others freely estimated
+  "DevAdj =~ 1*Belong + Gains + SupportEnv + Satisf\n",
+  # Mediator factors: MARKER VARIABLE identification (single-factor models)
+  # First indicator loading fixed to 1, remaining loadings freely estimated
+  "EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial\n",
+  "QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff\n"
+)
+
+# ============================================================
+# MEASUREMENT INVARIANCE SYNTAX (RQ4)
+# For stepwise testing: Configural → Metric → Scalar
+# ============================================================
+
+# Configural invariance: same factor structure, loadings FREE within each group
+# This is MEASUREMENT_SYNTAX without cross-group constraints
+# REQUIRES: std.lv = TRUE for first-order factor identification
+MEASUREMENT_SYNTAX_CONFIGURAL <- MEASUREMENT_SYNTAX
+
+# Metric invariance: loadings CONSTRAINED equal across groups
+# Uses labeled loadings for cross-group equality constraints
+# All first-order loadings labeled; second-order marker on Belong
+MEASUREMENT_SYNTAX_METRIC <- paste0(
+  # First-order factors: all loadings labeled for equality
+  "Belong =~ c(lam_sb1, lam_sb1)*sbvalued + c(lam_sb2, lam_sb2)*sbmyself + c(lam_sb3, lam_sb3)*sbcommunity\n",
+  "Gains  =~ c(lam_pg1, lam_pg1)*pganalyze + c(lam_pg2, lam_pg2)*pgthink + c(lam_pg3, lam_pg3)*pgwork + c(lam_pg4, lam_pg4)*pgvalues + c(lam_pg5, lam_pg5)*pgprobsolve\n",
+  "SupportEnv =~ c(lam_se1, lam_se1)*SEacademic + c(lam_se2, lam_se2)*SEwellness + c(lam_se3, lam_se3)*SEnonacad + c(lam_se4, lam_se4)*SEactivities + c(lam_se5, lam_se5)*SEdiverse\n",
+  "Satisf =~ c(lam_sa1, lam_sa1)*sameinst + c(lam_sa2, lam_sa2)*evalexp\n",
+  # Second-order: Belong marker, other loadings constrained equal
+  "DevAdj =~ 1*Belong + c(lam_d2, lam_d2)*Gains + c(lam_d3, lam_d3)*SupportEnv + c(lam_d4, lam_d4)*Satisf\n",
+  "EmoDiss =~ c(lam_ed1, lam_ed1)*MHWdacad + c(lam_ed2, lam_ed2)*MHWdlonely + c(lam_ed3, lam_ed3)*MHWdmental + c(lam_ed4, lam_ed4)*MHWdexhaust + c(lam_ed5, lam_ed5)*MHWdsleep + c(lam_ed6, lam_ed6)*MHWdfinancial\n",
+  "QualEngag =~ c(lam_qi1, lam_qi1)*QIadmin + c(lam_qi2, lam_qi2)*QIstudent + c(lam_qi3, lam_qi3)*QIadvisor + c(lam_qi4, lam_qi4)*QIfaculty + c(lam_qi5, lam_qi5)*QIstaff\n"
+)
+
+# Scalar invariance: loadings AND intercepts constrained equal across groups
+# (Intercept constraints handled via lavaan group.equal = c("loadings", "intercepts"))
+
+# ============================================================
+# RQ4 STRUCTURAL MG SYNTAX
+# Measurement structure FIXED, loadings FREE within each group
+# NO equality constraints across groups - loadings re-estimated per group
+# ============================================================
+
+# For MG structural analysis: use MEASUREMENT_SYNTAX_CONFIGURAL
+# Structural paths are group-specific (labeled per group)
+# This is the default for build_model_fast_treat_control_mg()
+
+# ============================================================
+# ML + FIML + CASE-RESAMPLING BOOTSTRAP SEM (lavaan)
+# ============================================================
+
+# Parallel mediation model (no serial d path)
+# REQUIRES: std.lv = TRUE for first-order factor identification
+MODEL_FULL <- paste0(
+  # measurement: all first-order loadings freely estimated (std.lv = TRUE identifies)
+  "Belong =~ sbvalued + sbmyself + sbcommunity\n",
+  "Gains  =~ pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
+  "SupportEnv =~ SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
+  "Satisf =~ sameinst + evalexp\n",
+  # Second-order factor: Belong is marker (most reliable)
+  "DevAdj =~ 1*Belong + Gains + SupportEnv + Satisf\n",
+  "\n",
+  # Standalone mediator factors: use marker variable identification (1* on first indicator)
+  "EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial\n",
+  "QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff\n",
+  "\n",
+  "# structural (treatment/control + moderation)\n",
+  "# X = x_FASt (0/1), XZ_c = x_FASt*credit_dose_c (treated-only dose effect)\n",
+  "# NOTE: credit_dose_c main effect OMITTED - dose only matters for FASt students\n",
+  "# Disturbances for EmoDiss, QualEngag, DevAdj are implicit (lavaan default)\n",
+  "EmoDiss ~ a1*x_FASt + a1z*XZ_c + g1*cohort +\n",
+  "         hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n",
+  "\n",
+  "QualEngag ~ a2*x_FASt + a2z*XZ_c + g2*cohort +\n",
+  "           hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n",
+  "\n",
+  "DevAdj ~ c*x_FASt + cz*XZ_c + b1*EmoDiss + b2*QualEngag + g3*cohort +\n",
+  "        hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n"
+)
+
+# Serial mediation model (includes EmoDiss → QualEngag path)
+# Path structure:
+#   X → M1 (a1, a1z)
+#   X → M2 (a2, a2z)  
+#   M1 → M2 (d) <- Serial mediation path
+#   M1 → Y (b1)
+#   M2 → Y (b2)
+#   X → Y (c, cz)
+#
+# Serial indirect: X → M1 → M2 → Y = a1 * d * b2
+# Parallel indirects: X → M1 → Y = a1 * b1, X → M2 → Y = a2 * b2
+# REQUIRES: std.lv = TRUE for first-order factor identification
+MODEL_FULL_SERIAL <- paste0(
+  # measurement: all first-order loadings freely estimated (std.lv = TRUE identifies)
+  "Belong =~ sbvalued + sbmyself + sbcommunity\n",
+  "Gains  =~ pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
+  "SupportEnv =~ SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
+  "Satisf =~ sameinst + evalexp\n",
+  "DevAdj =~ 1*Belong + Gains + SupportEnv + Satisf\n",
+  "\n",
+  # Standalone mediator factors: use marker variable identification (1* on first indicator)
+  "EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial\n",
+  "QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff\n",
+  "\n",
+  "# structural with SERIAL MEDIATION: EmoDiss → QualEngag → DevAdj\n",
+  "# X = x_FASt (0/1), XZ_c = x_FASt*credit_dose_c (treated-only dose effect)\n",
+  "# NOTE: credit_dose_c main effect OMITTED - dose only matters for FASt students\n",
+  "# Disturbances (residual variances) are implicit for all endogenous variables\n",
+  "EmoDiss ~ a1*x_FASt + a1z*XZ_c + g1*cohort +\n",
+  "         hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n",
+  "\n",
+  "# QualEngag regressed on EmoDiss (d path for serial mediation)\n",
+  "QualEngag ~ a2*x_FASt + a2z*XZ_c + d*EmoDiss + g2*cohort +\n",
+  "           hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n",
+  "\n",
+  "DevAdj ~ c*x_FASt + cz*XZ_c + b1*EmoDiss + b2*QualEngag + g3*cohort +\n",
+  "        hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n",
+  "\n",
+  "# DEFINED PARAMETERS for serial mediation\n",
+  "# Serial indirect effect: X → EmoDiss → QualEngag → DevAdj\n",
+  "serial_ind := a1 * d * b2\n",
+  "\n",
+  "# Parallel indirect through EmoDiss (controlling for serial path)\n",
+  "ind_EmoDiss := a1 * b1\n",
+  "\n",
+  "# Parallel indirect through QualEngag (direct X→QualEngag path only)\n",
+  "ind_QualEngag := a2 * b2\n",
+  "\n",
+  "# Total indirect (all mediated paths)\n",
+  "total_ind := (a1 * b1) + (a2 * b2) + (a1 * d * b2)\n",
+  "\n",
+  "# Total effect\n",
+  "total_effect := c + (a1 * b1) + (a2 * b2) + (a1 * d * b2)\n"
+)
+
+# ============================================================
+# MEASUREMENT INVARIANCE TESTING FUNCTIONS (RQ4)
+# Stepwise: Configural → Metric → Scalar
+# ============================================================
+
+#' Fit measurement invariance sequence across groups
+#' @param dat Data frame with group variable
+#' @param group_var Name of grouping variable (e.g., "re_all", "pell")
+#' @param ordered_vars Character vector of ordered indicator names (NULL for continuous)
+#' @param estimator Estimator to use ("WLSMV" for ordinal, "ML" for continuous)
+#' @return List with configural, metric, scalar fits and comparison tests
+fit_measurement_invariance <- function(dat, group_var, ordered_vars = NULL, 
+                                       estimator = "WLSMV") {
+  if (!requireNamespace("lavaan", quietly = TRUE)) {
+    stop("lavaan is required for measurement invariance testing")
+  }
+  
+  # Use CFA-only measurement syntax (no structural paths)
+  cfa_syntax <- MEASUREMENT_SYNTAX
+  
+  # Common arguments
+  common_args <- list(
+    model = cfa_syntax,
+    data = dat,
+    group = group_var
+  )
+  
+  if (!is.null(ordered_vars) && estimator == "WLSMV") {
+    common_args$ordered <- ordered_vars
+    common_args$estimator <- "WLSMV"
+    common_args$parameterization <- "theta"
+    # Handle empty cells that can occur in MG ordinal models
+    common_args$zero.cell <- TRUE
+    common_args$zero.keep <- TRUE
+  } else {
+    common_args$estimator <- estimator
+    common_args$missing <- "fiml"
+  }
+  
+  # Configural: same structure, loadings FREE within each group
+  fit_config <- tryCatch(
+    do.call(lavaan::cfa, common_args),
+    error = function(e) {
+      message("Configural invariance failed: ", e$message)
+      NULL
+    }
+  )
+  
+  # Metric: loadings CONSTRAINED equal across groups
+  metric_args <- c(common_args, list(group.equal = c("loadings")))
+  fit_metric <- tryCatch(
+    do.call(lavaan::cfa, metric_args),
+    error = function(e) {
+      message("Metric invariance failed: ", e$message)
+      NULL
+    }
+  )
+  
+  # Scalar: loadings AND intercepts/thresholds constrained equal
+  scalar_args <- c(common_args, list(group.equal = c("loadings", "intercepts")))
+  fit_scalar <- tryCatch(
+    do.call(lavaan::cfa, scalar_args),
+    error = function(e) {
+      message("Scalar invariance failed: ", e$message)
+      NULL
+    }
+  )
+  
+  # Model comparisons (if both fits succeeded)
+  comp_metric_config <- NULL
+  comp_scalar_metric <- NULL
+  
+  if (!is.null(fit_config) && !is.null(fit_metric)) {
+    comp_metric_config <- tryCatch(
+      lavaan::lavTestLRT(fit_config, fit_metric),
+      error = function(e) {
+        message("Metric vs Configural comparison failed: ", e$message)
+        NULL
+      }
+    )
+  }
+  
+  if (!is.null(fit_metric) && !is.null(fit_scalar)) {
+    comp_scalar_metric <- tryCatch(
+      lavaan::lavTestLRT(fit_metric, fit_scalar),
+      error = function(e) {
+        message("Scalar vs Metric comparison failed: ", e$message)
+        NULL
+      }
+    )
+  }
+  
+  list(
+    configural = fit_config,
+    metric = fit_metric,
+    scalar = fit_scalar,
+    test_metric_vs_configural = comp_metric_config,
+    test_scalar_vs_metric = comp_scalar_metric
+  )
+}
+
+#' Extract fit indices for invariance comparison table
+#' @param inv_result Result from fit_measurement_invariance()
+#' @return Data frame with fit indices for each invariance level
+summarize_invariance_fits <- function(inv_result) {
+  extract_fit <- function(fit, level) {
+    fm <- lavaan::fitMeasures(fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr"))
+    data.frame(
+      level = level,
+      chisq = fm["chisq"],
+      df = fm["df"],
+      pvalue = fm["pvalue"],
+      cfi = fm["cfi"],
+      tli = fm["tli"],
+      rmsea = fm["rmsea"],
+      srmr = fm["srmr"],
+      row.names = NULL
+    )
+  }
+  
+  rbind(
+    extract_fit(inv_result$configural, "Configural"),
+    extract_fit(inv_result$metric, "Metric"),
+    extract_fit(inv_result$scalar, "Scalar")
+  )
+}
+
+# ============================================================
+# RQ4 STRUCTURAL MG: Measurement FIXED, loadings FREE per group
+# NO cross-group constraints on loadings
+# ============================================================
+
+#' Build MG structural model with measurement fixed, loadings free per group
+#' This is used for race-stratified RQ4 structural analysis
+#' @param dat Data frame
+#' @param group_var Grouping variable name
+#' @param z_vals Z values for conditional effects probing
+#' @return lavaan model string
+build_model_mg_structural_free_loadings <- function(dat, group_var, z_vals = NULL) {
+  if (is.null(z_vals)) {
+    sd_z <- stats::sd(dat$credit_dose_c, na.rm = TRUE)
+    z_vals <- c(z_low = -sd_z, z_mid = 0, z_high = sd_z)
+  }
+  
+  z_low  <- as.numeric(z_vals[[1]])
+  z_mid  <- as.numeric(z_vals[[2]])
+  z_high <- as.numeric(z_vals[[3]])
+  
+  z_low_txt  <- format(z_low,  digits = 12, scientific = FALSE)
+  z_mid_txt  <- format(z_mid,  digits = 12, scientific = FALSE)
+  z_high_txt <- format(z_high, digits = 12, scientific = FALSE)
+  
+  # Get number of groups
+  G <- length(unique(dat[[group_var]]))
+  
+  # Build group-specific structural path labels
+  a1_vec  <- paste0("a1_", seq_len(G))
+  a1z_vec <- paste0("a1z_", seq_len(G))
+  a2_vec  <- paste0("a2_", seq_len(G))
+  a2z_vec <- paste0("a2z_", seq_len(G))
+  b1_vec  <- paste0("b1_", seq_len(G))
+  b2_vec  <- paste0("b2_", seq_len(G))
+  c_vec   <- paste0("c_", seq_len(G))
+  cz_vec  <- paste0("cz_", seq_len(G))
+  
+  a1_free  <- paste0("c(", paste(a1_vec, collapse = ","), ")*x_FASt")
+  a1z_free <- paste0("c(", paste(a1z_vec, collapse = ","), ")*XZ_c")
+  a2_free  <- paste0("c(", paste(a2_vec, collapse = ","), ")*x_FASt")
+  a2z_free <- paste0("c(", paste(a2z_vec, collapse = ","), ")*XZ_c")
+  b1_free  <- paste0("c(", paste(b1_vec, collapse = ","), ")*EmoDiss")
+  b2_free  <- paste0("c(", paste(b2_vec, collapse = ","), ")*QualEngag")
+  c_free   <- paste0("c(", paste(c_vec, collapse = ","), ")*x_FASt")
+  cz_free  <- paste0("c(", paste(cz_vec, collapse = ","), ")*XZ_c")
+  
+  # Measurement syntax (loadings FREE within each group - no constraints)
+  # lavaan will re-estimate loadings per group by default in MG
+  paste0(
+    # Measurement (same structure, loadings re-estimated per group)
+    MEASUREMENT_SYNTAX,
+    "\n",
+    "# Structural paths: FREE across groups (labeled per group)\n",
+    "EmoDiss ~ ", a1_free, " + ", a1z_free, " + a1c*credit_dose_c + g1*cohort +\n",
+    "         hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n",
+    "\n",
+    "QualEngag ~ ", a2_free, " + ", a2z_free, " + a2c*credit_dose_c + g2*cohort +\n",
+    "           hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n",
+    "\n",
+    "DevAdj ~ ", c_free, " + ", cz_free, " + cc*credit_dose_c + ", b1_free, " + ", b2_free, " + g3*cohort +\n",
+    "        hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n"
+  )
+}
+
+prep_dat_for_ml <- function(dat) {
+  dat <- as.data.frame(dat)
+  if (!all(c("x_FASt", "credit_dose_c") %in% names(dat))) {
+    stop("prep_dat_for_ml() requires columns: x_FASt, credit_dose_c")
+  }
+  if (!("XZ_c" %in% names(dat))) {
+    dat$XZ_c <- dat$x_FASt * dat$credit_dose_c
+  }
+  dat
+}
+
+fit_full_sem_ml_fiml_boot <- function(dat,
+                                      weights_var = "psw",
+                                      bootstrap_B = 2000,
+                                      ci_level = 0.95,
+                                      boot_ci_type = NULL) {
+  dat <- prep_dat_for_ml(dat)
+
+  wts <- if (!is.null(weights_var) && weights_var %in% names(dat)) weights_var else NULL
+
+  fit <- lavaan::sem(
+    model = MODEL_FULL,
+    data = dat,
+    estimator = "ML",
+    missing = "fiml",
+    se = "bootstrap",
+    bootstrap = bootstrap_B,
+    sampling.weights = wts,
+    fixed.x = TRUE,
+    meanstructure = TRUE,
+    check.gradient = FALSE,
+    control = list(iter.max = 20000)
+  )
+
+  pe <- if (is.null(boot_ci_type)) {
+    lavaan::parameterEstimates(
+      fit,
+      standardized = TRUE,
+      ci = TRUE,
+      level = ci_level
+    )
+  } else {
+    lavaan::parameterEstimates(
+      fit,
+      standardized = TRUE,
+      ci = TRUE,
+      level = ci_level,
+      boot.ci.type = boot_ci_type
+    )
+  }
+
+  list(fit = fit, pe = pe)
+}
 
 # Build a lavaan model string with conditional effects evaluated at three Z values.
 # Default Z values are: -1 SD, 0 (centered), +1 SD of credit_dose_c.
@@ -22,24 +459,16 @@ build_model_fast_treat_control <- function(dat, z_vals = NULL) {
   z_high_txt <- format(z_high, digits = 12, scientific = FALSE)
 
   paste0(
-"# measurement (marker-variable identification)\n",
-"belong =~ 1*sbvalued + sbmyself + sbcommunity\n",
-"gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
-"SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
-"Satisf =~ 1*sameinst + evalexp\n",
-"DevAdj =~ 1*belong + gains + SuppEnv + Satisf\n\n",
-"# mediators (names must match the variable table)\n",
-"EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial\n",
-"# NOTE: SF items removed from QualEngag measurement as requested\n",
-"QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff\n\n",
+MEASUREMENT_SYNTAX,
+"\n",
 "# structural (treatment/control + moderation)\n",
-"# Naming: *_c = main effect of credit_dose_c (Z); *_z = interaction effect with XZ\n",
-"# X = x_DE (0/1), Z = credit_dose_c (centered), XZ = x_DE*credit_dose_c\n",
-"EmoDiss ~ a1*x_DE + a1c*credit_dose_c + a1z*XZ + g1*cohort +\n",
+"# X = x_FASt (0/1), XZ_c = x_FASt*credit_dose_c (treated-only dose effect)\n",
+"# NOTE: credit_dose_c main effect OMITTED - dose only matters for FASt students\n",
+"EmoDiss ~ a1*x_FASt + a1z*XZ_c + g1*cohort +\n",
 "     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n\n",
-"QualEngag ~ a2*x_DE + a2c*credit_dose_c + a2z*XZ + g2*cohort +\n",
+"QualEngag ~ a2*x_FASt + a2z*XZ_c + g2*cohort +\n",
 "     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n\n",
-"DevAdj ~ c*x_DE + cc*credit_dose_c + cz*XZ + b1*EmoDiss + b2*QualEngag + g3*cohort +\n",
+"DevAdj ~ c*x_FASt + cz*XZ_c + b1*EmoDiss + b2*QualEngag + g3*cohort +\n",
 "         hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n\n",
 "# conditional direct effects of FASt on DevAdj at Z values\n",
 "dir_z_low  := c + cz*", z_low_txt, "\n",
@@ -86,24 +515,16 @@ build_model_fast_treat_control_serial <- function(dat, z_vals = NULL) {
   z_high_txt <- format(z_high, digits = 12, scientific = FALSE)
 
   paste0(
-"# measurement (marker-variable identification)\n",
-"belong =~ 1*sbvalued + sbmyself + sbcommunity\n",
-"gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
-"SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
-"Satisf =~ 1*sameinst + evalexp\n",
-"DevAdj =~ 1*belong + gains + SuppEnv + Satisf\n\n",
-"# mediators (names must match the variable table)\n",
-"EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial\n",
-"# NOTE: SF items removed from QualEngag measurement as requested\n",
-"QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff\n\n",
-"# structural (treatment/control + moderation)\n",
-"# Naming: *_c = main effect of credit_dose_c (Z); *_z = interaction effect with XZ\n",
-"# X = x_DE (0/1), Z = credit_dose_c (centered), XZ = x_DE*credit_dose_c\n",
-"EmoDiss ~ a1*x_DE + a1c*credit_dose_c + a1z*XZ + g1*cohort +\n",
+MEASUREMENT_SYNTAX,
+"\n",
+"# structural (treatment/control + moderation) - SERIAL MEDIATION\n",
+"# X = x_FASt (0/1), XZ_c = x_FASt*credit_dose_c (treated-only dose effect)\n",
+"# NOTE: credit_dose_c main effect OMITTED - dose only matters for FASt students\n",
+"EmoDiss ~ a1*x_FASt + a1z*XZ_c + g1*cohort +\n",
 "     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n\n",
-"QualEngag ~ a2*x_DE + a2c*credit_dose_c + a2z*XZ + d*EmoDiss + g2*cohort +\n",
+"QualEngag ~ a2*x_FASt + a2z*XZ_c + d*EmoDiss + g2*cohort +\n",
 "     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n\n",
-"DevAdj ~ c*x_DE + cc*credit_dose_c + cz*XZ + b1*EmoDiss + b2*QualEngag + g3*cohort +\n",
+"DevAdj ~ c*x_FASt + cz*XZ_c + b1*EmoDiss + b2*QualEngag + g3*cohort +\n",
 "         hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n\n",
 "# conditional direct effects of FASt on DevAdj at Z values\n",
 "dir_z_low  := c + cz*", z_low_txt, "\n",
@@ -140,14 +561,10 @@ build_model_fast_treat_control_serial <- function(dat, z_vals = NULL) {
 # Total effect model (Eq. 1): DevAdj ~ X only (no mediators, no moderator).
 build_model_total_effect <- function(dat) {
   paste0(
-"# measurement (marker-variable identification)\n",
-"belong =~ 1*sbvalued + sbmyself + sbcommunity\n",
-"gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
-"SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
-"Satisf =~ 1*sameinst + evalexp\n",
-"DevAdj =~ 1*belong + gains + SuppEnv + Satisf\n\n",
+MEASUREMENT_SYNTAX,
+"\n",
 "# total effect (Eq. 1)\n",
-"DevAdj ~ c_total*x_DE\n"
+"DevAdj ~ c_total*x_FASt\n"
   )
 }
 
@@ -272,24 +689,22 @@ build_model_fast_treat_control_mg <- function(dat, group_var, w_label = NULL, z_
   diff_imm_m1  <- def_contrast_vs_g1("index_MM_EmoDiss",   "index_MM_EmoDiss")
   diff_imm_m2  <- def_contrast_vs_g1("index_MM_QualEngag", "index_MM_QualEngag")
 
+  # IMPORTANT: do not include the grouping variable as an exogenous covariate.
+  # Example: when group_var == "pell", pell is constant within each group and lavaan errors.
+  covars <- c("hgrades_c", "bparented_c", "pell", "hapcl", "hprecalc13", "hchallenge_c", "cSFcareer_c")
+  covars <- setdiff(covars, group_var)
+  covars_txt <- paste(covars, collapse = " + ")
+
   paste0(
-    "# measurement (marker-variable identification)\n",
-    "belong =~ 1*sbvalued + sbmyself + sbcommunity\n",
-    "gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
-    "SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
-    "Satisf =~ 1*sameinst + evalexp\n",
-    "DevAdj =~ 1*belong + gains + SuppEnv + Satisf\n\n",
-    "# mediators (names must match the variable table)\n",
-    "EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial\n",
-    "# NOTE: SF items removed from QualEngag measurement as requested\n",
-    "QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff\n\n",
+    MEASUREMENT_SYNTAX,
+    "\n",
     "# structural (multi-group by W with group-varying paths)\n",
-    "EmoDiss ~ ", a1, "*x_DE + ", a1c, "*credit_dose_c + ", a1z, "*XZ + ", g1p, "*cohort +\n",
-    "     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n\n",
-    "QualEngag ~ ", a2, "*x_DE + ", a2c, "*credit_dose_c + ", a2z, "*XZ + ", g2p, "*cohort +\n",
-    "     hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n\n",
-    "DevAdj ~ ", c0, "*x_DE + ", cc, "*credit_dose_c + ", cz, "*XZ + ", b1, "*EmoDiss + ", b2, "*QualEngag + ", g3p, "*cohort +\n",
-    "         hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c\n\n",
+    "EmoDiss ~ ", a1, "*x_FASt + ", a1c, "*credit_dose_c + ", a1z, "*XZ_c + ", g1p, "*cohort +\n",
+    "     ", covars_txt, "\n\n",
+    "QualEngag ~ ", a2, "*x_FASt + ", a2c, "*credit_dose_c + ", a2z, "*XZ_c + ", g2p, "*cohort +\n",
+    "     ", covars_txt, "\n\n",
+    "DevAdj ~ ", c0, "*x_FASt + ", cc, "*credit_dose_c + ", cz, "*XZ_c + ", b1, "*EmoDiss + ", b2, "*QualEngag + ", g3p, "*cohort +\n",
+    "         ", covars_txt, "\n\n",
     "# conditional direct effects of FASt on DevAdj at Z values (per group)\n",
     paste0(dir_low, collapse = "\n"), "\n",
     paste0(dir_mid, collapse = "\n"), "\n",
@@ -337,9 +752,9 @@ fit_mg_fast_vs_nonfast <- function(dat,
                                   group = NULL,
                                   w_label = NULL,
                                   model_type = c("parallel", "serial", "total"),
-                                  estimator = "MLR",
+                                  estimator = "ML",
                                   missing = "fiml",
-                                  fixed.x = FALSE,
+                                  fixed.x = TRUE,
                                   weight_var = "psw",
                                   bootstrap = NULL,
                                   se = NULL,
@@ -348,9 +763,9 @@ fit_mg_fast_vs_nonfast <- function(dat,
   model_type <- match.arg(model_type)
   wts <- if (!is.null(weight_var) && weight_var %in% names(dat)) weight_var else NULL
 
-  # Build observed interaction term if needed: XZ = x_FASt * credit_dose_c
-  if (!("XZ" %in% names(dat))) {
-    dat$XZ <- dat$x_DE * dat$credit_dose_c
+  # Build observed interaction term if needed: XZ_c = x_FASt * credit_dose_c
+  if (!("XZ_c" %in% names(dat))) {
+    dat$XZ_c <- dat$x_FASt * dat$credit_dose_c
   }
 
   model_tc <- if (is.null(group)) {
@@ -372,6 +787,9 @@ fit_mg_fast_vs_nonfast <- function(dat,
     se = se,
     bootstrap = bootstrap,
     check.lv.names = FALSE,
+    meanstructure = TRUE,
+    check.gradient = FALSE,
+    control = list(iter.max = 20000),
     ...
   )
 }
@@ -384,13 +802,13 @@ fit_mg_fast_vs_nonfast <- function(dat,
 # NOTE: SF items removed from QualEngag as requested.
 model_mg_fast_vs_nonfast_meas <- '
 # measurement (marker-variable identification)
-belong =~ 1*sbvalued + sbmyself + sbcommunity
-gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve
-SuppEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse
+Belong =~ 1*sbvalued + sbmyself + sbcommunity
+Gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve
+SupportEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse
 Satisf =~ 1*sameinst + evalexp
 
 # higher-order outcome
-DevAdj =~ 1*belong + gains + SuppEnv + Satisf
+DevAdj =~ 1*Belong + Gains + SupportEnv + Satisf
 
 # mediators
 EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial
@@ -868,9 +1286,9 @@ fit_mg_fast_vs_nonfast_with_outputs <- function(
   w_label = NULL,
   model_type = c("parallel", "serial", "total"),
   out_dir = file.path("results", "fast_treat_control", "structural"),
-  estimator = "MLR",
+  estimator = "ML",
   missing = "fiml",
-  fixed.x = FALSE,
+  fixed.x = TRUE,
   weight_var = "psw",
   bootstrap = 2000,
   boot_ci_type = "bca.simple",
@@ -883,17 +1301,9 @@ fit_mg_fast_vs_nonfast_with_outputs <- function(
     writeLines(paste0("group = ", group), con = file.path(out_dir, "group_var.txt"))
   }
 
-  wts <- if (!is.null(weight_var) && weight_var %in% names(dat)) weight_var else NULL
-
-  # Build observed interaction term if needed: XZ = x_FASt * credit_dose_c
-  if (!("XZ" %in% names(dat))) {
-    dat$XZ <- dat$x_DE * dat$credit_dose_c
-  }
-
-  # Bootstrap SEs in lavaan are computed under ML; switch from MLR to ML when bootstrapping.
-  if (!is.null(bootstrap) && is.numeric(bootstrap) && bootstrap > 0 && !identical(estimator, "ML")) {
-    message("[fast_treat_control] bootstrap requested: switching estimator from ", estimator, " to ML for bootstrap inference")
-    estimator <- "ML"
+  # Build observed interaction term if needed: XZ_c = x_FASt * credit_dose_c
+  if (!("XZ_c" %in% names(dat))) {
+    dat$XZ_c <- dat$x_FASt * dat$credit_dose_c
   }
 
   se_arg <- if (!is.null(bootstrap) && is.numeric(bootstrap) && bootstrap > 0) "bootstrap" else "standard"
