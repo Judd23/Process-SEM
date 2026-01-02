@@ -1,4 +1,4 @@
-# Process-SEM: Conditional-Process SEM Analysis
+# Conditional-Process Structural Equation Model Analysis
 
 **Dissertation Study**: Psychosocial Effects of Accelerated Dual Credit on First-Year Developmental Adjustment
 
