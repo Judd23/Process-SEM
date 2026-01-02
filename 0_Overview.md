@@ -8,7 +8,7 @@
 
 | What You Need | Location |
 |---------------|----------|
-| **Results Tables** | [4_Model_Results/Tables/Dissertation_Tables.docx](4_Model_Results/Tables/Dissertation_Tables.docx) |
+| **Results Tables** | [4_Model_Results/Tables/](4_Model_Results/Tables/) *(download .docx to view)* |
 | **Figures** | [4_Model_Results/Figures/](4_Model_Results/Figures/) |
 | **Plain-Language Summary** | [4_Model_Results/Summary/Key_Findings_Summary.md](4_Model_Results/Summary/Key_Findings_Summary.md) |
 | **Variable Dictionary** | [2_Codebooks/Variable_Table.xlsx](2_Codebooks/Variable_Table.xlsx) |
