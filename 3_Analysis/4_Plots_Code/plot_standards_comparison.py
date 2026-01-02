@@ -6,9 +6,9 @@ Creates an elegant, academically professional figure showing how the study
 meets or exceeds peer-reviewed benchmarks for PSW-SEM analysis.
 
 Usage:
-    python scripts/plot_standards_comparison.py [--out DIR] [--data JSON_FILE]
+    python 3_Analysis/4_Plots_Code/plot_standards_comparison.py [--out DIR] [--data JSON_FILE]
 
-If --out is not specified, defaults to results/fast_treat_control/official_all_RQs/
+If --out is not specified, defaults to 4_Model_Results/Figures/
 If --data is not specified, uses hardcoded study values.
 """
 
@@ -152,7 +152,7 @@ DEFAULT_DATA = {
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Generate standards compliance visualizations')
-parser.add_argument('--out', type=str, default='results/fast_treat_control/official_all_RQs',
+parser.add_argument('--out', type=str, default='4_Model_Results/Figures',
                     help='Output directory for figures')
 parser.add_argument('--data', type=str, default=None,
                     help='JSON file with actual data values (optional)')

@@ -31,7 +31,7 @@ suppressPackageStartupMessages({
 })
 
 # Source model definitions
-source("r/models/mg_fast_vs_nonfast_model.R")
+source("5_Statistical_Models/models/mg_fast_vs_nonfast_model.R")
 
 # =============================================================================
 # CONFIGURATION
@@ -50,8 +50,8 @@ parse_arg <- function(args, flag, default) {
 B <- as.integer(parse_arg(args, "--B", "500"))
 NCPUS <- as.integer(parse_arg(args, "--cores", "6"))
 SEED <- as.integer(parse_arg(args, "--seed", "20251230"))
-DATA_FILE <- parse_arg(args, "--data", "rep_data.csv")
-OUT_DIR <- parse_arg(args, "--out", "results/fast_treat_control/official_all_RQs/bootstrap_pipeline")
+DATA_FILE <- parse_arg(args, "--data", "1_Dataset/rep_data.csv")
+OUT_DIR <- parse_arg(args, "--out", "4_Model_Results/Outputs/bootstrap_pipeline")
 CI_TYPE <- parse_arg(args, "--ci", "bca")  # bca, perc, or norm
 MODE <- parse_arg(args, "--mode", "bootstrap_psw")  # bootstrap_psw or mg_invariance
 ESTIMATOR <- parse_arg(args, "--estimator", "MLR")  # Estimator for mg_invariance mode

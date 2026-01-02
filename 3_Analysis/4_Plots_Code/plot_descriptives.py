@@ -4,7 +4,7 @@ Generate descriptive statistics plots for Process-SEM dissertation.
 Outputs publication-quality figures for Chapter 4 (Results).
 
 Usage:
-    python scripts/plot_descriptives.py [--data rep_data.csv] [--outdir results/descriptive_plots]
+    python 3_Analysis/4_Plots_Code/plot_descriptives.py [--data 1_Dataset/rep_data.csv] [--outdir 4_Model_Results/Figures]
 """
 
 import pandas as pd
@@ -22,7 +22,7 @@ def add_sim_note(fig, y_offset=-0.02):
              fontsize=8, fontstyle='italic', color='#666666',
              transform=fig.transFigure)
 
-def main(data_path='rep_data.csv', outdir='results/descriptive_plots'):
+def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     os.makedirs(outdir, exist_ok=True)
     
     df = pd.read_csv(data_path)
@@ -449,8 +449,8 @@ def main(data_path='rep_data.csv', outdir='results/descriptive_plots'):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate descriptive plots')
-    parser.add_argument('--data', default='rep_data.csv', help='Path to data file')
-    parser.add_argument('--outdir', default='results/descriptive_plots', help='Output directory')
+    parser.add_argument('--data', default='1_Dataset/rep_data.csv', help='Path to data file')
+    parser.add_argument('--outdir', default='4_Model_Results/Figures', help='Output directory')
     args = parser.parse_args()
     
     main(args.data, args.outdir)

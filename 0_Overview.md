@@ -4,6 +4,17 @@
 
 ---
 
+## 📋 For Reviewers — Quick Links
+
+| What You Need | Location |
+|---------------|----------|
+| **Results Tables** | [4_Model_Results/Tables/Dissertation_Tables.docx](4_Model_Results/Tables/Dissertation_Tables.docx) |
+| **Figures** | [4_Model_Results/Figures/](4_Model_Results/Figures/) |
+| **Plain-Language Summary** | [4_Model_Results/Summary/Key_Findings_Summary.md](4_Model_Results/Summary/Key_Findings_Summary.md) |
+| **Variable Dictionary** | [2_Codebooks/Variable_Table.xlsx](2_Codebooks/Variable_Table.xlsx) |
+
+---
+
 ## Overview
 
 This repository contains the statistical analysis pipeline for an Ed.D. dissertation examining how accelerated dual credit participation (FASt status) affects first-year developmental adjustment among equity-impacted California State University students, mediated by emotional distress and quality of engagement.
@@ -46,34 +57,29 @@ Moderation: Z = credit_dose_c (mean-centered credit dose)
 
 ```
 Process-SEM/
-├── README.md                    # This file
-├── rep_data.csv                 # Representative dataset (N=5,000)
-├── requirements.txt             # Python dependencies
-├── .github/
-│   └── copilot-instructions.md  # Development guidelines
-├── Codebooks/                   # Variable documentation
-├── r/
-│   ├── models/                  # lavaan model specifications
-│   │   └── mg_fast_vs_nonfast_model.R
-│   ├── themes/                  # ggplot themes
-│   └── utils/                   # Helper functions
-├── scripts/
-│   ├── run_all_RQs_official.R   # ★ MAIN ENTRY POINT
-│   ├── bootstrap_*.R            # Bootstrap inference scripts
-│   ├── build_*.py               # Table generation
-│   ├── plot_*.py                # Visualization
-│   └── make_*.R                 # Supporting utilities
-└── results/
-    └── official/                # ★ FINAL RESULTS
-        ├── RQ1_RQ3_main/        # Main model outputs
-        ├── RQ4_measurement/     # Measurement invariance
-        ├── RQ4_structural_MG/   # Multi-group structural
-        ├── A0_total_effect/     # Total effect model
-        ├── A1_serial_exploratory/  # Serial mediation
-        ├── Bootstrap_Tables.docx
-        ├── Dissertation_Tables.docx
-        ├── fig1-12 (*.png)      # Descriptive figures
-        └── verification_checklist.txt
+├── 0_Overview.md                # This file
+├── 1_Dataset/                   # Representative dataset (N=5,000)
+│   └── rep_data.csv
+├── 2_Codebooks/                 # Survey documentation
+│   ├── BCSSE_Codebook.xlsx
+│   ├── NSSE_Core_Codebook.docx
+│   └── NSSE_MHW_Codebook.docx
+├── 3_Analysis/                  # All analysis scripts
+│   ├── 1_Main_Pipeline_Code/    # ★ MAIN ENTRY POINT
+│   ├── 2_Bootstrap_Code/        # Bootstrap inference
+│   ├── 3_Tables_Code/           # Table generation (Python)
+│   ├── 4_Plots_Code/            # Visualization (Python)
+│   └── 5_Utilities_Code/        # Supporting utilities
+├── 4_Model_Results/             # ★ ALL OUTPUTS
+│   ├── Tables/                  # APA 7 formatted tables
+│   ├── Figures/                 # Publication-ready plots
+│   ├── Summary/                 # Plain-language findings
+│   └── Outputs/                 # Raw model outputs
+├── 5_Statistical_Models/        # lavaan model specifications
+│   └── models/
+│       └── mg_fast_vs_nonfast_model.R
+└── _Setup/                      # Technical setup files
+    └── requirements.txt
 ```
 
 ---

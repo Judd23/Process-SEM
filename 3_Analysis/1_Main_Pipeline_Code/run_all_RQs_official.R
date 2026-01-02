@@ -25,16 +25,13 @@ has_env <- function(name) nzchar(Sys.getenv(name, unset = ""))
 # -------------------------
 # USER SETTINGS (edit these)
 # -------------------------
-MODEL_FILE   <- "r/models/mg_fast_vs_nonfast_model.R"
+MODEL_FILE   <- "5_Statistical_Models/models/mg_fast_vs_nonfast_model.R"
 
 # Priority order for rep_data.csv:
 #   1. REP_DATA_CSV env var (explicit override)
-#   2. repo root rep_data.csv (standard location)
-#   3. legacy paths in results/repstudy_bootstrap/
+#   2. 1_Dataset/rep_data.csv (standard location)
 DEFAULT_REP_DATA_CSV_CANDIDATES <- c(
-  "rep_data.csv",
-  "results/repstudy_bootstrap/seed20251223_N3000_B100_ciperc/rep_data.csv",
-  "results/repstudy_bootstrap/seed20251229_N3000_B1_ciperc/rep_data.csv"
+  "1_Dataset/rep_data.csv"
 )
 
 # Prefer explicit env override; fall back to known default candidates.
@@ -51,7 +48,7 @@ if (!nzchar(REP_DATA_CSV)) {
 # SIMULATION RUN OUTPUT - Representative data pipeline validation
 # When you have your actual dissertation data, change this path accordingly.
 # =============================================================================
-OUT_BASE     <- Sys.getenv("OUT_BASE", unset = "results/SIMULATION_RUN_Jan2026")
+OUT_BASE     <- Sys.getenv("OUT_BASE", unset = "4_Model_Results/Outputs")
 
 # Treatment/control definition for official RQs:
 #   X = FASt status (>= 12 transferable credits applied at matriculation)
@@ -1368,9 +1365,9 @@ tryCatch({
 
 # Call visualization script with actual data
 viz_cmd <- if (file.exists(standards_data_path)) {
-  sprintf("python3 scripts/plot_standards_comparison.py --out '%s' --data '%s'", OUT_BASE, standards_data_path)
+  sprintf("python3 3_Analysis/4_Plots_Code/plot_standards_comparison.py --out '%s' --data '%s'", OUT_BASE, standards_data_path)
 } else {
-  sprintf("python3 scripts/plot_standards_comparison.py --out '%s'", OUT_BASE)
+  sprintf("python3 3_Analysis/4_Plots_Code/plot_standards_comparison.py --out '%s'", OUT_BASE)
 }
 viz_result <- system(viz_cmd, intern = FALSE)
 if (viz_result == 0) {
@@ -1388,7 +1385,7 @@ message("\n=== Building Bootstrap Tables ===")
 boot_csv_path <- file.path(OUT_BASE, "RQ1_RQ3_main", "structural", "structural_parameterEstimates.txt")
 if (file.exists(boot_csv_path)) {
   tables_cmd <- sprintf(
-    "python3 scripts/build_bootstrap_tables.py --csv '%s' --B %d --ci_type '%s' --out '%s'",
+    "python3 3_Analysis/3_Tables_Code/build_bootstrap_tables.py --csv '%s' --B %d --ci_type '%s' --out '%s'",
     boot_csv_path, B_BOOT_MAIN, BOOT_CI_TYPE_MAIN, OUT_BASE
   )
   tables_result <- system(tables_cmd, intern = FALSE)
@@ -1409,7 +1406,7 @@ message("\n=== Generating Descriptive Plots ===")
 
 # Run plot_descriptives.py - outputs to OUT_BASE
 desc_cmd <- sprintf(
-  "python3 scripts/plot_descriptives.py --data '%s' --outdir '%s'",
+  "python3 3_Analysis/4_Plots_Code/plot_descriptives.py --data '%s' --outdir '%s'",
   REP_DATA_CSV, OUT_BASE
 )
 desc_result <- system(desc_cmd, intern = FALSE)
@@ -1421,7 +1418,7 @@ if (desc_result == 0) {
 
 # Run plot_deep_cuts.py - outputs to OUT_BASE
 deep_cmd <- sprintf(
-  "python3 scripts/plot_deep_cuts.py --data '%s' --outdir '%s'",
+  "python3 3_Analysis/4_Plots_Code/plot_deep_cuts.py --data '%s' --outdir '%s'",
   REP_DATA_CSV, OUT_BASE
 )
 deep_result <- system(deep_cmd, intern = FALSE)

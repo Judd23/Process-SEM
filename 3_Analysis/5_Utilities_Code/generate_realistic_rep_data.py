@@ -675,7 +675,7 @@ def main():
     )
     parser.add_argument("--n", type=int, default=3000, help="Number of observations")
     parser.add_argument("--seed", type=int, default=20251229, help="Random seed")
-    parser.add_argument("--out", type=Path, default=Path("rep_data.csv"), help="Output path")
+    parser.add_argument("--out", type=Path, default=Path("1_Dataset/rep_data.csv"), help="Output path")
     parser.add_argument("--report", action="store_true", help="Print distribution report")
     
     args = parser.parse_args()

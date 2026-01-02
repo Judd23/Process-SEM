@@ -2,6 +2,15 @@
 results/
 results/**
 
+# macOS
+.DS_Store
+**/.DS_Store
+
+# R
+.Rhistory
+.RData
+.Rproj.user
+
 # Python
 __pycache__/
 *.py[cod]

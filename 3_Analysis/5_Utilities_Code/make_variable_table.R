@@ -40,7 +40,7 @@
 # Last Updated: 2026-01-01
 # ══════════════════════════════════════════════════════════════════════════════
 
-out_path <- file.path("results", "tables", "variable_table.csv")
+out_path <- file.path("2_Codebooks", "Variable_Table.csv")
 dir.create(dirname(out_path), recursive = TRUE, showWarnings = FALSE)
 
 rows <- list()

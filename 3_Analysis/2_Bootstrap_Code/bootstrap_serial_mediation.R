@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 # =============================================================================
-# Bootstrap-Then-Weight: Total Effect Model
+# Bootstrap-Then-Weight: Serial Mediation Model
 # =============================================================================
-# Bootstraps the total effect model (DevAdj ~ x_FASt only, no mediators)
+# Bootstraps the serial mediation model (EmoDiss -> QualEngag -> DevAdj)
 # =============================================================================
 
 suppressPackageStartupMessages({
@@ -10,7 +10,7 @@ suppressPackageStartupMessages({
   library(parallel)
 })
 
-source("r/models/mg_fast_vs_nonfast_model.R")
+source("5_Statistical_Models/models/mg_fast_vs_nonfast_model.R")
 
 # Configuration
 args <- commandArgs(trailingOnly = TRUE)
@@ -23,10 +23,10 @@ parse_arg <- function(args, flag, default) {
 B <- as.integer(parse_arg(args, "--B", "200"))
 NCPUS <- as.integer(parse_arg(args, "--cores", "6"))
 SEED <- as.integer(parse_arg(args, "--seed", "20251230"))
-OUT_DIR <- parse_arg(args, "--out", "results/fast_treat_control/official_all_RQs/bootstrap_total")
+OUT_DIR <- parse_arg(args, "--out", "4_Model_Results/Outputs/bootstrap_serial")
 
 cat("=============================================================\n")
-cat("Bootstrap-Then-Weight: Total Effect Model\n")
+cat("Bootstrap-Then-Weight: Serial Mediation Model\n")
 cat("B =", B, "| cores =", NCPUS, "| seed =", SEED, "\n")
 cat("=============================================================\n\n")
 
@@ -34,7 +34,7 @@ set.seed(SEED)
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
 # Load data
-dat <- read.csv("rep_data.csv", stringsAsFactors = FALSE)
+dat <- read.csv("1_Dataset/rep_data.csv", stringsAsFactors = FALSE)
 n <- nrow(dat)
 idx_treat <- which(dat$x_FASt == 1)
 idx_ctrl <- which(dat$x_FASt == 0)
@@ -43,8 +43,16 @@ cat("N =", n, "| Treated =", length(idx_treat), "| Control =", length(idx_ctrl),
 # PS formula
 PS_FORMULA <- x_FASt ~ cohort + hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c
 
-# Target parameters for total effect
-PARAM_NAMES <- c("c_total")
+# Target parameters for serial model (includes d path and serial indirects)
+PARAM_NAMES <- c("a1", "a1z", "a2", "a2z", "d", "b1", "b2", "c", "cz",
+                 "a1_z_low", "a1_z_mid", "a1_z_high",
+                 "a2_z_low", "a2_z_mid", "a2_z_high",
+                 "dir_z_low", "dir_z_mid", "dir_z_high",
+                 "ind_EmoDiss_z_low", "ind_EmoDiss_z_mid", "ind_EmoDiss_z_high",
+                 "ind_QualEngag_z_low", "ind_QualEngag_z_mid", "ind_QualEngag_z_high",
+                 "ind_serial_z_low", "ind_serial_z_mid", "ind_serial_z_high",
+                 "total_z_low", "total_z_mid", "total_z_high",
+                 "index_MM_EmoDiss", "index_MM_QualEngag", "index_MM_serial")
 
 # Function to fit one bootstrap replicate
 fit_one_boot <- function(b, dat, idx_treat, idx_ctrl, n) {
@@ -65,13 +73,24 @@ fit_one_boot <- function(b, dat, idx_treat, idx_ctrl, n) {
   boot_dat$psw <- ifelse(boot_dat$x_FASt == 1, 1 - ps, ps)
   boot_dat$psw <- boot_dat$psw * n / sum(boot_dat$psw)
   
-  # Build and fit model
-  model_total <- build_model_total_effect(boot_dat)
+  # Recenter for this sample
+  boot_dat$credit_dose_c <- boot_dat$credit_dose - mean(boot_dat$credit_dose, na.rm = TRUE)
+  boot_dat$hgrades_c <- boot_dat$hgrades - mean(boot_dat$hgrades, na.rm = TRUE)
+  boot_dat$bparented_c <- boot_dat$bparented - mean(boot_dat$bparented, na.rm = TRUE)
+  boot_dat$hchallenge_c <- boot_dat$hchallenge - mean(boot_dat$hchallenge, na.rm = TRUE)
+  boot_dat$cSFcareer_c <- boot_dat$cSFcareer - mean(boot_dat$cSFcareer, na.rm = TRUE)
+  boot_dat$XZ_c <- boot_dat$x_FASt * boot_dat$credit_dose_c
+  
+  sd_z <- sd(boot_dat$credit_dose_c, na.rm = TRUE)
+  z_vals <- c(z_low = -sd_z, z_mid = 0, z_high = sd_z)
+  
+  # Build and fit serial model
+  model_serial <- build_model_fast_treat_control_serial(boot_dat, z_vals = z_vals)
   
   fit <- tryCatch({
     suppressWarnings(
       lavaan::sem(
-        model = model_total,
+        model = model_serial,
         data = boot_dat,
         estimator = "MLR",
         fixed.x = TRUE,
@@ -108,7 +127,11 @@ ps_orig <- pmax(pmin(ps_orig, 0.99), 0.01)
 dat$psw <- ifelse(dat$x_FASt == 1, 1 - ps_orig, ps_orig)
 dat$psw <- dat$psw * n / sum(dat$psw)
 
-model_orig <- build_model_total_effect(dat)
+dat$XZ_c <- dat$x_FASt * dat$credit_dose_c
+sd_z_orig <- sd(dat$credit_dose_c, na.rm = TRUE)
+z_vals_orig <- c(z_low = -sd_z_orig, z_mid = 0, z_high = sd_z_orig)
+
+model_orig <- build_model_fast_treat_control_serial(dat, z_vals = z_vals_orig)
 fit_orig <- lavaan::sem(
   model = model_orig,
   data = dat,
@@ -129,11 +152,7 @@ get_est_orig <- function(label) {
   if (nrow(row) == 1) row$est else NA_real_
 }
 orig_est <- sapply(PARAM_NAMES, get_est_orig)
-
-# Get robust SE from original fit
-orig_se <- pe_orig[pe_orig$label == "c_total", "se"]
-cat("Original estimates:\n")
-cat("  c_total =", orig_est, "(robust SE =", orig_se, ")\n\n")
+cat("Original estimates computed.\n\n")
 
 # Bootstrap
 cat("Starting bootstrap with B =", B, "replicates...\n")
@@ -143,11 +162,11 @@ if (NCPUS > 1) {
   cat("Using", NCPUS, "cores\n")
   cl <- makeCluster(NCPUS)
   clusterExport(cl, c("dat", "idx_treat", "idx_ctrl", "n", "PS_FORMULA", 
-                      "PARAM_NAMES", "fit_one_boot", "build_model_total_effect",
+                      "PARAM_NAMES", "fit_one_boot", "build_model_fast_treat_control_serial",
                       "MEASUREMENT_SYNTAX", "SEED"))
   clusterEvalQ(cl, {
     suppressPackageStartupMessages(library(lavaan))
-    source("r/models/mg_fast_vs_nonfast_model.R")
+    source("5_Statistical_Models/models/mg_fast_vs_nonfast_model.R")
   })
   
   boot_results <- parLapply(cl, 1:B, function(b) {
@@ -163,12 +182,12 @@ if (NCPUS > 1) {
   })
 }
 
-boot_vec <- unlist(boot_results)
+boot_mat <- do.call(rbind, boot_results)
 boot_time <- difftime(Sys.time(), start_time, units = "mins")
 cat("\nBootstrap completed in", round(boot_time, 1), "minutes\n")
 
 # Count successes
-n_success <- sum(!is.na(boot_vec))
+n_success <- sum(complete.cases(boot_mat))
 cat("Successful replicates:", n_success, "/", B, "(", round(100*n_success/B, 1), "%)\n\n")
 
 # Compute CIs
@@ -176,29 +195,29 @@ cat("Computing percentile 95% CIs...\n")
 results <- data.frame(
   parameter = PARAM_NAMES,
   est = orig_est,
-  robust_se = orig_se,
-  boot_se = sd(boot_vec, na.rm = TRUE),
-  ci_lower = quantile(boot_vec, probs = 0.025, na.rm = TRUE),
-  ci_upper = quantile(boot_vec, probs = 0.975, na.rm = TRUE),
+  boot_se = apply(boot_mat, 2, sd, na.rm = TRUE),
+  ci_lower = apply(boot_mat, 2, quantile, probs = 0.025, na.rm = TRUE),
+  ci_upper = apply(boot_mat, 2, quantile, probs = 0.975, na.rm = TRUE),
   stringsAsFactors = FALSE
 )
 results$sig <- with(results, (ci_lower > 0 & ci_upper > 0) | (ci_lower < 0 & ci_upper < 0))
 
 # Save
-write.csv(results, file.path(OUT_DIR, "bootstrap_total_effect.csv"), row.names = FALSE)
-saveRDS(list(boot_vec = boot_vec, orig_est = orig_est, B = B, n_success = n_success),
-        file.path(OUT_DIR, "boot_total_object.rds"))
+write.csv(results, file.path(OUT_DIR, "bootstrap_serial.csv"), row.names = FALSE)
+saveRDS(list(boot_mat = boot_mat, orig_est = orig_est, B = B, n_success = n_success),
+        file.path(OUT_DIR, "boot_serial_object.rds"))
 
 # Print results
-sink(file.path(OUT_DIR, "bootstrap_total_effect.txt"))
+sink(file.path(OUT_DIR, "bootstrap_serial.txt"))
 cat("=============================================================\n")
-cat("Bootstrap-Then-Weight: Total Effect Model Results\n")
+cat("Bootstrap-Then-Weight: Serial Mediation Results\n")
 cat("B =", B, "| Successful =", n_success, "| Time =", round(boot_time, 1), "min\n")
 cat("=============================================================\n\n")
 print(results, row.names = FALSE)
 sink()
 
-cat("\n=== TOTAL EFFECT RESULTS ===\n")
-print(results, row.names = FALSE)
+cat("\n=== KEY SERIAL MEDIATION RESULTS ===\n")
+key_params <- c("d", "ind_serial_z_mid", "ind_serial_z_high", "index_MM_serial")
+print(results[results$parameter %in% key_params, ], row.names = FALSE)
 cat("\n* sig = 95% CI excludes zero\n")
 cat("\nResults saved to:", OUT_DIR, "\n")

@@ -19,7 +19,7 @@ cat("CFA FOR ALL CONSTRUCTS - PROCESS-SEM MEASUREMENT MODEL\n")
 cat(rep("=", 70), "\n\n", sep = "")
 
 # Load data
-dat <- read.csv("rep_data.csv")
+dat <- read.csv("1_Dataset/rep_data.csv")
 cat("Data loaded: N =", nrow(dat), "observations\n\n")
 
 # ##############################################################################
