@@ -89,9 +89,11 @@ data/*.csv
 # ------------------------------
 results/
 outputs/
-figures/
 plots/
-tables/
+
+# But DO track 4_Model_Results (official outputs)
+!4_Model_Results/
+!4_Model_Results/**
 
 # Logs / temp
 *.log

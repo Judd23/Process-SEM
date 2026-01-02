@@ -1,0 +1,4 @@
+level	n
+Off-campus (rent/apartment)	1517
+On-campus (residence hall)	1232
+With family (commuting)	2251

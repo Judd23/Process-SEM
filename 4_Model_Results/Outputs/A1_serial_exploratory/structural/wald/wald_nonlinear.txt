@@ -1,0 +1,13 @@
+Wald tests: nonlinear constraints (conditional indirect/total differences: high vs low Z)
+$stat
+[1] 106.8415
+
+$df
+[1] 4
+
+$p.value
+[1] 0
+
+$se
+[1] "robust.huber.white"
+

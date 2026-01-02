@@ -1,0 +1,28 @@
+$Pell
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.488         0.507         0.546         0.397         0.208 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.275         0.278         0.343         0.299         0.368 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.369         0.434         0.299         0.458         0.554 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.280         0.231         0.378         0.306         0.341 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.333         0.520         0.468         0.500         0.468 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.475         0.240         0.340         0.178         0.244 
+
+$`Non-Pell`
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.487         0.484         0.547         0.405         0.219 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.272         0.264         0.377         0.319         0.401 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.395         0.468         0.330         0.499         0.581 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.304         0.248         0.399         0.308         0.346 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.344         0.556         0.473         0.523         0.492 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.487         0.249         0.341         0.154         0.407 
+

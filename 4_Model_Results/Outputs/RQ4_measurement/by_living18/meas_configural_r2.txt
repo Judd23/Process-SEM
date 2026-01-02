@@ -1,0 +1,42 @@
+$`Off-campus (rent/apartment)`
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.486         0.509         0.573         0.398         0.252 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.318         0.374         0.359         0.312         0.378 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.357         0.486         0.359         0.632         0.443 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.375         0.263         0.373         0.346         0.394 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.272         0.564         0.516         0.510         0.516 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.516         0.264         0.368         0.173         0.306 
+
+$`With family (commuting)`
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.414         0.457         0.553         0.441         0.206 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.250         0.231         0.361         0.282         0.373 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.393         0.473         0.286         0.401         0.552 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.297         0.232         0.390         0.357         0.329 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.389         0.503         0.444         0.519         0.442 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.459         0.225         0.247         0.133         0.365 
+
+$`On-campus (residence hall)`
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.628         0.529         0.515         0.347         0.191 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.263         0.220         0.326         0.354         0.415 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.383         0.365         0.312         0.508         0.704 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.178         0.223         0.412         0.212         0.323 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.335         0.568         0.449         0.506         0.505 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.459         0.285         0.479         0.204         0.293 
+

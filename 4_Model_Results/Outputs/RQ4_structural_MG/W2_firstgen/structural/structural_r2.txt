@@ -1,0 +1,32 @@
+$`Continuing-gen`
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.482         0.496         0.540         0.418         0.208 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.219         0.254         0.336         0.328         0.399 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.340         0.447         0.283         0.384         0.641 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.258         0.222         0.359         0.333         0.326 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.308         0.493         0.472         0.511         0.486 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.495         0.289         0.328         0.150         0.257 
+       DevAdj       EmoDiss     QualEngag 
+        0.473         0.143         0.097 
+
+$`First-gen`
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.498         0.489         0.541         0.374         0.214 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.330         0.285         0.378         0.292         0.368 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.419         0.445         0.342         0.617         0.466 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.322         0.245         0.387         0.305         0.352 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.371         0.585         0.457         0.525         0.475 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.460         0.205         0.365         0.169         0.325 
+       DevAdj       EmoDiss     QualEngag 
+        0.419         0.223         0.132 
+
