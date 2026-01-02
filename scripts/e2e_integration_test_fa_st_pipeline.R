@@ -245,11 +245,10 @@ utils::write.csv(counts, file = counts_path, row.names = FALSE)
 # -------------------------
 
 center_col <- function(d, base, centered) {
-  if (!(centered %in% names(d))) {
-    if (!(base %in% names(d))) stop("Missing base var needed for centering: ", base)
-    d[[base]] <- suppressWarnings(as.numeric(d[[base]]))
-    d[[centered]] <- as.numeric(scale(d[[base]], scale = FALSE))
-  }
+  # ALWAYS recenter to ensure mean is exactly 0, even if centered var already exists
+  if (!(base %in% names(d))) stop("Missing base var needed for centering: ", base)
+  d[[base]] <- suppressWarnings(as.numeric(d[[base]]))
+  d[[centered]] <- as.numeric(scale(d[[base]], scale = FALSE))
   d
 }
 
@@ -318,13 +317,25 @@ if (length(bad_sets) > 0) {
 # -------------------------
 # Measurement + structural model strings (exact)
 # -------------------------
+# IDENTIFICATION STRATEGY:
+# 1. First-order DevAdj factors (Belong, Gains, SupportEnv, Satisf): 
+#    - ALL loadings freely estimated (requires std.lv = TRUE for identification)
+#    - Factor variances fixed to 1 by std.lv
+# 2. Second-order DevAdj: 
+#    - Belong is marker (loading = 1), others freely estimated
+# 3. Mediator factors (EmoDiss, QualEngag):
+#    - Marker variable identification (first indicator loading = 1)
+#    - These are standalone factors, not part of the DevAdj hierarchy
 
 REQUIRED_MEASUREMENT_SYNTAX <- paste0(
-  "Belong =~ 1*sbvalued + sbmyself + sbcommunity\n",
-  "Gains  =~ 1*pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
-  "SupportEnv =~ 1*SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
-  "Satisf =~ 1*sameinst + evalexp\n",
+  # DevAdj hierarchy: first-order loadings freely estimated (std.lv = TRUE identifies)
+  "Belong =~ sbvalued + sbmyself + sbcommunity\n",
+  "Gains  =~ pganalyze + pgthink + pgwork + pgvalues + pgprobsolve\n",
+  "SupportEnv =~ SEacademic + SEwellness + SEnonacad + SEactivities + SEdiverse\n",
+  "Satisf =~ sameinst + evalexp\n",
+  # Second-order factor: Belong is marker (loading = 1), others freely estimated
   "DevAdj =~ 1*Belong + Gains + SupportEnv + Satisf\n",
+  # Mediator factors: MARKER VARIABLE identification (standalone single-factor models)
   "EmoDiss =~ 1*MHWdacad + MHWdlonely + MHWdmental + MHWdexhaust + MHWdsleep + MHWdfinancial\n",
   "QualEngag =~ 1*QIadmin + QIstudent + QIadvisor + QIfaculty + QIstaff\n"
 )

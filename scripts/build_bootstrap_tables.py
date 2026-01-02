@@ -173,9 +173,24 @@ def main():
         print(f"ERROR: {csv_path} not found")
         return
     
-    df = pd.read_csv(csv_path)
+    # Handle both CSV and tab-delimited files (.txt from lavaan output)
+    df = pd.read_csv(csv_path, sep='\t' if csv_path.suffix == '.txt' else ',')
+    
+    # Map lavaan column names to expected names
+    col_map = {
+        'label': 'parameter',
+        'ci.lower': 'ci_lower',
+        'ci.upper': 'ci_upper'
+    }
+    df.rename(columns=col_map, inplace=True)
+    
+    # Handle SE column naming
     if 'se' in df.columns and 'boot_se' not in df.columns:
         df['boot_se'] = df['se']
+    
+    # Create sig column based on CI excluding zero
+    if 'sig' not in df.columns and 'ci_lower' in df.columns and 'ci_upper' in df.columns:
+        df['sig'] = (df['ci_lower'] > 0) | (df['ci_upper'] < 0)
     
     B = args.B
     ci = {'bca': 'BCa', 'perc': 'percentile', 'norm': 'normal'}.get(args.ci_type.lower(), args.ci_type)

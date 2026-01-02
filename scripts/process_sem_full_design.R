@@ -95,7 +95,7 @@ INDICATORS <- c(
 CORE_VARS <- c(
   "x_FASt", "credit_dose", "trnsfr_cr", "hdc17", "DC_student",
   # pre-college / baseline covariates used in PS (align with your project)
-  "cohort", "hgrades", "bparented", "pell", "hapcl", "hprecalc13", "hchallenge"
+  "cohort", "hgrades", "bparented", "pell", "hapcl", "hprecalc13", "hchallenge", "cSFcareer"
 )
 
 # W moderator variables for RQ4 (use --W flag to select one)
@@ -160,6 +160,7 @@ center_terms <- function(d) {
   if ("hgrades"   %in% names(d)) d$hgrades_c   <- d$hgrades   - mean(d$hgrades,   na.rm = TRUE)
   if ("bparented" %in% names(d)) d$bparented_c <- d$bparented - mean(d$bparented, na.rm = TRUE)
   if ("hchallenge"%in% names(d)) d$hchallenge_c<- d$hchallenge- mean(d$hchallenge,na.rm = TRUE)
+  if ("cSFcareer" %in% names(d)) d$cSFcareer_c <- d$cSFcareer - mean(d$cSFcareer, na.rm = TRUE)
 
   d
 }
@@ -200,11 +201,14 @@ build_struct_model <- function(sd_z) {
 
   paste0(MEAS_MODEL, sprintf('
 
-  # Regressions (conditional-process)
-  EmoDiss   ~ a1*x_FASt + a1z*XZ_c
-  QualEngag ~ a2*x_FASt + a2z*XZ_c
+  # Regressions (conditional-process) with covariates for confounding control
+  EmoDiss   ~ a1*x_FASt + a1z*XZ_c + g1*cohort +
+              hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
+  QualEngag ~ a2*x_FASt + a2z*XZ_c + g2*cohort +
+              hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
-  DevAdj ~ c*x_FASt + cz*XZ_c + b1*EmoDiss + b2*QualEngag
+  DevAdj ~ c*x_FASt + cz*XZ_c + b1*EmoDiss + b2*QualEngag + g3*cohort +
+          hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
   # Mediator covariance
   EmoDiss ~~ QualEngag
@@ -251,11 +255,14 @@ build_struct_model_serial <- function(sd_z) {
 
   paste0(MEAS_MODEL, sprintf('
 
-  # Regressions (serial mediation: EmoDiss -> QualEngag)
-  EmoDiss   ~ a1*x_FASt + a1z*XZ_c
-  QualEngag ~ a2*x_FASt + a2z*XZ_c + d*EmoDiss
+  # Regressions (serial mediation: EmoDiss -> QualEngag) with covariates
+  EmoDiss   ~ a1*x_FASt + a1z*XZ_c + g1*cohort +
+              hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
+  QualEngag ~ a2*x_FASt + a2z*XZ_c + d*EmoDiss + g2*cohort +
+              hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
-  DevAdj ~ c*x_FASt + cz*XZ_c + b1*EmoDiss + b2*QualEngag
+  DevAdj ~ c*x_FASt + cz*XZ_c + b1*EmoDiss + b2*QualEngag + g3*cohort +
+          hgrades_c + bparented_c + pell + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
   # --- Conditional a-paths at Z levels
   a1_z_low  := a1 + a1z*(%f)

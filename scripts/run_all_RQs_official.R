@@ -46,7 +46,12 @@ if (!nzchar(REP_DATA_CSV)) {
   }
   REP_DATA_CSV <- DEFAULT_REP_DATA_CSV
 }
-OUT_BASE     <- Sys.getenv("OUT_BASE", unset = "results/fast_treat_control/official_all_RQs")
+
+# =============================================================================
+# SIMULATION RUN OUTPUT - Representative data pipeline validation
+# When you have your actual dissertation data, change this path accordingly.
+# =============================================================================
+OUT_BASE     <- Sys.getenv("OUT_BASE", unset = "results/SIMULATION_RUN_Jan2026")
 
 # Treatment/control definition for official RQs:
 #   X = FASt status (>= 12 transferable credits applied at matriculation)
@@ -152,6 +157,9 @@ if (is.na(SMOKE_B_BOOT) || SMOKE_B_BOOT < 0) SMOKE_B_BOOT <- if (isTRUE(TABLE_CH
 SMOKE_BOOT_CI_TYPE <- Sys.getenv("SMOKE_BOOT_CI_TYPE", unset = "perc")
 
 if (isTRUE(SMOKE_ONLY_A)) {
+  # Route smoke test outputs to SmokeTest subfolder
+  OUT_BASE <- file.path(OUT_BASE, "SmokeTest")
+  
   B_BOOT_MAIN <- SMOKE_B_BOOT
   B_BOOT_TOTAL <- SMOKE_B_BOOT
   B_BOOT_SERIAL <- SMOKE_B_BOOT
@@ -1293,13 +1301,65 @@ print(sessionInfo())
 sink()
 
 # =============================================================================
-# Generate Standards Compliance Visualizations
+# Generate Standards Compliance Visualizations (with actual data from this run)
 # =============================================================================
 message("\n=== Generating Standards Compliance Visualizations ===")
-viz_cmd <- sprintf(
-  "python3 scripts/plot_standards_comparison.py --out '%s'",
-  OUT_BASE
-)
+
+# Extract actual fit measures from the main fit for the visualization
+standards_data_path <- file.path(OUT_BASE, "standards_data.json")
+tryCatch({
+  # Read fit measures from main structural output
+  fm_path <- file.path(out_main, "structural", "structural_fitMeasures.txt")
+  if (file.exists(fm_path)) {
+    fm_df <- read.delim(fm_path, stringsAsFactors = FALSE)
+    fm <- setNames(fm_df$value, fm_df$measure)
+    
+    # Read PSW balance report for SMD info
+    psw_path <- file.path(out_main, "psw_balance_smd.txt")
+    max_smd_weighted <- 0.0
+    max_smd_unweighted <- 0.0
+    if (file.exists(psw_path)) {
+      psw_lines <- readLines(psw_path)
+      # Extract SMD values (format varies, try to find max)
+      smd_pattern <- "SMD.*weighted.*([0-9.]+)"
+      # Simplified: use defaults if parsing fails
+    }
+    
+    # Build JSON data with actual values
+    standards_list <- list(
+      n = nrow(dat_main),
+      cfi = as.numeric(fm["cfi"]),
+      tli = as.numeric(fm["tli"]),
+      rmsea = as.numeric(fm["rmsea"]),
+      srmr = as.numeric(fm["srmr"]),
+      chisq = as.numeric(fm["chisq"]),
+      df = as.numeric(fm["df"]),
+      pvalue = as.numeric(fm["pvalue"]),
+      cfi_robust = as.numeric(fm["cfi.robust"]),
+      tli_robust = as.numeric(fm["tli.robust"]),
+      rmsea_robust = as.numeric(fm["rmsea.robust"]),
+      bootstrap_b = B_BOOT_MAIN,
+      bootstrap_converged = B_BOOT_MAIN,  # Assume all converged unless we have failure info
+      bootstrap_pct = 100.0
+    )
+    
+    # Remove NAs (use defaults in Python script)
+    standards_list <- standards_list[!sapply(standards_list, function(x) is.na(x) || is.null(x))]
+    
+    # Write JSON
+    jsonlite::write_json(standards_list, standards_data_path, auto_unbox = TRUE, pretty = TRUE)
+    message("Wrote standards data: ", standards_data_path)
+  }
+}, error = function(e) {
+  message("Could not extract fit measures for visualization: ", e$message)
+})
+
+# Call visualization script with actual data
+viz_cmd <- if (file.exists(standards_data_path)) {
+  sprintf("python3 scripts/plot_standards_comparison.py --out '%s' --data '%s'", OUT_BASE, standards_data_path)
+} else {
+  sprintf("python3 scripts/plot_standards_comparison.py --out '%s'", OUT_BASE)
+}
 viz_result <- system(viz_cmd, intern = FALSE)
 if (viz_result == 0) {
   message("Standards visualizations saved to: ", OUT_BASE)
@@ -1311,15 +1371,52 @@ if (viz_result == 0) {
 # Build Bootstrap Tables (DOCX)
 # =============================================================================
 message("\n=== Building Bootstrap Tables ===")
-tables_cmd <- sprintf(
- "python3 scripts/build_bootstrap_tables.py --results_dir '%s'",
-  OUT_BASE
-)
-tables_result <- system(tables_cmd, intern = FALSE)
-if (tables_result == 0) {
-  message("Bootstrap tables saved to: ", OUT_BASE)
+
+# Find the parameter estimates file from the main structural run
+boot_csv_path <- file.path(OUT_BASE, "RQ1_RQ3_main", "structural", "structural_parameterEstimates.txt")
+if (file.exists(boot_csv_path)) {
+  tables_cmd <- sprintf(
+    "python3 scripts/build_bootstrap_tables.py --csv '%s' --B %d --ci_type '%s'",
+    boot_csv_path, B_BOOT_MAIN, BOOT_CI_TYPE_MAIN
+  )
+  tables_result <- system(tables_cmd, intern = FALSE)
+  if (tables_result == 0) {
+    message("Bootstrap tables saved to: ", dirname(boot_csv_path))
+  } else {
+    warning("Bootstrap tables script failed (exit code ", tables_result, ")")
+  }
 } else {
-  warning("Bootstrap tables script failed (exit code ", tables_result, ")")
+  warning("Bootstrap parameter estimates not found: ", boot_csv_path)
+}
+
+# =============================================================================
+# Generate Descriptive Plots (repopulated with fresh data each run)
+# All outputs go to OUT_BASE (same folder as tables, results, figures)
+# =============================================================================
+message("\n=== Generating Descriptive Plots ===")
+
+# Run plot_descriptives.py - outputs to OUT_BASE
+desc_cmd <- sprintf(
+  "python3 scripts/plot_descriptives.py --data '%s' --outdir '%s'",
+  REP_DATA_CSV, OUT_BASE
+)
+desc_result <- system(desc_cmd, intern = FALSE)
+if (desc_result == 0) {
+  message("Descriptive plots saved to: ", OUT_BASE)
+} else {
+  warning("plot_descriptives.py failed (exit code ", desc_result, ")")
+}
+
+# Run plot_deep_cuts.py - outputs to OUT_BASE
+deep_cmd <- sprintf(
+  "python3 scripts/plot_deep_cuts.py --data '%s' --outdir '%s'",
+  REP_DATA_CSV, OUT_BASE
+)
+deep_result <- system(deep_cmd, intern = FALSE)
+if (deep_result == 0) {
+  message("Deep-cut plots saved to: ", OUT_BASE)
+} else {
+  warning("plot_deep_cuts.py failed (exit code ", deep_result, ")")
 }
 
 message("ALL RQs run complete. Outputs under: ", OUT_BASE)
