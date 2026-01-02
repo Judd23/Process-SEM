@@ -1,0 +1,169 @@
+================================================================================
+PROCESS-SEM MODEL REFERENCES
+================================================================================
+References used in the development and validation of the conditional-process
+SEM model examining psychosocial effects of accelerated dual credit (FASt)
+on first-year developmental adjustment.
+
+Last Updated: January 2, 2026
+================================================================================
+
+CONDITIONAL-PROCESS ANALYSIS (MODERATED MEDIATION)
+--------------------------------------------------------------------------------
+Hayes, A. F. (2022). Introduction to mediation, moderation, and conditional 
+    process analysis: A regression-based approach (3rd ed.). Guilford Press.
+
+Hayes, A. F., & Preacher, K. J. (2014). Statistical mediation analysis with a 
+    multicategorical independent variable. British Journal of Mathematical 
+    and Statistical Psychology, 67(3), 451-470.
+
+Preacher, K. J., Rucker, D. D., & Hayes, A. F. (2007). Addressing moderated 
+    mediation hypotheses: Theory, methods, and prescriptions. Multivariate 
+    Behavioral Research, 42(1), 185-227.
+
+
+STRUCTURAL EQUATION MODELING (lavaan)
+--------------------------------------------------------------------------------
+Rosseel, Y. (2012). lavaan: An R package for structural equation modeling. 
+    Journal of Statistical Software, 48(2), 1-36.
+
+Jöreskog, K. G., & Sörbom, D. (1996). LISREL 8: User's reference guide. 
+    Scientific Software International.
+
+Kline, R. B. (2016). Principles and practice of structural equation modeling 
+    (4th ed.). Guilford Press.
+
+Bollen, K. A. (1989). Structural equations with latent variables. Wiley.
+
+
+PROPENSITY SCORE WEIGHTING (PSW)
+--------------------------------------------------------------------------------
+Rosenbaum, P. R., & Rubin, D. B. (1983). The central role of the propensity 
+    score in observational studies for causal effects. Biometrika, 70(1), 41-55.
+
+Austin, P. C., & Stuart, E. A. (2015). Moving towards best practice when using 
+    inverse probability of treatment weighting (IPTW) using the propensity 
+    score to estimate causal treatment effects in observational studies. 
+    Statistics in Medicine, 34(28), 3661-3679.
+
+Li, F., Morgan, K. L., & Zaslavsky, A. M. (2018). Balancing covariates via 
+    propensity score weighting. Journal of the American Statistical 
+    Association, 113(521), 390-400.
+
+Abadie, A., & Imbens, G. W. (2016). Matching on the estimated propensity score. 
+    Econometrica, 84(2), 781-807.
+
+Imai, K., King, G., & Stuart, E. A. (2008). Misunderstandings between 
+    experimentalists and observationalists about causal inference. Journal 
+    of the Royal Statistical Society: Series A, 171(2), 481-502.
+
+
+BOOTSTRAP INFERENCE
+--------------------------------------------------------------------------------
+Efron, B., & Tibshirani, R. J. (1993). An introduction to the bootstrap. 
+    Chapman & Hall.
+
+Efron, B., & Hastie, T. (2016). Computer age statistical inference: Algorithms, 
+    evidence, and data science. Cambridge University Press.
+
+MacKinnon, D. P., Lockwood, C. M., & Williams, J. (2004). Confidence limits 
+    for the indirect effect: Distribution of the product and resampling 
+    methods. Multivariate Behavioral Research, 39(1), 99-128.
+
+Shrout, P. E., & Bolger, N. (2002). Mediation in experimental and 
+    nonexperimental studies: New procedures and recommendations. 
+    Psychological Methods, 7(4), 422-445.
+
+
+MEASUREMENT INVARIANCE
+--------------------------------------------------------------------------------
+Cheung, G. W., & Rensvold, R. B. (2002). Evaluating goodness-of-fit indexes 
+    for testing measurement invariance. Structural Equation Modeling, 9(2), 
+    233-255.
+
+Chen, F. F. (2007). Sensitivity of goodness of fit indexes to lack of 
+    measurement invariance. Structural Equation Modeling, 14(3), 464-504.
+
+Vandenberg, R. J., & Lance, C. E. (2000). A review and synthesis of the 
+    measurement invariance literature: Suggestions, practices, and 
+    recommendations for organizational research. Organizational Research 
+    Methods, 3(1), 4-70.
+
+
+DUAL ENROLLMENT / ACCELERATED CREDIT RESEARCH
+--------------------------------------------------------------------------------
+An, B. P. (2013). The impact of dual enrollment on college degree attainment: 
+    Do low-SES students benefit? Educational Evaluation and Policy Analysis, 
+    35(1), 57-75.
+
+Giani, M., Alexander, C., & Reyes, P. (2014). Exploring variation in the 
+    impact of dual-credit coursework on postsecondary outcomes: A 
+    quasi-experimental analysis of Texas students. High School Journal, 
+    97(4), 200-218.
+
+Karp, M. M. (2012). "I don't know, I've never been to college!" Dual 
+    enrollment as a college readiness strategy. New Directions for Higher 
+    Education, 2012(158), 21-28.
+
+Raufman, J., Brathwaite, J., & Kalamkarian, H. S. (2021). English learners 
+    and ESL programs in the community college: A review of the literature. 
+    Community College Research Center, Teachers College, Columbia University.
+
+
+STUDENT ADJUSTMENT & WELLBEING
+--------------------------------------------------------------------------------
+Singh, S., Lee, S., & Lindquist, M. A. (2021). Mental health during the 
+    transition to college: Results from a longitudinal study. Journal of 
+    College Student Development, 62(4), 425-440.
+
+Weissbourd, R., et al. (2023). On edge: Understanding and preventing young 
+    adults' mental health challenges. Making Caring Common Project, Harvard 
+    Graduate School of Education.
+
+Moreno, M. A., et al. (2023). College student mental health and counseling 
+    service utilization: A systematic review. Journal of American College 
+    Health, 71(2), 256-271.
+
+
+NSSE / BCSSE INSTRUMENTS
+--------------------------------------------------------------------------------
+National Survey of Student Engagement. (2024). NSSE 2024 codebook. Indiana 
+    University Center for Postsecondary Research.
+
+Beginning College Survey of Student Engagement. (2024). BCSSE 2024 codebook. 
+    Indiana University Center for Postsecondary Research.
+
+Kuh, G. D. (2009). The National Survey of Student Engagement: Conceptual and 
+    empirical foundations. New Directions for Institutional Research, 
+    2009(141), 5-20.
+
+
+EQUITY & FIRST-GENERATION STUDENTS
+--------------------------------------------------------------------------------
+Stephens, N. M., Hamedani, M. G., & Destin, M. (2014). Closing the 
+    social-class achievement gap: A difference-education intervention 
+    improves first-generation students' academic performance and all 
+    students' college transition. Psychological Science, 25(4), 943-953.
+
+Cataldi, E. F., Bennett, C. T., & Chen, X. (2018). First-generation students: 
+    College access, persistence, and postbachelor's outcomes (NCES 2018-421). 
+    U.S. Department of Education, National Center for Education Statistics.
+
+
+R PACKAGES
+--------------------------------------------------------------------------------
+R Core Team. (2024). R: A language and environment for statistical computing. 
+    R Foundation for Statistical Computing. https://www.R-project.org/
+
+Rosseel, Y. (2024). lavaan: Latent variable analysis (R package version 0.6-21). 
+    https://CRAN.R-project.org/package=lavaan
+
+Jorgensen, T. D., Pornprasertmanit, S., Schoemann, A. M., & Rosseel, Y. (2024). 
+    semTools: Useful tools for structural equation modeling (R package 
+    version 0.5-7). https://CRAN.R-project.org/package=semTools
+
+van Buuren, S., & Groothuis-Oudshoorn, K. (2011). mice: Multivariate 
+    imputation by chained equations in R. Journal of Statistical Software, 
+    45(3), 1-67.
+
+================================================================================
