@@ -113,8 +113,8 @@ BOOT_CI_TYPE_MG     <- boot_chr_env("BOOT_CI_TYPE_MG",     BOOT_CI_TYPE_MG)
 BOOT_CI_TYPE_RACE   <- boot_chr_env("BOOT_CI_TYPE_RACE",   BOOT_CI_TYPE_RACE)
 
 # Don’t bootstrap multi-group / race unless you truly need bootstrap CIs
-BOOTSTRAP_MG   <- FALSE
-BOOTSTRAP_RACE <- FALSE
+BOOTSTRAP_MG   <- env_flag("BOOTSTRAP_MG", FALSE)
+BOOTSTRAP_RACE <- env_flag("BOOTSTRAP_RACE", FALSE)
 
 # Bootstrap parallelization for lavaan (only used when bootstrap > 0)
 BOOT_PARALLEL <- "multicore"
@@ -193,6 +193,18 @@ W_DEFINITIONS <- list(
   W4 = list(var = "sex",      label = "Sex/Gender"),
   W5 = list(var = "living18", label = "Living Arrangement")
 )
+
+# Allow env var to select specific W variables (comma-separated indices, e.g., "4" or "1,3,4")
+# If not set, all W1-W5 are used
+W_SELECT_ENV <- Sys.getenv("W_SELECT", unset = "")
+if (nzchar(W_SELECT_ENV)) {
+  w_indices <- as.integer(strsplit(W_SELECT_ENV, ",")[[1]])
+  w_indices <- w_indices[!is.na(w_indices) & w_indices >= 1 & w_indices <= 5]
+  if (length(w_indices) > 0) {
+    W_DEFINITIONS <- W_DEFINITIONS[paste0("W", w_indices)]
+    message("[W_SELECT] Using only: ", paste(names(W_DEFINITIONS), collapse = ", "))
+  }
+}
 
 # Extract variable names for measurement and structural analyses
 W_VARS_MEAS   <- sapply(W_DEFINITIONS, function(x) x$var)   # c("re_all", "firstgen", ...)

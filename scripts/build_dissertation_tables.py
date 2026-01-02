@@ -155,6 +155,42 @@ def find_csv(data_dir, filename):
     return main_path
 
 
+def load_standardized_coefficients(data_dir):
+    """Load standardized coefficients from CSV or TXT file.
+    
+    Returns dict mapping parameter labels to standardized coefficients (std.all or est.std).
+    """
+    std_map = {}
+    
+    # Try CSV format first (point_estimates_parameter_table_std.csv)
+    csv_path = find_csv(data_dir, "point_estimates_parameter_table_std.csv")
+    if csv_path.exists():
+        std_df = pd.read_csv(csv_path)
+        # Filter to regression paths and defined parameters with labels
+        for _, row in std_df.iterrows():
+            if row['op'] in ('~', ':=') and pd.notna(row.get('label')) and row.get('label') != '':
+                std_col = 'std.all' if 'std.all' in std_df.columns else 'est.std'
+                if std_col in std_df.columns:
+                    std_map[row['label']] = row[std_col]
+        return std_map
+    
+    # Try TXT format (structural_standardizedSolution.txt) - tab-delimited
+    txt_path = data_dir / "structural_standardizedSolution.txt"
+    if txt_path.exists():
+        try:
+            std_df = pd.read_csv(txt_path, sep='\t')
+            # The TXT format has columns: lhs, op, rhs, label, est.std, se, z, pvalue, ci.lower, ci.upper
+            for _, row in std_df.iterrows():
+                if row['op'] in ('~', ':=') and pd.notna(row.get('label')) and str(row.get('label', '')).strip() != '':
+                    std_col = 'est.std' if 'est.std' in std_df.columns else 'est'
+                    if std_col in std_df.columns:
+                        std_map[row['label']] = row[std_col]
+        except Exception as e:
+            print(f"Warning: Could not parse {txt_path}: {e}")
+    
+    return std_map
+
+
 def fmt(x, nd=2):
     """Format number to nd decimal places."""
     try:
@@ -361,7 +397,20 @@ def add_apa7_table_advanced(doc, table_num, title, data_rows,
     # Create table
     table = doc.add_table(rows=num_header_rows + num_data_rows, cols=num_cols)
     table.alignment = WD_TABLE_ALIGNMENT.LEFT
+    table.autofit = False  # Disable autofit for explicit widths
     set_table_apa_borders(table)
+    
+    # Set column widths - first column wider for stub, others equal
+    total_width = Inches(6.5)  # Standard page width minus margins
+    stub_width = Inches(2.0)   # First column (variable names)
+    other_width = (total_width - stub_width) / max(1, num_cols - 1)
+    
+    for row in table.rows:
+        for col_idx, cell in enumerate(row.cells):
+            if col_idx == 0:
+                cell.width = stub_width
+            else:
+                cell.width = other_width
     
     current_row = 0
     
@@ -428,10 +477,10 @@ def add_apa7_table_advanced(doc, table_num, title, data_rows,
         for col_idx, value in enumerate(row_data):
             cell = data_row.cells[col_idx]
             text = str(value) if value is not None and pd.notna(value) else ""
-            # First column left-aligned (stub column), others right-aligned
+            # First column left-aligned (stub column), others centered to align with headers
             cell.text = text
             cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-            cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT if col_idx == 0 else WD_ALIGN_PARAGRAPH.RIGHT
+            cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.LEFT if col_idx == 0 else WD_ALIGN_PARAGRAPH.CENTER
             for run in cell.paragraphs[0].runs:
                 run.font.name = 'Times New Roman'
                 run.font.size = Pt(font_size)
@@ -961,9 +1010,12 @@ def table9_model_fit(doc, table_num, data_dir, B, ci_type, compact=True):
     
     Uses column spanners for fit index groupings (matching Table 5 style).
     """
-    # Try model_fit.csv first, then point_estimates_fit_indices.csv
+    # Try multiple file formats
     fit_file = find_csv(data_dir, "model_fit.csv")
     pe_fit_file = find_csv(data_dir, "point_estimates_fit_indices.csv")
+    fit_txt_file = data_dir / "structural_fitMeasures.txt"
+    
+    data_rows = None
     
     if fit_file.exists():
         raw = pd.read_csv(fit_file)
@@ -982,7 +1034,37 @@ def table9_model_fit(doc, table_num, data_dir, B, ci_type, compact=True):
              rmsea_ci,
              fmt(raw.get('srmr', [None])[0], 3)],
         ]
-    else:
+    elif fit_txt_file.exists():
+        # Read the structural_fitMeasures.txt format (two columns: measure, value)
+        try:
+            fit_df = pd.read_csv(fit_txt_file, sep='\t')
+            # Convert to dict for easy access
+            fit_dict = dict(zip(fit_df['measure'], fit_df['value']))
+            
+            # Get values (prefer robust/scaled if available)
+            cfi = fit_dict.get('cfi.robust', fit_dict.get('cfi.scaled', fit_dict.get('cfi', None)))
+            tli = fit_dict.get('tli.robust', fit_dict.get('tli.scaled', fit_dict.get('tli', None)))
+            rmsea = fit_dict.get('rmsea.robust', fit_dict.get('rmsea.scaled', fit_dict.get('rmsea', None)))
+            srmr = fit_dict.get('srmr', None)
+            chisq = fit_dict.get('chisq', None)
+            df = fit_dict.get('df', None)
+            
+            # Format RMSEA (no CI available in this format)
+            rmsea_str = fmt(rmsea, 3)
+            
+            data_rows = [
+                ['Full structural model',
+                 fmt(chisq, 2),
+                 fmt_int(df) if df else '—',
+                 fmt(cfi, 3),
+                 fmt(tli, 3),
+                 rmsea_str,
+                 fmt(srmr, 3)],
+            ]
+        except Exception as e:
+            print(f"Warning: Could not parse {fit_txt_file}: {e}")
+    
+    if data_rows is None:
         data_rows = [
             ['Measurement model (CFA)', '—', '—', '—', '—', '—', '—'],
             ['Structural model (full)', '—', '—', '—', '—', '—', '—'],
@@ -1022,15 +1104,8 @@ def table10_structural_paths(doc, table_num, bootstrap_df, B, ci_type, data_dir,
     if paths.empty:
         return table_num
     
-    # Try to load standardized coefficients
-    std_file = find_csv(data_dir, "point_estimates_parameter_table_std.csv")
-    std_map = {}
-    if std_file.exists():
-        std_df = pd.read_csv(std_file)
-        # Filter to regression paths with labels
-        std_reg = std_df[(std_df['op'] == '~') & (std_df['label'].notna()) & (std_df['label'] != '')]
-        for _, row in std_reg.iterrows():
-            std_map[row['label']] = row['std.all']
+    # Load standardized coefficients
+    std_map = load_standardized_coefficients(data_dir)
     
     labels = {
         'a1': 'a₁: X → M₁ (FASt → EmoDiss)',
@@ -1079,19 +1154,8 @@ def table11_indirect_effects(doc, table_num, bootstrap_df, B, ci_type, data_dir,
     """
     ci_label = {'bca': 'BCa', 'perc': 'percentile', 'norm': 'normal'}.get(ci_type.lower(), ci_type)
     
-    # Try to load standardized coefficients
-    std_file = find_csv(data_dir, "point_estimates_parameter_table_std.csv")
-    std_map = {}
-    if std_file.exists():
-        std_df = pd.read_csv(std_file)
-        # Filter to defined parameters with labels
-        std_def = std_df[(std_df['op'] == ':=') & (std_df['label'].notna()) & (std_df['label'] != '')]
-        for _, row in std_def.iterrows():
-            std_map[row['label']] = row['std.all']
-        # Also get regression paths
-        std_reg = std_df[(std_df['op'] == '~') & (std_df['label'].notna()) & (std_df['label'] != '')]
-        for _, row in std_reg.iterrows():
-            std_map[row['label']] = row['std.all']
+    # Load standardized coefficients
+    std_map = load_standardized_coefficients(data_dir)
     
     # Get indirect effects at mean (z_mid)
     ind_params = ['ind_EmoDiss_z_mid', 'ind_QualEngag_z_mid']
@@ -1178,15 +1242,8 @@ def table12_conditional_indirect(doc, table_num, bootstrap_df, B, ci_type, data_
     """
     ci_label = {'bca': 'BCa', 'perc': 'percentile', 'norm': 'normal'}.get(ci_type.lower(), ci_type)
     
-    # Try to load standardized coefficients
-    std_file = find_csv(data_dir, "point_estimates_parameter_table_std.csv")
-    std_map = {}
-    if std_file.exists():
-        std_df = pd.read_csv(std_file)
-        # Filter to defined parameters with labels
-        std_def = std_df[(std_df['op'] == ':=') & (std_df['label'].notna()) & (std_df['label'] != '')]
-        for _, row in std_def.iterrows():
-            std_map[row['label']] = row['std.all']
+    # Load standardized coefficients
+    std_map = load_standardized_coefficients(data_dir)
     
     # Build data rows with table spanner sections
     rows = []
