@@ -1,0 +1,14 @@
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.489         0.498         0.552         0.400         0.216 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.277         0.271         0.347         0.313         0.385 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.386         0.445         0.313         0.475         0.570 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.291         0.248         0.393         0.312         0.344 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.336         0.535         0.469         0.508         0.478 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.483         0.212         0.379         0.154         0.348 
+       DevAdj 
+        0.029 

@@ -691,8 +691,29 @@ build_model_fast_treat_control_mg <- function(dat, group_var, w_label = NULL, z_
 
   # IMPORTANT: do not include the grouping variable as an exogenous covariate.
   # Example: when group_var == "pell", pell is constant within each group and lavaan errors.
+  # Also exclude any covariate with zero variance in ANY group (causes lavaan error).
   covars <- c("hgrades_c", "bparented_c", "pell", "hapcl", "hprecalc13", "hchallenge_c", "cSFcareer_c")
   covars <- setdiff(covars, group_var)
+  
+  # Check for zero-variance covariates within any group
+  zero_var_covars <- character(0)
+  for (cv in covars) {
+    if (cv %in% names(dat)) {
+      for (lv in levs) {
+        grp_vals <- dat[[cv]][dat[[group_var]] == lv]
+        grp_vals <- grp_vals[!is.na(grp_vals)]
+        if (length(unique(grp_vals)) <= 1) {
+          zero_var_covars <- c(zero_var_covars, cv)
+          break
+        }
+      }
+    }
+  }
+  if (length(zero_var_covars) > 0) {
+    message("[MG model] Excluding zero-variance covariates: ", paste(zero_var_covars, collapse = ", "))
+    covars <- setdiff(covars, zero_var_covars)
+  }
+  
   covars_txt <- paste(covars, collapse = " + ")
 
   paste0(

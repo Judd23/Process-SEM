@@ -412,9 +412,9 @@ add_row("cohort", "Cohort Year [cohort]", "PS Covariate", "ML (continuous)", "Ex
         model_num = "MG")
 
 add_row("hgrades", "High School Grades [hgrades23]", "PS Covariate", "ML (continuous)", "Exogenous",
-        scale = "Ordinal", scale_points = 8,
-        levels = "1=D or below | 2=C- | 3=C | 4=C+ | 5=B- | 6=B | 7=B+ | 8=A",
-        source = "BCSSE", notes = "hgrades23: What were most of your high school grades?",
+        scale = "Ordinal", scale_points = 7,
+        levels = "3=C+ or below | 4=B- | 5=B | 6=B+ | 7=A- | 8=A/A+",
+        source = "BCSSE", notes = "hgrades23: What were most of your high school grades? (9=A+ merged into 8; 99=NA)",
         model_num = "59")
 
 add_row("hgrades_c", "High School GPA (Centered)", "PS Covariate", "ML (continuous)", "Exogenous",
@@ -494,7 +494,7 @@ add_row("pell", "Pell Grant Recipient [pell]", "MG Grouping (W3)", "ML (continuo
         model_num = "MG")
 
 add_row("sex", "Sex/Gender [sex]", "MG Grouping (W4)", "ML (continuous)", "Exogenous",
-        scale = "Nominal", scale_points = 2, levels = "0=Woman | 1=Man",
+        scale = "Nominal", scale_points = 2, levels = "Female | Male",
         source = "Institutional", notes = "Binary sex from institutional records",
         model_num = "MG")
 

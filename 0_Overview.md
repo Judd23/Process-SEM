@@ -129,12 +129,12 @@ pip install -r requirements.txt
 
 ```bash
 # Full analysis (RQ1-4, bootstrap, tables, figures)
-Rscript scripts/run_all_RQs_official.R
+Rscript 3_Analysis/1_Main_Pipeline_Code/run_all_RQs_official.R
 ```
 
 Environment variables for customization:
 ```bash
-export OUT_BASE="results/official"
+export OUT_BASE="4_Model_Results/Outputs"
 export B_BOOT_MAIN=2000
 export BOOT_CI_TYPE_MAIN="bca.simple"
 ```
@@ -145,11 +145,11 @@ export BOOT_CI_TYPE_MAIN="bca.simple"
 
 | File | Description |
 |------|-------------|
-| `results/official/Dissertation_Tables.docx` | All dissertation tables (APA 7) |
-| `results/official/Bootstrap_Tables.docx` | Bootstrap inference tables |
-| `results/official/verification_checklist.txt` | Data validation audit |
-| `results/official/RQ1_RQ3_main/structural/` | Main model parameter estimates |
-| `results/official/fig*.png` | Descriptive visualizations |
+| `4_Model_Results/Tables/Dissertation_Tables.docx` | All dissertation tables (APA 7) |
+| `4_Model_Results/Tables/Bootstrap_Tables.docx` | Bootstrap inference tables |
+| `4_Model_Results/Outputs/logs/verification_checklist.txt` | Data validation audit |
+| `4_Model_Results/Outputs/RQ1_RQ3_main/structural/` | Main model parameter estimates |
+| `4_Model_Results/Figures/fig*.png` | Descriptive visualizations |
 
 ---
 

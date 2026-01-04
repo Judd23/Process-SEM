@@ -1,28 +1,28 @@
 $Male
      sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
-        0.497         0.498         0.572         0.398         0.218 
+        0.777         0.711         0.794         0.537         0.611 
        pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
-        0.279         0.275         0.345         0.289         0.361 
+        0.567         0.504         0.595         0.718         0.696 
     SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
-        0.390         0.447         0.305         0.491         0.469 
+        0.624         0.605         0.648         0.787         0.746 
      MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
-        0.314         0.257         0.417         0.304         0.350 
+        0.831         0.869         0.904         0.883         0.855 
 MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
-        0.342         0.565         0.481         0.512         0.484 
+        0.760         0.804         0.831         0.861         0.881 
       QIstaff        Belong         Gains    SupportEnv        Satisf 
-        0.457         0.238         0.321         0.157         0.346 
+        0.858         0.325         0.106         0.347         0.395 
 
 $Female
      sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
-        0.485         0.494         0.532         0.403         0.209 
+        0.764         0.725         0.804         0.512         0.599 
        pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
-        0.272         0.272         0.360         0.328         0.405 
+        0.556         0.475         0.574         0.726         0.703 
     SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
-        0.374         0.450         0.317         0.502         0.598 
+        0.626         0.584         0.654         0.771         0.761 
      MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
-        0.277         0.235         0.376         0.313         0.347 
+        0.848         0.880         0.909         0.894         0.859 
 MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
-        0.340         0.524         0.465         0.513         0.477 
+        0.778         0.811         0.831         0.864         0.883 
       QIstaff        Belong         Gains    SupportEnv        Satisf 
-        0.497         0.265         0.352         0.163         0.307 
+        0.860         0.329         0.113         0.345         0.373 
 

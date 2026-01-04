@@ -46,7 +46,7 @@ QIfaculty,                Faculty [QIfaculty],Indicator,DWLS (ordered),Indicator
 QIstaff,                Student services staff [QIstaff],Indicator,DWLS (ordered),Indicator,"4, 6, 59",Ordinal,7,QualEngag,λ freely estimated,1=Poor | 2 | 3 | 4 | 5 | 6 | 7=Excellent,NSSE,Q13d; 9=N/A coded missing,Yes
 PROPENSITY SCORE COVARIATES,,,,,,,,,,,,,
 cohort,Cohort Year [cohort],PS Covariate,ML (continuous),Exogenous,MG,Nominal,2,,,0=2019 | 1=2020,Institutional,Academic cohort year; also MG moderator,Yes
-hgrades,High School Grades [hgrades23],PS Covariate,ML (continuous),Exogenous,59,Ordinal,8,,,1=D or below | 2=C- | 3=C | 4=C+ | 5=B- | 6=B | 7=B+ | 8=A,BCSSE,hgrades23: What were most of your high school grades?,Yes
+hgrades,High School Grades [hgrades23],PS Covariate,ML (continuous),Exogenous,59,Ordinal,7,,,3=C+ or below | 4=B- | 5=B | 6=B+ | 7=A- | 8=A/A+,BCSSE,hgrades23: What were most of your high school grades? (9=A+ merged into 8; 99=NA),Yes
 hgrades_c,High School GPA (Centered),PS Covariate,ML (continuous),Exogenous,59,Interval,,,hgrades_c = hgrades - mean(hgrades),Continuous (mean-centered),Computed,Mean-centered version used in PS model,Yes
 bparented,Highest Parent Education [cpardegr18],PS Covariate,ML (continuous),Exogenous,59,Ordinal,8,,,1=Less than HS | 2=HS diploma | 3=Some college | 4=Associate | 5=Bachelor's | 6=Master's | 7=Prof degree | 8=Doctoral,BCSSE,cpardegr18: Highest education of parent(s)/guardian(s),Yes
 bparented_c,Parent Education (Centered),PS Covariate,ML (continuous),Exogenous,59,Interval,,,bparented_c = bparented - mean(bparented),Continuous (mean-centered),Computed,Mean-centered version,Yes

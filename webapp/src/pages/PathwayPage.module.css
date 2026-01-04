@@ -1,0 +1,223 @@
+.page {
+  padding-bottom: var(--spacing-3xl);
+}
+
+.header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto var(--spacing-2xl);
+}
+
+.header h1 {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+}
+
+.pathwayButtons {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.pathwayButton {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pathwayButton:hover {
+  border-color: var(--button-color, var(--color-accent));
+  color: var(--button-color, var(--color-accent));
+}
+
+.pathwayButton.active {
+  background: var(--button-color, var(--color-accent));
+  border-color: var(--button-color, var(--color-accent));
+  color: white;
+}
+
+.toggleContainer {
+  flex-shrink: 0;
+}
+
+/* Diagram */
+.diagram {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  justify-content: center;
+}
+
+/* Dose Control */
+.doseControl {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.doseControl h2 {
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.doseDescription {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sliderContainer {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Coefficients */
+.coefficients {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.coefficients h2 {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.coefficientGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.coefficientCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  transition: opacity var(--transition-fast);
+}
+
+.coefficientCard.dimmed {
+  opacity: 0.4;
+}
+
+.coefficientHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+.coefficientLabel {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.strengthBadge {
+  font-size: var(--font-size-xs);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-border-light);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.sigStar {
+  color: var(--color-significant);
+  font-weight: 700;
+}
+
+.coefficientValue {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-xs);
+}
+
+.coefficientSE {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.coefficientPvalue {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.coefficientInterpretation {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Summary */
+.summary h2 {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.summaryCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+}
+
+.summaryCard h3 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.summaryCard p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.summaryCard strong {
+  color: var(--color-text);
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pathwayButtons {
+    justify-content: center;
+  }
+}

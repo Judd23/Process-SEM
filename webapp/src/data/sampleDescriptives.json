@@ -1,0 +1,184 @@
+{
+  "n": 5000,
+  "demographics": {
+    "race": {
+      "Hispanic/Latino": {
+        "n": 1900,
+        "pct": 38.0
+      },
+      "White": {
+        "n": 1506,
+        "pct": 30.1
+      },
+      "Asian": {
+        "n": 964,
+        "pct": 19.3
+      },
+      "Other/Multiracial/Unknown": {
+        "n": 380,
+        "pct": 7.6
+      },
+      "Black/African American": {
+        "n": 250,
+        "pct": 5.0
+      }
+    },
+    "firstgen": {
+      "yes": {
+        "n": 2958,
+        "pct": 59.2
+      },
+      "no": {
+        "n": 2042,
+        "pct": 40.8
+      }
+    },
+    "pell": {
+      "yes": {
+        "n": 2939,
+        "pct": 58.8
+      },
+      "no": {
+        "n": 2061,
+        "pct": 41.2
+      }
+    },
+    "fast": {
+      "yes": {
+        "n": 2249,
+        "pct": 45.0
+      },
+      "no": {
+        "n": 2751,
+        "pct": 55.0
+      }
+    },
+    "sex": {
+      "women": {
+        "n": 2952,
+        "pct": 59.0
+      },
+      "men": {
+        "n": 2048,
+        "pct": 41.0
+      }
+    },
+    "transferCredits": {
+      "mean": 18.9,
+      "sd": 18.9,
+      "min": 0,
+      "max": 80,
+      "median": 10.0
+    }
+  },
+  "outcomes": {
+    "distress": {
+      "mean": 3.71,
+      "sd": 1.17,
+      "range": [
+        1,
+        6
+      ],
+      "scaleName": "Mental Health & Wellness",
+      "indicators": [
+        {
+          "name": "MHWdacad",
+          "label": "Academic Difficulties",
+          "mean": 3.72,
+          "sd": 1.17
+        },
+        {
+          "name": "MHWdlonely",
+          "label": "Loneliness",
+          "mean": 3.7,
+          "sd": 1.16
+        },
+        {
+          "name": "MHWdmental",
+          "label": "Mental Health",
+          "mean": 3.71,
+          "sd": 1.14
+        },
+        {
+          "name": "MHWdexhaust",
+          "label": "Exhaustion",
+          "mean": 3.72,
+          "sd": 1.17
+        },
+        {
+          "name": "MHWdsleep",
+          "label": "Sleep Problems",
+          "mean": 3.72,
+          "sd": 1.17
+        },
+        {
+          "name": "MHWdfinancial",
+          "label": "Financial Stress",
+          "mean": 3.71,
+          "sd": 1.23
+        }
+      ]
+    },
+    "engagement": {
+      "mean": 4.88,
+      "sd": 1.13,
+      "range": [
+        1,
+        7
+      ],
+      "scaleName": "Quality of Interactions",
+      "indicators": [
+        {
+          "name": "QIadmin",
+          "label": "Administrative Staff",
+          "mean": 4.87,
+          "sd": 1.15
+        },
+        {
+          "name": "QIstudent",
+          "label": "Other Students",
+          "mean": 4.88,
+          "sd": 1.14
+        },
+        {
+          "name": "QIadvisor",
+          "label": "Academic Advisors",
+          "mean": 4.89,
+          "sd": 1.13
+        },
+        {
+          "name": "QIfaculty",
+          "label": "Faculty",
+          "mean": 4.88,
+          "sd": 1.11
+        },
+        {
+          "name": "QIstaff",
+          "label": "Student Services Staff",
+          "mean": 4.89,
+          "sd": 1.12
+        }
+      ]
+    },
+    "belonging": {
+      "mean": 2.72,
+      "sd": 0.8,
+      "n_items": 3
+    },
+    "gains": {
+      "mean": 2.91,
+      "sd": 0.7,
+      "n_items": 5
+    },
+    "support": {
+      "mean": 2.71,
+      "sd": 0.79,
+      "n_items": 5
+    },
+    "satisfaction": {
+      "mean": 2.92,
+      "sd": 0.69,
+      "n_items": 2
+    }
+  }
+}

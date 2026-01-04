@@ -1,28 +1,28 @@
-$`Continuing-gen`
-     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
-        0.472         0.494         0.541         0.391         0.202 
-       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
-        0.267         0.253         0.343         0.319         0.386 
-    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
-        0.359         0.435         0.308         0.480         0.527 
-     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
-        0.259         0.235         0.380         0.273         0.330 
-MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
-        0.324         0.523         0.474         0.501         0.480 
-      QIstaff        Belong         Gains    SupportEnv        Satisf 
-        0.469         0.252         0.331         0.159         0.320 
-
 $`First-gen`
      sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
-        0.503         0.497         0.549         0.406         0.224 
+        0.742         0.684         0.778         0.516         0.588 
        pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
-        0.286         0.293         0.368         0.301         0.382 
+        0.546         0.475         0.573         0.694         0.670 
     SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
-        0.403         0.458         0.321         0.508         0.561 
+        0.592         0.550         0.618         0.747         0.711 
      MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
-        0.309         0.243         0.390         0.332         0.354 
+        0.815         0.851         0.888         0.867         0.835 
 MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
-        0.353         0.553         0.465         0.521         0.479 
+        0.733         0.784         0.809         0.844         0.867 
       QIstaff        Belong         Gains    SupportEnv        Satisf 
-        0.486         0.252         0.343         0.161         0.315 
+        0.846         0.247         0.064         0.245         0.281 
+
+$`Continuing-gen`
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.785         0.740         0.808         0.515         0.614 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.565         0.486         0.581         0.726         0.706 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.633         0.612         0.658         0.802         0.764 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.849         0.886         0.913         0.899         0.863 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.785         0.815         0.838         0.869         0.885 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.857         0.360         0.109         0.368         0.398 
 

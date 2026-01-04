@@ -1,0 +1,342 @@
+{
+  "creditDoseRange": {
+    "min": 0,
+    "max": 80,
+    "threshold": 12,
+    "units": "credits"
+  },
+  "coefficients": {
+    "distress": {
+      "main": 0.1269,
+      "moderation": 0.0028,
+      "se": 0.0374
+    },
+    "engagement": {
+      "main": -0.0103,
+      "moderation": -0.0142,
+      "se": 0.0365
+    },
+    "adjustment": {
+      "main": 0.0414,
+      "moderation": -0.009,
+      "se": 0.0135
+    }
+  },
+  "effects": [
+    {
+      "creditDose": 0,
+      "distressEffect": 0.1235,
+      "distressCI": [
+        0.0414,
+        0.2056
+      ],
+      "engagementEffect": 0.0067,
+      "engagementCI": [
+        -0.0734,
+        0.0869
+      ],
+      "adjustmentEffect": 0.0522,
+      "adjustmentCI": [
+        0.0226,
+        0.0818
+      ]
+    },
+    {
+      "creditDose": 5,
+      "distressEffect": 0.1249,
+      "distressCI": [
+        0.0465,
+        0.2034
+      ],
+      "engagementEffect": -0.0004,
+      "engagementCI": [
+        -0.0769,
+        0.0762
+      ],
+      "adjustmentEffect": 0.0477,
+      "adjustmentCI": [
+        0.0194,
+        0.076
+      ]
+    },
+    {
+      "creditDose": 10,
+      "distressEffect": 0.1263,
+      "distressCI": [
+        0.0516,
+        0.2011
+      ],
+      "engagementEffect": -0.0075,
+      "engagementCI": [
+        -0.0804,
+        0.0655
+      ],
+      "adjustmentEffect": 0.0432,
+      "adjustmentCI": [
+        0.0162,
+        0.0702
+      ]
+    },
+    {
+      "creditDose": 15,
+      "distressEffect": 0.1277,
+      "distressCI": [
+        0.0522,
+        0.2032
+      ],
+      "engagementEffect": -0.0146,
+      "engagementCI": [
+        -0.0882,
+        0.0591
+      ],
+      "adjustmentEffect": 0.0387,
+      "adjustmentCI": [
+        0.0114,
+        0.066
+      ]
+    },
+    {
+      "creditDose": 20,
+      "distressEffect": 0.1291,
+      "distressCI": [
+        0.05,
+        0.2083
+      ],
+      "engagementEffect": -0.0217,
+      "engagementCI": [
+        -0.0989,
+        0.0556
+      ],
+      "adjustmentEffect": 0.0342,
+      "adjustmentCI": [
+        0.0056,
+        0.0628
+      ]
+    },
+    {
+      "creditDose": 25,
+      "distressEffect": 0.1305,
+      "distressCI": [
+        0.0477,
+        0.2134
+      ],
+      "engagementEffect": -0.0288,
+      "engagementCI": [
+        -0.1096,
+        0.0521
+      ],
+      "adjustmentEffect": 0.0297,
+      "adjustmentCI": [
+        -0.0002,
+        0.0596
+      ]
+    },
+    {
+      "creditDose": 30,
+      "distressEffect": 0.1319,
+      "distressCI": [
+        0.0454,
+        0.2184
+      ],
+      "engagementEffect": -0.0359,
+      "engagementCI": [
+        -0.1203,
+        0.0486
+      ],
+      "adjustmentEffect": 0.0252,
+      "adjustmentCI": [
+        -0.006,
+        0.0564
+      ]
+    },
+    {
+      "creditDose": 35,
+      "distressEffect": 0.1333,
+      "distressCI": [
+        0.0432,
+        0.2235
+      ],
+      "engagementEffect": -0.043,
+      "engagementCI": [
+        -0.131,
+        0.045
+      ],
+      "adjustmentEffect": 0.0207,
+      "adjustmentCI": [
+        -0.0118,
+        0.0532
+      ]
+    },
+    {
+      "creditDose": 40,
+      "distressEffect": 0.1347,
+      "distressCI": [
+        0.0409,
+        0.2286
+      ],
+      "engagementEffect": -0.0501,
+      "engagementCI": [
+        -0.1416,
+        0.0415
+      ],
+      "adjustmentEffect": 0.0162,
+      "adjustmentCI": [
+        -0.0177,
+        0.0501
+      ]
+    },
+    {
+      "creditDose": 45,
+      "distressEffect": 0.1361,
+      "distressCI": [
+        0.0386,
+        0.2336
+      ],
+      "engagementEffect": -0.0572,
+      "engagementCI": [
+        -0.1523,
+        0.038
+      ],
+      "adjustmentEffect": 0.0117,
+      "adjustmentCI": [
+        -0.0235,
+        0.0469
+      ]
+    },
+    {
+      "creditDose": 50,
+      "distressEffect": 0.1375,
+      "distressCI": [
+        0.0364,
+        0.2387
+      ],
+      "engagementEffect": -0.0643,
+      "engagementCI": [
+        -0.163,
+        0.0345
+      ],
+      "adjustmentEffect": 0.0072,
+      "adjustmentCI": [
+        -0.0293,
+        0.0437
+      ]
+    },
+    {
+      "creditDose": 55,
+      "distressEffect": 0.1389,
+      "distressCI": [
+        0.0341,
+        0.2438
+      ],
+      "engagementEffect": -0.0714,
+      "engagementCI": [
+        -0.1737,
+        0.0309
+      ],
+      "adjustmentEffect": 0.0027,
+      "adjustmentCI": [
+        -0.0351,
+        0.0405
+      ]
+    },
+    {
+      "creditDose": 60,
+      "distressEffect": 0.1403,
+      "distressCI": [
+        0.0319,
+        0.2488
+      ],
+      "engagementEffect": -0.0785,
+      "engagementCI": [
+        -0.1843,
+        0.0274
+      ],
+      "adjustmentEffect": -0.0018,
+      "adjustmentCI": [
+        -0.041,
+        0.0374
+      ]
+    },
+    {
+      "creditDose": 65,
+      "distressEffect": 0.1417,
+      "distressCI": [
+        0.0296,
+        0.2539
+      ],
+      "engagementEffect": -0.0856,
+      "engagementCI": [
+        -0.195,
+        0.0239
+      ],
+      "adjustmentEffect": -0.0063,
+      "adjustmentCI": [
+        -0.0468,
+        0.0342
+      ]
+    },
+    {
+      "creditDose": 70,
+      "distressEffect": 0.1431,
+      "distressCI": [
+        0.0273,
+        0.259
+      ],
+      "engagementEffect": -0.0927,
+      "engagementCI": [
+        -0.2057,
+        0.0204
+      ],
+      "adjustmentEffect": -0.0108,
+      "adjustmentCI": [
+        -0.0526,
+        0.031
+      ]
+    },
+    {
+      "creditDose": 75,
+      "distressEffect": 0.1445,
+      "distressCI": [
+        0.0251,
+        0.264
+      ],
+      "engagementEffect": -0.0998,
+      "engagementCI": [
+        -0.2164,
+        0.0169
+      ],
+      "adjustmentEffect": -0.0153,
+      "adjustmentCI": [
+        -0.0584,
+        0.0278
+      ]
+    },
+    {
+      "creditDose": 80,
+      "distressEffect": 0.1459,
+      "distressCI": [
+        0.0228,
+        0.2691
+      ],
+      "engagementEffect": -0.1069,
+      "engagementCI": [
+        -0.227,
+        0.0133
+      ],
+      "adjustmentEffect": -0.0198,
+      "adjustmentCI": [
+        -0.0643,
+        0.0247
+      ]
+    }
+  ],
+  "johnsonNeymanPoints": {
+    "distress": {
+      "lower": null,
+      "upper": null
+    },
+    "engagement": {
+      "crossover": 15.2
+    }
+  }
+}

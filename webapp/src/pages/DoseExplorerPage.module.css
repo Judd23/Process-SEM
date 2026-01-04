@@ -1,0 +1,125 @@
+.page {
+  padding-bottom: var(--spacing-3xl);
+}
+
+.header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto var(--spacing-2xl);
+}
+
+.header h1 {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Controls */
+.controls {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  gap: var(--spacing-xl);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.sliderContainer {
+  flex: 1;
+  min-width: 300px;
+}
+
+.toggleContainer {
+  flex-shrink: 0;
+}
+
+/* Conditional Effects */
+.conditionalEffects {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.conditionalEffects h2 {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.effectCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Charts */
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-3xl);
+}
+
+.chartContainer {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+}
+
+.chartContainer h3 {
+  margin-bottom: var(--spacing-sm);
+}
+
+.chartDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+/* Interpretation */
+.interpretation h2 {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.interpretationContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.interpretationCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+}
+
+.interpretationCard h3 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.interpretationCard p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sliderContainer {
+    min-width: unset;
+  }
+
+  .charts {
+    grid-template-columns: 1fr;
+  }
+}

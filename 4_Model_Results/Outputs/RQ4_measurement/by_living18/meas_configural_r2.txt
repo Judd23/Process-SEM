@@ -1,42 +1,42 @@
-$`Off-campus (rent/apartment)`
-     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
-        0.486         0.509         0.573         0.398         0.252 
-       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
-        0.318         0.374         0.359         0.312         0.378 
-    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
-        0.357         0.486         0.359         0.632         0.443 
-     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
-        0.375         0.263         0.373         0.346         0.394 
-MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
-        0.272         0.564         0.516         0.510         0.516 
-      QIstaff        Belong         Gains    SupportEnv        Satisf 
-        0.516         0.264         0.368         0.173         0.306 
-
 $`With family (commuting)`
      sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
-        0.414         0.457         0.553         0.441         0.206 
+        0.761         0.704         0.783         0.493         0.577 
        pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
-        0.250         0.231         0.361         0.282         0.373 
+        0.540         0.458         0.559         0.702         0.679 
     SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
-        0.393         0.473         0.286         0.401         0.552 
+        0.591         0.561         0.611         0.788         0.710 
      MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
-        0.297         0.232         0.390         0.357         0.329 
+        0.840         0.874         0.905         0.888         0.845 
 MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
-        0.389         0.503         0.444         0.519         0.442 
+        0.766         0.788         0.813         0.839         0.875 
       QIstaff        Belong         Gains    SupportEnv        Satisf 
-        0.459         0.225         0.247         0.133         0.365 
+        0.848         0.242         0.055         0.252         0.287 
+
+$`Off-campus (rent/apartment)`
+     sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
+        0.734         0.719         0.793         0.579         0.592 
+       pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
+        0.559         0.495         0.624         0.703         0.689 
+    SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
+        0.668         0.622         0.681         0.729         0.811 
+     MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
+        0.788         0.843         0.882         0.856         0.862 
+MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
+        0.720         0.810         0.834         0.873         0.868 
+      QIstaff        Belong         Gains    SupportEnv        Satisf 
+        0.857         0.302         0.140         0.318         0.406 
 
 $`On-campus (residence hall)`
      sbvalued      sbmyself   sbcommunity     pganalyze       pgthink 
-        0.628         0.529         0.515         0.347         0.191 
+        0.733         0.672         0.774         0.466         0.604 
        pgwork      pgvalues   pgprobsolve    SEacademic    SEwellness 
-        0.263         0.220         0.326         0.354         0.415 
+        0.556         0.492         0.535         0.687         0.642 
     SEnonacad  SEactivities     SEdiverse      sameinst       evalexp 
-        0.383         0.365         0.312         0.508         0.704 
+        0.555         0.513         0.624         0.735         0.700 
      MHWdacad    MHWdlonely    MHWdmental   MHWdexhaust     MHWdsleep 
-        0.178         0.223         0.412         0.212         0.323 
+        0.789         0.831         0.867         0.849         0.800 
 MHWdfinancial       QIadmin     QIstudent     QIadvisor     QIfaculty 
-        0.335         0.568         0.449         0.506         0.505 
+        0.699         0.785         0.807         0.859         0.862 
       QIstaff        Belong         Gains    SupportEnv        Satisf 
-        0.459         0.285         0.479         0.204         0.293 
+        0.835         0.240         0.063         0.239         0.259 
 

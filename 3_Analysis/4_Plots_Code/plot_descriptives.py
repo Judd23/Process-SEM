@@ -2,9 +2,10 @@
 """
 Generate descriptive statistics plots for Process-SEM dissertation.
 Outputs publication-quality figures for Chapter 4 (Results).
+Supports PSW (propensity score) weighting for causal effect visualization.
 
 Usage:
-    python 3_Analysis/4_Plots_Code/plot_descriptives.py [--data 1_Dataset/rep_data.csv] [--outdir 4_Model_Results/Figures]
+    python 3_Analysis/4_Plots_Code/plot_descriptives.py [--data 1_Dataset/rep_data.csv] [--outdir 4_Model_Results/Figures] [--weights psw]
 """
 
 import pandas as pd
@@ -15,18 +16,81 @@ import argparse
 
 # Note for simulated data
 SIM_NOTE = "Note: Data simulated to reflect CSU demographics and theorized treatment effects."
+PSW_NOTE = "Estimates weighted by propensity score overlap weights (PSW) for causal inference."
 
-def add_sim_note(fig, y_offset=-0.02):
-    """Add simulation note to bottom of figure."""
-    fig.text(0.5, y_offset, SIM_NOTE, ha='center', va='top', 
+def add_sim_note(fig, y_offset=-0.02, weighted=False):
+    """Add simulation note (and PSW note if weighted) to bottom of figure."""
+    note = SIM_NOTE
+    if weighted:
+        note = f"{SIM_NOTE}\n{PSW_NOTE}"
+    fig.text(0.5, y_offset, note, ha='center', va='top', 
              fontsize=8, fontstyle='italic', color='#666666',
              transform=fig.transFigure)
 
-def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
+# ============================================================================
+# PSW-Weighted Statistics Helper Functions
+# ============================================================================
+def weighted_mean(x, w):
+    """Calculate weighted mean."""
+    mask = ~np.isnan(x) & ~np.isnan(w)
+    if mask.sum() == 0:
+        return np.nan
+    return np.average(x[mask], weights=w[mask])
+
+def weighted_std(x, w):
+    """Calculate weighted standard deviation."""
+    mask = ~np.isnan(x) & ~np.isnan(w)
+    if mask.sum() == 0:
+        return np.nan
+    avg = np.average(x[mask], weights=w[mask])
+    variance = np.average((x[mask] - avg)**2, weights=w[mask])
+    return np.sqrt(variance)
+
+def weighted_sem(x, w):
+    """Approximate weighted standard error of the mean."""
+    mask = ~np.isnan(x) & ~np.isnan(w)
+    n_eff = mask.sum()  # Use sample size as approximation
+    if n_eff <= 1:
+        return np.nan
+    return weighted_std(x, w) / np.sqrt(n_eff)
+
+def weighted_proportion(binary_col, w):
+    """Calculate weighted proportion for binary variable."""
+    mask = ~np.isnan(binary_col) & ~np.isnan(w)
+    if mask.sum() == 0:
+        return np.nan
+    return np.average(binary_col[mask], weights=w[mask])
+
+def weighted_hist(ax, data, weights, bins=20, **kwargs):
+    """Create weighted histogram."""
+    mask = ~np.isnan(data) & ~np.isnan(weights)
+    ax.hist(data[mask], bins=bins, weights=weights[mask], **kwargs)
+
+def weighted_value_counts(series, weights, normalize=False):
+    """Calculate weighted value counts."""
+    df_temp = pd.DataFrame({'val': series, 'w': weights}).dropna()
+    result = df_temp.groupby('val')['w'].sum()
+    if normalize:
+        result = result / result.sum()
+    return result
+
+def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures', weight_col=None):
     os.makedirs(outdir, exist_ok=True)
     
     df = pd.read_csv(data_path)
     plt.style.use('seaborn-v0_8-whitegrid')
+    
+    # Setup weighting
+    use_weights = weight_col is not None and weight_col in df.columns
+    if use_weights:
+        w = df[weight_col].values
+        print(f"✓ Using PSW weights from column '{weight_col}'")
+    else:
+        w = np.ones(len(df))  # Uniform weights if no PSW
+        if weight_col:
+            print(f"⚠ Weight column '{weight_col}' not found, using unweighted")
+        else:
+            print("Using unweighted statistics")
     
     # Color palette - CONSISTENT across all figures
     # Distress=RED, Engagement=BLUE, FASt=ORANGE, Credits=YELLOW
@@ -52,22 +116,28 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     # =========================================================================
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
     
-    # 1a. Race/Ethnicity - BLACK bars
+    # 1a. Race/Ethnicity - BLACK bars (weighted)
     ax = axes[0, 0]
     race_order = ['Hispanic/Latino', 'White', 'Asian', 'Black/African American', 'Other/Multiracial/Unknown']
-    race_counts = df['re_all'].value_counts().reindex(race_order)
-    bars = ax.barh(race_order, race_counts.values, color='black', edgecolor='white')
-    ax.set_xlabel('Count', fontsize=11)
-    ax.set_title('Race/Ethnicity Distribution', fontsize=12, fontweight='bold')
-    for i, (v, pct) in enumerate(zip(race_counts.values, race_counts.values/len(df)*100)):
-        ax.text(v + 20, i, f'{pct:.1f}%', va='center', fontsize=10)
-    ax.set_xlim(0, max(race_counts.values) * 1.15)
+    race_weights = weighted_value_counts(df['re_all'], w)
+    race_weights = race_weights.reindex(race_order, fill_value=0)
+    total_weight = w.sum()
+    bars = ax.barh(race_order, race_weights.values, color='black', edgecolor='white')
+    ax.set_xlabel('Weighted Count' if use_weights else 'Count', fontsize=11)
+    ax.set_title('Race/Ethnicity Distribution' + (' (PSW)' if use_weights else ''), fontsize=12, fontweight='bold')
+    for i, (v, pct) in enumerate(zip(race_weights.values, race_weights.values/total_weight*100)):
+        ax.text(v + total_weight*0.01, i, f'{pct:.1f}%', va='center', fontsize=10)
+    ax.set_xlim(0, max(race_weights.values) * 1.15)
     
-    # 1b. First-gen and Pell status - BLACK bar charts
+    # 1b. First-gen and Pell status - BLACK bar charts (weighted)
     ax = axes[0, 1]
     categories = ['First-Gen', 'Pell-Eligible', 'Women', 'FASt Status']
-    yes_pct = [df['firstgen'].mean()*100, df['pell'].mean()*100, 
-               (df['sex']=='Woman').mean()*100, df['x_FASt'].mean()*100]
+    yes_pct = [
+        weighted_proportion(df['firstgen'].values, w)*100, 
+        weighted_proportion(df['pell'].values, w)*100,
+        weighted_proportion((df['sex'] == 'Female').astype(float).values, w)*100, 
+        weighted_proportion(df['x_FASt'].values, w)*100
+    ]
     no_pct = [100-p for p in yes_pct]
     x = np.arange(len(categories))
     width = 0.6
@@ -76,44 +146,47 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
         ax.bar(x[i], yes_pct[i], width, color='black', label='Yes' if i == 0 else '')
         ax.bar(x[i], no_pct[i], width, bottom=yes_pct[i], color='#cccccc', label='No' if i == 0 else '')
     ax.set_ylabel('Percentage', fontsize=11)
-    ax.set_title('Key Demographic Indicators', fontsize=12, fontweight='bold')
+    ax.set_title('Key Demographic Indicators' + (' (PSW)' if use_weights else ''), fontsize=12, fontweight='bold')
     ax.set_xticks(x)
     ax.set_xticklabels(categories, fontsize=10)
     ax.legend(loc='upper right')
     for i, pct in enumerate(yes_pct):
         ax.text(i, pct/2, f'{pct:.1f}%', ha='center', va='center', color='white', fontweight='bold')
     
-    # 1c. Credit dose distribution (use raw trnsfr_cr if available) - YELLOW for credits
+    # 1c. Credit dose distribution (use raw trnsfr_cr if available) - YELLOW for credits (weighted)
     ax = axes[1, 0]
     credit_col = 'trnsfr_cr' if 'trnsfr_cr' in df.columns else 'credit_dose'
-    ax.hist(df[credit_col], bins=20, color=colors['credits'], edgecolor='white', alpha=0.8)
+    credit_data = df[credit_col].values
+    weighted_hist(ax, credit_data, w, bins=20, color=colors['credits'], edgecolor='white', alpha=0.8)
+    wtd_mean = weighted_mean(credit_data, w)
     ax.axvline(12, color=colors['fast'], linestyle='--', linewidth=2, label='FASt threshold (12)')  # Orange
-    ax.axvline(df[credit_col].mean(), color='#8B4513', linestyle='-', linewidth=2, 
-               label=f'Mean ({df[credit_col].mean():.1f})')  # Brown for mean
+    ax.axvline(wtd_mean, color='#8B4513', linestyle='-', linewidth=2, 
+               label=f'Mean ({wtd_mean:.1f})')  # Brown for mean
     ax.set_xlabel('Transfer Credits', fontsize=11)
-    ax.set_ylabel('Frequency', fontsize=11)
-    ax.set_title('Distribution of Transfer Credits', fontsize=12, fontweight='bold')
+    ax.set_ylabel('Weighted Frequency' if use_weights else 'Frequency', fontsize=11)
+    ax.set_title('Distribution of Transfer Credits' + (' (PSW)' if use_weights else ''), fontsize=12, fontweight='bold')
     ax.legend()
     
-    # 1d. Cohort distribution - BLACK bars
+    # 1d. Cohort distribution - BLACK bars (weighted)
     ax = axes[1, 1]
-    cohort_counts = df['cohort'].value_counts().sort_index()
-    ax.bar(cohort_counts.index.astype(str), cohort_counts.values, color='black', edgecolor='white')
+    cohort_weights = weighted_value_counts(df['cohort'], w)
+    cohort_weights = cohort_weights.sort_index()
+    ax.bar(cohort_weights.index.astype(str), cohort_weights.values, color='black', edgecolor='white')
     ax.set_xlabel('Cohort Year', fontsize=11)
-    ax.set_ylabel('Count', fontsize=11)
-    ax.set_title('Cohort Distribution', fontsize=12, fontweight='bold')
-    for i, v in enumerate(cohort_counts.values):
-        ax.text(i, v + 20, f'{v}', ha='center', fontsize=10)
+    ax.set_ylabel('Weighted Count' if use_weights else 'Count', fontsize=11)
+    ax.set_title('Cohort Distribution' + (' (PSW)' if use_weights else ''), fontsize=12, fontweight='bold')
+    for i, v in enumerate(cohort_weights.values):
+        ax.text(i, v + total_weight*0.01, f'{v:.0f}', ha='center', fontsize=10)
     
-    plt.suptitle('Figure 1\nSample Demographics Overview', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('Figure 1\nSample Demographics Overview' + (' (PSW Weighted)' if use_weights else ''), fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
-    add_sim_note(fig)
+    add_sim_note(fig, weighted=use_weights)
     plt.savefig(f'{outdir}/fig1_demographics.png', dpi=300, bbox_inches='tight')
     plt.close()
     print('✓ Figure 1: Demographics saved')
     
     # =========================================================================
-    # FIGURE 2: Emotional Distress (EmoDiss) Distributions
+    # FIGURE 2: Emotional Distress (EmoDiss) Distributions (weighted)
     # =========================================================================
     fig, axes = plt.subplots(2, 3, figsize=(14, 9))
     mhw_cols = ['MHWdacad', 'MHWdlonely', 'MHWdmental', 'MHWdexhaust', 'MHWdsleep', 'MHWdfinancial']
@@ -122,28 +195,29 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     # Red gradient: lighter for low values, darker for high values (more distress = darker red)
     for idx, (col, label) in enumerate(zip(mhw_cols, mhw_labels)):
         ax = axes[idx // 3, idx % 3]
-        counts = df[col].value_counts().sort_index()
+        counts = weighted_value_counts(df[col], w)
+        counts = counts.sort_index()
         max_val = int(df[col].max())
         # Create red gradient based on response value
         red_gradient = plt.cm.Reds(np.linspace(0.2, 0.9, max_val))
         bar_colors = [red_gradient[int(v)-1] for v in counts.index]
         bars = ax.bar(counts.index, counts.values, color=bar_colors, edgecolor='white')
         ax.set_xlabel(f'Response (1=Not at all, {max_val}=Very much)', fontsize=9)
-        ax.set_ylabel('Count', fontsize=9)
+        ax.set_ylabel('Weighted Count' if use_weights else 'Count', fontsize=9)
         threshold = max_val // 2 + 1  # e.g., 4+ on 1-6 scale
-        elevated_pct = (df[col] >= threshold).mean() * 100
+        elevated_pct = weighted_proportion((df[col] >= threshold).astype(float).values, w) * 100
         ax.set_title(f'{label}\n({elevated_pct:.1f}% elevated)', fontsize=11, fontweight='bold')
         ax.set_xticks(range(1, max_val + 1))
     
-    plt.suptitle('Figure 2\nEmotional Distress Indicators (EmoDiss)', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('Figure 2\nEmotional Distress Indicators (EmoDiss)' + (' (PSW Weighted)' if use_weights else ''), fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
-    add_sim_note(fig)
+    add_sim_note(fig, weighted=use_weights)
     plt.savefig(f'{outdir}/fig2_emotional_distress.png', dpi=300, bbox_inches='tight')
     plt.close()
     print('✓ Figure 2: Emotional Distress saved')
     
     # =========================================================================
-    # FIGURE 3: Quality of Engagement (QualEngag) Distributions - BLUE theme
+    # FIGURE 3: Quality of Engagement (QualEngag) Distributions - BLUE theme (weighted)
     # =========================================================================
     fig, axes = plt.subplots(2, 3, figsize=(14, 9))
     qi_cols = ['QIstudent', 'QIadvisor', 'QIfaculty', 'QIstaff', 'QIadmin']
@@ -154,21 +228,24 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     
     for idx, (col, label) in enumerate(zip(qi_cols, qi_labels)):
         ax = axes[idx // 3, idx % 3]
-        counts = df[col].value_counts().sort_index()
+        counts = weighted_value_counts(df[col], w)
+        counts = counts.sort_index()
         # Apply gradient based on response value (1-7)
         bar_colors = [blue_gradient[int(v)-1] for v in counts.index]
         ax.bar(counts.index, counts.values, color=bar_colors, edgecolor='white')
         ax.set_xlabel('Response (1=Poor, 7=Excellent)', fontsize=9)
-        ax.set_ylabel('Frequency', fontsize=9)
-        ax.set_title(f'Quality of Interactions: {label}\n(M={df[col].mean():.2f}, SD={df[col].std():.2f})', 
+        ax.set_ylabel('Weighted Frequency' if use_weights else 'Frequency', fontsize=9)
+        wtd_m = weighted_mean(df[col].values, w)
+        wtd_sd = weighted_std(df[col].values, w)
+        ax.set_title(f'Quality of Interactions: {label}\n(M={wtd_m:.2f}, SD={wtd_sd:.2f})', 
                      fontsize=11, fontweight='bold')
         ax.set_xticks(range(1, 8))
     
     axes[1, 2].axis('off')
     
-    plt.suptitle('Figure 3\nQuality of Engagement Indicators (QualEngag)', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('Figure 3\nQuality of Engagement Indicators (QualEngag)' + (' (PSW Weighted)' if use_weights else ''), fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
-    add_sim_note(fig)
+    add_sim_note(fig, weighted=use_weights)
     plt.savefig(f'{outdir}/fig3_quality_engagement.png', dpi=300, bbox_inches='tight')
     plt.close()
     print('✓ Figure 3: Quality of Engagement saved')
@@ -203,10 +280,10 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
         ax.set_title(f'{label}\n({low_pct:.1f}% low)', fontsize=10, fontweight='bold')
         ax.set_xticks(range(1, sb_max + 1))
     
-    # Summary belonging
+    # Summary belonging (weighted)
     ax = axes[0, 3]
     low_threshold = sb_max // 2  # Bottom half of scale
-    low_belong = [(df[c] <= low_threshold).mean() * 100 for c in sb_cols]
+    low_belong = [weighted_proportion((df[c] <= low_threshold).astype(float).values, w) * 100 for c in sb_cols]
     # Green gradient based on percentage (higher = darker = worse)
     green_shades = [plt.cm.Greens(0.3 + 0.5 * (v / max(low_belong) if max(low_belong) > 0 else 0)) for v in low_belong]
     ax.barh(sb_labels, low_belong, color=green_shades)
@@ -217,12 +294,12 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     for i, v in enumerate(low_belong):
         ax.text(v + 1, i, f'{v:.1f}%', va='center', fontsize=10)
     
-    # Gains items (Perceived Gains) - CYAN
+    # Gains items (Perceived Gains) - CYAN (weighted)
     pg_cols = ['pgthink', 'pganalyze', 'pgwork', 'pgvalues', 'pgprobsolve']
     pg_labels = ['Think Critically', 'Analyze Info', 'Work with Others', 'Develop Values', 'Problem Solving']
     pg_max = int(df[pg_cols].max().max())  # Auto-detect scale
-    means = [df[c].mean() for c in pg_cols]
-    sds = [df[c].std() for c in pg_cols]
+    means = [weighted_mean(df[c].values, w) for c in pg_cols]
+    sds = [weighted_std(df[c].values, w) for c in pg_cols]
     
     ax = axes[1, 0]
     ax.barh(pg_labels, means, xerr=sds, color=devadj_colors['gains'], capsize=3)
@@ -230,12 +307,12 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     ax.set_title('Perceived Gains', fontsize=10, fontweight='bold')
     ax.set_xlim(1, pg_max)
     
-    # SE items (Supportive Environment) - PURPLE
+    # SE items (Supportive Environment) - PURPLE (weighted)
     se_cols = ['SEwellness', 'SEnonacad', 'SEactivities', 'SEacademic', 'SEdiverse']
     se_labels = ['Wellness Support', 'Non-Academic Support', 'Co-Curricular Activities', 'Academic Support', 'Diverse Interactions']
     se_max = int(df[se_cols].max().max())  # Auto-detect scale
-    means = [df[c].mean() for c in se_cols]
-    sds = [df[c].std() for c in se_cols]
+    means = [weighted_mean(df[c].values, w) for c in se_cols]
+    sds = [weighted_std(df[c].values, w) for c in se_cols]
     
     ax = axes[1, 1]
     ax.barh(se_labels, means, xerr=sds, color=devadj_colors['support'], capsize=3)
@@ -243,13 +320,13 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     ax.set_title('Supportive Environment', fontsize=10, fontweight='bold')
     ax.set_xlim(1, se_max)
     
-    # Satisfaction - BROWN
+    # Satisfaction - BROWN (weighted)
     ax = axes[1, 2]
     sat_cols = ['evalexp', 'sameinst']
     sat_labels = ['Rate Overall Experience', 'Choose Same Institution']
     sat_max = int(df[sat_cols].max().max())  # Auto-detect scale
-    means = [df[c].mean() for c in sat_cols]
-    sds = [df[c].std() for c in sat_cols]
+    means = [weighted_mean(df[c].values, w) for c in sat_cols]
+    sds = [weighted_std(df[c].values, w) for c in sat_cols]
     ax.barh(sat_labels, means, xerr=sds, color=devadj_colors['satisfaction'], capsize=3)
     ax.set_xlabel(f'M ± SD (1-{sat_max} scale)', fontsize=10)
     ax.set_title('Satisfaction', fontsize=10, fontweight='bold')
@@ -257,25 +334,27 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     
     axes[1, 3].axis('off')
     
-    plt.suptitle('Figure 4\nDevelopmental Adjustment Indicators (DevAdj)', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('Figure 4\nDevelopmental Adjustment Indicators (DevAdj)' + (' (PSW Weighted)' if use_weights else ''), fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
-    add_sim_note(fig)
+    add_sim_note(fig, weighted=use_weights)
     plt.savefig(f'{outdir}/fig4_developmental_adjustment.png', dpi=300, bbox_inches='tight')
     plt.close()
     print('✓ Figure 4: Developmental Adjustment saved')
     
     # =========================================================================
-    # FIGURE 5: Equity Gaps Visualization
+    # FIGURE 5: Equity Gaps Visualization (weighted)
     # =========================================================================
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     
+    # Create masks for FASt/Non-FASt
+    fast_mask = df['x_FASt'] == 1
+    nonfast_mask = df['x_FASt'] == 0
+    
     # 5a. FASt vs Non-FASt - Emotional Distress (RED theme, FASt=Orange accent)
     ax = axes[0, 0]
-    fast = df[df['x_FASt'] == 1]
-    nonfast = df[df['x_FASt'] == 0]
     mhw_short = ['Academic', 'Lonely', 'Mental', 'Exhaust', 'Sleep', 'Financial']
-    fast_means = [fast[c].mean() for c in mhw_cols]
-    nonfast_means = [nonfast[c].mean() for c in mhw_cols]
+    fast_means = [weighted_mean(df.loc[fast_mask, c].values, w[fast_mask]) for c in mhw_cols]
+    nonfast_means = [weighted_mean(df.loc[nonfast_mask, c].values, w[nonfast_mask]) for c in mhw_cols]
     x = np.arange(len(mhw_short))
     width = 0.35
     # Non-FASt: hatched bars
@@ -295,8 +374,8 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     # 5b. FASt vs Non-FASt - Quality of Engagement (BLUE theme, FASt=Orange accent)
     ax = axes[0, 1]
     qi_short = ['Students', 'Advisors', 'Faculty', 'Staff', 'Admin']
-    fast_means = [fast[c].mean() for c in qi_cols]
-    nonfast_means = [nonfast[c].mean() for c in qi_cols]
+    fast_means = [weighted_mean(df.loc[fast_mask, c].values, w[fast_mask]) for c in qi_cols]
+    nonfast_means = [weighted_mean(df.loc[nonfast_mask, c].values, w[nonfast_mask]) for c in qi_cols]
     x = np.arange(len(qi_short))
     # Non-FASt: hatched bars
     ax.bar(x - width/2, nonfast_means, width, label='Non-FASt', color='#99ccff',
@@ -310,18 +389,18 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     ax.legend()
     ax.set_ylim(1, 7)
     
-    # 5c. First-gen gaps - use construct-appropriate colors
+    # 5c. First-gen gaps - use construct-appropriate colors (weighted)
     ax = axes[1, 0]
-    firstgen = df[df['firstgen'] == 1]
-    contgen = df[df['firstgen'] == 0]
+    fg_mask = df['firstgen'] == 1
+    cg_mask = df['firstgen'] == 0
     key_vars = ['MHWdacad', 'MHWdlonely', 'sbcommunity', 'QIfaculty', 'evalexp']
     key_labels = ['Academic\nDistress', 'Loneliness', 'Community\nBelong', 'Faculty\nQuality', 'Overall\nExperience']
     # Colors match construct: red for distress, green for belonging, blue for engagement, purple for satisfaction
     bar_colors_fg = ['#d62728', '#d62728', '#2ca02c', '#1f77b4', '#8c564b']
     bar_colors_cg = ['#ff9999', '#ff9999', '#90EE90', '#99ccff', '#d4a574']
     
-    fg_means = [firstgen[c].mean() for c in key_vars]
-    cg_means = [contgen[c].mean() for c in key_vars]
+    fg_means = [weighted_mean(df.loc[fg_mask, c].values, w[fg_mask]) for c in key_vars]
+    cg_means = [weighted_mean(df.loc[cg_mask, c].values, w[cg_mask]) for c in key_vars]
     x = np.arange(len(key_labels))
     
     for i in range(len(key_vars)):
@@ -336,19 +415,26 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     ax.set_xticklabels(key_labels, fontsize=9)
     ax.legend()
     
-    # 5d. Gap summary (effect sizes) - use construct colors
+    # 5d. Gap summary (effect sizes) - weighted Cohen's d
     ax = axes[1, 1]
     gap_vars = ['MHWdacad', 'MHWdmental', 'sbcommunity', 'QIfaculty', 'evalexp']
     gap_labels = ['Academic Distress', 'Mental Health', 'Community Belonging', 'Faculty Quality', 'Overall Experience']
     
-    # Calculate Cohen's d for FASt effect
-    def cohens_d(g1, g2):
-        n1, n2 = len(g1), len(g2)
-        var1, var2 = g1.var(), g2.var()
-        pooled_std = np.sqrt(((n1-1)*var1 + (n2-1)*var2) / (n1+n2-2))
-        return (g1.mean() - g2.mean()) / pooled_std
+    # Calculate weighted Cohen's d for FASt effect
+    def weighted_cohens_d(g1_vals, g1_wts, g2_vals, g2_wts):
+        m1 = weighted_mean(g1_vals, g1_wts)
+        m2 = weighted_mean(g2_vals, g2_wts)
+        s1 = weighted_std(g1_vals, g1_wts)
+        s2 = weighted_std(g2_vals, g2_wts)
+        n1 = np.sum(~np.isnan(g1_vals) & ~np.isnan(g1_wts))
+        n2 = np.sum(~np.isnan(g2_vals) & ~np.isnan(g2_wts))
+        pooled_std = np.sqrt(((n1-1)*s1**2 + (n2-1)*s2**2) / (n1+n2-2))
+        return (m1 - m2) / pooled_std if pooled_std > 0 else 0
     
-    fast_d = [cohens_d(fast[c], nonfast[c]) for c in gap_vars]
+    fast_d = [weighted_cohens_d(
+        df.loc[fast_mask, c].values, w[fast_mask],
+        df.loc[nonfast_mask, c].values, w[nonfast_mask]
+    ) for c in gap_vars]
     
     # Colors by construct: red for distress, green for belonging, blue for engagement
     construct_colors = [colors['distress'], colors['distress'], '#2ca02c', colors['engagement'], '#8c564b']
@@ -360,15 +446,16 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     ax.set_title('FASt Effect Sizes\n(+) = FASt higher, (−) = FASt lower', fontsize=12, fontweight='bold')
     ax.set_xlim(-0.5, 0.5)
     
-    plt.suptitle('Figure 5\nEquity Gaps Analysis', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('Figure 5\nEquity Gaps Analysis' + (' (PSW Weighted)' if use_weights else ''), fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
-    add_sim_note(fig)
+    add_sim_note(fig, weighted=use_weights)
     plt.savefig(f'{outdir}/fig5_equity_gaps.png', dpi=300, bbox_inches='tight')
     plt.close()
     print('✓ Figure 5: Equity Gaps saved')
     
     # =========================================================================
     # FIGURE 6: Correlation Heatmap - Key Variables (grouped by construct)
+    # Note: Correlations are not PSW-weighted (correlation is a bivariate measure)
     # =========================================================================
     fig, ax = plt.subplots(figsize=(14, 12))
     
@@ -413,8 +500,10 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     var_labels = [l for v, l in available]
     
     corr_matrix = df[key_vars].corr()
-    
-    im = ax.imshow(corr_matrix, cmap='RdBu_r', vmin=-1, vmax=1)
+
+    # Use a diverging colormap where RED = positive, BLUE = negative
+    # (common interpretation for correlation heatmaps)
+    im = ax.imshow(corr_matrix, cmap='RdBu', vmin=-1, vmax=1)
     ax.set_xticks(range(len(var_labels)))
     ax.set_yticks(range(len(var_labels)))
     ax.set_xticklabels(var_labels, rotation=45, ha='right', fontsize=8)
@@ -434,7 +523,7 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
             ax.axhline(sep - 0.5, color='black', linewidth=1.5)
             ax.axvline(sep - 0.5, color='black', linewidth=1.5)
     
-    plt.colorbar(im, ax=ax, label='Pearson r', shrink=0.8)
+    plt.colorbar(im, ax=ax, label='Pearson r (red=positive, blue=negative)', shrink=0.8)
     ax.set_title('Figure 6\nCorrelation Matrix by Construct\n(X/Z | Covariates | EmoDiss | QualEngag | Belong | Gains | Satisf)', 
                  fontsize=14, fontweight='bold')
     plt.tight_layout()
@@ -448,9 +537,10 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Generate descriptive plots')
+    parser = argparse.ArgumentParser(description='Generate descriptive plots with optional PSW weighting')
     parser.add_argument('--data', default='1_Dataset/rep_data.csv', help='Path to data file')
     parser.add_argument('--outdir', default='4_Model_Results/Figures', help='Output directory')
+    parser.add_argument('--weights', default=None, help='Name of PSW weight column (e.g., "psw")')
     args = parser.parse_args()
     
-    main(args.data, args.outdir)
+    main(args.data, args.outdir, weight_col=args.weights)

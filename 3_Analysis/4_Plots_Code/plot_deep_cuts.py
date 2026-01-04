@@ -2,9 +2,10 @@
 """
 Deep-cut visualizations for Process-SEM dissertation.
 These reveal nuanced patterns in the data beyond basic descriptives.
+Supports PSW (propensity score) weighting for causal effect visualization.
 
 Usage:
-    python 3_Analysis/4_Plots_Code/plot_deep_cuts.py [--data 1_Dataset/rep_data.csv] [--outdir 4_Model_Results/Figures]
+    python 3_Analysis/4_Plots_Code/plot_deep_cuts.py [--data 1_Dataset/rep_data.csv] [--outdir 4_Model_Results/Figures] [--weights psw]
 """
 
 import pandas as pd
@@ -18,18 +19,92 @@ import matplotlib.patches as mpatches
 
 # Note for simulated data
 SIM_NOTE = "Note: Data simulated to reflect CSU demographics and theorized treatment effects."
+PSW_NOTE = "Estimates weighted by propensity score overlap weights (PSW) for causal inference."
 
-def add_sim_note(fig, y_offset=-0.02):
-    """Add simulation note to bottom of figure."""
-    fig.text(0.5, y_offset, SIM_NOTE, ha='center', va='top', 
+def add_sim_note(fig, y_offset=-0.02, weighted=False):
+    """Add simulation note (and PSW note if weighted) to bottom of figure."""
+    note = SIM_NOTE
+    if weighted:
+        note = f"{SIM_NOTE}\n{PSW_NOTE}"
+    fig.text(0.5, y_offset, note, ha='center', va='top', 
              fontsize=8, fontstyle='italic', color='#666666',
              transform=fig.transFigure)
 
-def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
+# ============================================================================
+# PSW-Weighted Statistics Helper Functions
+# ============================================================================
+def weighted_mean(x, w):
+    """Calculate weighted mean."""
+    mask = ~np.isnan(x) & ~np.isnan(w)
+    if mask.sum() == 0:
+        return np.nan
+    return np.average(x[mask], weights=w[mask])
+
+def weighted_std(x, w):
+    """Calculate weighted standard deviation."""
+    mask = ~np.isnan(x) & ~np.isnan(w)
+    if mask.sum() == 0:
+        return np.nan
+    avg = np.average(x[mask], weights=w[mask])
+    variance = np.average((x[mask] - avg)**2, weights=w[mask])
+    return np.sqrt(variance)
+
+def weighted_sem(x, w):
+    """Approximate weighted standard error of the mean."""
+    mask = ~np.isnan(x) & ~np.isnan(w)
+    n_eff = mask.sum()  # Use sample size as approximation
+    if n_eff <= 1:
+        return np.nan
+    return weighted_std(x, w) / np.sqrt(n_eff)
+
+def weighted_proportion(binary_col, w):
+    """Calculate weighted proportion for binary variable."""
+    mask = ~np.isnan(binary_col) & ~np.isnan(w)
+    if mask.sum() == 0:
+        return np.nan
+    return np.average(binary_col[mask], weights=w[mask])
+
+def weighted_value_counts(series, weights, normalize=False):
+    """Calculate weighted value counts."""
+    df_temp = pd.DataFrame({'val': series, 'w': weights}).dropna()
+    result = df_temp.groupby('val')['w'].sum()
+    if normalize:
+        result = result / result.sum()
+    return result
+
+def weighted_groupby_mean(df, group_col, val_col, weights):
+    """Calculate weighted group means."""
+    result = {}
+    for grp in df[group_col].dropna().unique():
+        mask = df[group_col] == grp
+        result[grp] = weighted_mean(df.loc[mask, val_col].values, weights[mask])
+    return pd.Series(result)
+
+def weighted_groupby_sem(df, group_col, val_col, weights):
+    """Calculate weighted group standard errors."""
+    result = {}
+    for grp in df[group_col].dropna().unique():
+        mask = df[group_col] == grp
+        result[grp] = weighted_sem(df.loc[mask, val_col].values, weights[mask])
+    return pd.Series(result)
+
+def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures', weight_col=None):
     os.makedirs(outdir, exist_ok=True)
     
     df = pd.read_csv(data_path)
     plt.style.use('seaborn-v0_8-whitegrid')
+    
+    # Setup weighting
+    use_weights = weight_col is not None and weight_col in df.columns
+    if use_weights:
+        w = df[weight_col].values
+        print(f"✓ Using PSW weights from column '{weight_col}'")
+    else:
+        w = np.ones(len(df))  # Uniform weights if no PSW
+        if weight_col:
+            print(f"⚠ Weight column '{weight_col}' not found, using unweighted")
+        else:
+            print("Using unweighted statistics")
     
     # Color schemes - CONSISTENT across all figures
     # Distress=RED, Engagement=BLUE, FASt=ORANGE, Credits=YELLOW
@@ -50,7 +125,7 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     }
     
     # =========================================================================
-    # FIGURE 7: Risk Factor Accumulation - Cumulative Disadvantage
+    # FIGURE 7: Risk Factor Accumulation - Cumulative Disadvantage (weighted)
     # =========================================================================
     fig, axes = plt.subplots(2, 2, figsize=(14, 12))
     
@@ -58,21 +133,23 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     df['urm'] = df['re_all'].isin(['Hispanic/Latino', 'Black/African American']).astype(int)
     df['risk_count'] = df['x_FASt'] + df['firstgen'] + df['pell'] + df['urm']
     
-    # 7a. Distribution of risk factor counts - gradient from light to dark based on risk
+    # 7a. Distribution of risk factor counts - gradient from light to dark based on risk (weighted)
     ax = axes[0, 0]
-    risk_counts = df['risk_count'].value_counts().sort_index()
+    risk_weights = weighted_value_counts(df['risk_count'], w)
+    risk_weights = risk_weights.sort_index()
+    total_weight = w.sum()
     # Gray gradient: more risk factors = darker
     risk_colors = ['#cccccc', '#999999', '#666666', '#444444', '#222222']
-    bars = ax.bar(risk_counts.index, risk_counts.values, 
-                  color=[risk_colors[min(int(i), len(risk_colors)-1)] for i in risk_counts.index], 
+    bars = ax.bar(risk_weights.index, risk_weights.values, 
+                  color=[risk_colors[min(int(i), len(risk_colors)-1)] for i in risk_weights.index], 
                   edgecolor='white')
     ax.set_xlabel('Number of Risk Factors\n(FASt + First-Gen + Pell + URM)', fontsize=11)
-    ax.set_ylabel('Count', fontsize=11)
-    ax.set_title('Distribution of Cumulative Risk Factors', fontsize=12, fontweight='bold')
-    for i, (idx, v) in enumerate(zip(risk_counts.index, risk_counts.values)):
-        ax.text(idx, v + 20, f'{v/len(df)*100:.1f}%', ha='center', fontsize=10)
+    ax.set_ylabel('Weighted Count' if use_weights else 'Count', fontsize=11)
+    ax.set_title('Distribution of Cumulative Risk Factors' + (' (PSW)' if use_weights else ''), fontsize=12, fontweight='bold')
+    for idx, v in zip(risk_weights.index, risk_weights.values):
+        ax.text(idx, v + total_weight*0.01, f'{v/total_weight*100:.1f}%', ha='center', fontsize=10)
     
-    # 7b. Mean distress by risk count
+    # 7b. Mean distress by risk count (weighted)
     ax = axes[0, 1]
     mhw_cols = ['MHWdacad', 'MHWdlonely', 'MHWdmental', 'MHWdexhaust', 'MHWdsleep', 'MHWdfinancial']
     df['mean_distress'] = df[mhw_cols].mean(axis=1)
@@ -80,27 +157,29 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     # Detect scale from data (1-6 for NSSE distress items)
     distress_max = int(df[mhw_cols].max().max())
     
-    means = df.groupby('risk_count')['mean_distress'].mean()
-    sems = df.groupby('risk_count')['mean_distress'].sem()
+    means = weighted_groupby_mean(df, 'risk_count', 'mean_distress', w)
+    sems = weighted_groupby_sem(df, 'risk_count', 'mean_distress', w)
+    means = means.sort_index()
+    sems = sems.reindex(means.index)
     
     ax.errorbar(means.index, means.values, yerr=1.96*sems.values, 
                 fmt='o-', color=colors['distress'], capsize=5, markersize=10, linewidth=2)
     ax.set_xlabel('Number of Risk Factors', fontsize=11)
     ax.set_ylabel(f'Mean Emotional Distress (1-{distress_max})', fontsize=11)
-    ax.set_title('Cumulative Risk → Distress\n(95% CI)', fontsize=12, fontweight='bold')
+    ax.set_title('Cumulative Risk → Distress\n(95% CI)' + (' (PSW)' if use_weights else ''), fontsize=12, fontweight='bold')
     # Auto-scale y-axis with padding
     y_min = means.min() - 1.96*sems.max() - 0.2
     y_max = means.max() + 1.96*sems.max() + 0.2
     ax.set_ylim(max(1, y_min), min(distress_max, y_max))
     
-    # Add trend line
+    # Add trend line (unweighted for simplicity)
     slope, intercept, r, p, se = stats.linregress(df['risk_count'], df['mean_distress'])
     x_line = np.array([0, 4])
     ax.plot(x_line, intercept + slope * x_line, '--', color='gray', alpha=0.7,
             label=f'Linear trend: β={slope:.3f}, p<.001')
     ax.legend(loc='lower right')
     
-    # 7c. Mean engagement by risk count
+    # 7c. Mean engagement by risk count (weighted)
     ax = axes[1, 0]
     qi_cols = ['QIstudent', 'QIadvisor', 'QIfaculty', 'QIstaff', 'QIadmin']
     df['mean_engagement'] = df[qi_cols].mean(axis=1)
@@ -108,14 +187,16 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     # Detect scale from data (1-7 for QI items)
     engage_max = int(df[qi_cols].max().max())
     
-    means = df.groupby('risk_count')['mean_engagement'].mean()
-    sems = df.groupby('risk_count')['mean_engagement'].sem()
+    means = weighted_groupby_mean(df, 'risk_count', 'mean_engagement', w)
+    sems = weighted_groupby_sem(df, 'risk_count', 'mean_engagement', w)
+    means = means.sort_index()
+    sems = sems.reindex(means.index)
     
     ax.errorbar(means.index, means.values, yerr=1.96*sems.values, 
                 fmt='s-', color=colors['engagement'], capsize=5, markersize=10, linewidth=2)
     ax.set_xlabel('Number of Risk Factors', fontsize=11)
     ax.set_ylabel(f'Mean Quality of Engagement (1-{engage_max})', fontsize=11)
-    ax.set_title('Cumulative Risk → Engagement\n(95% CI)', fontsize=12, fontweight='bold')
+    ax.set_title('Cumulative Risk → Engagement\n(95% CI)' + (' (PSW)' if use_weights else ''), fontsize=12, fontweight='bold')
     # Auto-scale y-axis with padding
     y_min = means.min() - 1.96*sems.max() - 0.2
     y_max = means.max() + 1.96*sems.max() + 0.2
@@ -127,22 +208,24 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
             label=f'Linear trend: β={slope:.3f}, p<.001')
     ax.legend(loc='upper right')
     
-    # 7d. % Low belonging by risk count
+    # 7d. % Low belonging by risk count (weighted)
     ax = axes[1, 1]
     df['low_belonging'] = (df['sbcommunity'] <= 2).astype(int)
     
-    pct_low = df.groupby('risk_count')['low_belonging'].mean() * 100
-    ns = df.groupby('risk_count').size()
-    
-    # Calculate 95% CI for proportions
+    # Calculate weighted proportions by risk count
+    pct_low = {}
     ci_low = []
     ci_high = []
-    for rc in pct_low.index:
-        p = pct_low[rc] / 100
-        n = ns[rc]
-        se = np.sqrt(p * (1-p) / n)
-        ci_low.append((p - 1.96*se) * 100)
-        ci_high.append((p + 1.96*se) * 100)
+    for rc in sorted(df['risk_count'].dropna().unique()):
+        mask = df['risk_count'] == rc
+        pct = weighted_proportion(df.loc[mask, 'low_belonging'].values.astype(float), w[mask]) * 100
+        pct_low[rc] = pct
+        n = mask.sum()
+        se = np.sqrt(pct/100 * (1-pct/100) / n) * 100
+        ci_low.append(max(0, pct - 1.96*se))
+        ci_high.append(min(100, pct + 1.96*se))
+    
+    pct_low = pd.Series(pct_low).sort_index()
     
     ax.bar(pct_low.index, pct_low.values, color='#2ca02c', edgecolor='white')  # Green for belonging
     ax.errorbar(pct_low.index, pct_low.values, 
@@ -150,13 +233,13 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
                 fmt='none', color='black', capsize=5)
     ax.set_xlabel('Number of Risk Factors', fontsize=11)
     ax.set_ylabel('% Low Community Belonging', fontsize=11)
-    ax.set_title('Cumulative Risk → Low Belonging\n(95% CI)', fontsize=12, fontweight='bold')
+    ax.set_title('Cumulative Risk → Low Belonging\n(95% CI)' + (' (PSW)' if use_weights else ''), fontsize=12, fontweight='bold')
     ax.axhline(42, color='gray', linestyle='--', alpha=0.7, label='National avg (42%)')
     ax.legend()
     
-    plt.suptitle('Figure 7\nCumulative Disadvantage Analysis', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('Figure 7\nCumulative Disadvantage Analysis' + (' (PSW Weighted)' if use_weights else ''), fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
-    add_sim_note(fig)
+    add_sim_note(fig, weighted=use_weights)
     plt.savefig(f'{outdir}/fig7_cumulative_risk.png', dpi=300, bbox_inches='tight')
     plt.close()
     print('✓ Figure 7: Cumulative Risk Analysis saved')
@@ -806,9 +889,9 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
     max_gap = max(abs(min(gaps)), abs(max(gaps)))
     ax.set_ylim(-max_gap * 1.2, max_gap * 1.2)
     
-    plt.suptitle('Figure 12\nCohort Comparison Patterns', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('Figure 12\nCohort Comparison Patterns' + (' (PSW Weighted)' if use_weights else ''), fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
-    add_sim_note(fig)
+    add_sim_note(fig, weighted=use_weights)
     plt.savefig(f'{outdir}/fig12_cohort_patterns.png', dpi=300, bbox_inches='tight')
     plt.close()
     print('✓ Figure 12: Cohort Patterns saved')
@@ -818,9 +901,10 @@ def main(data_path='1_Dataset/rep_data.csv', outdir='4_Model_Results/Figures'):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Generate deep-cut visualizations')
+    parser = argparse.ArgumentParser(description='Generate deep-cut visualizations with optional PSW weighting')
     parser.add_argument('--data', default='1_Dataset/rep_data.csv', help='Path to data file')
     parser.add_argument('--outdir', default='4_Model_Results/Figures', help='Output directory')
+    parser.add_argument('--weights', default=None, help='Name of PSW weight column (e.g., "psw")')
     args = parser.parse_args()
     
-    main(args.data, args.outdir)
+    main(args.data, args.outdir, weight_col=args.weights)

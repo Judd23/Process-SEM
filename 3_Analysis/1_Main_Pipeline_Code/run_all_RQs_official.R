@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# scripts/run_all_RQs_official.R
+# 3_Analysis/1_Main_Pipeline_Code/run_all_RQs_official.R
 # ONE run for all RQs:
 #  - RQ1–RQ3 (+ RQ4c): overall treatment/control SEM with XZ moderation + bootstrap CIs
 #  - RQ4 measurement: invariance by each W separately (incl. race)
@@ -48,7 +48,41 @@ if (!nzchar(REP_DATA_CSV)) {
 # SIMULATION RUN OUTPUT - Representative data pipeline validation
 # When you have your actual dissertation data, change this path accordingly.
 # =============================================================================
-OUT_BASE     <- Sys.getenv("OUT_BASE", unset = "4_Model_Results/Outputs")
+
+# Predeclare globals (used with <<- inside set_out_base)
+OUT_BASE <- NULL
+OUT_FIGURES <- NULL
+OUT_TABLES <- NULL
+OUT_SYNTAX <- NULL
+OUT_LOGS <- NULL
+OUT_SENS <- NULL
+
+# Keep all derived output paths in sync with OUT_BASE.
+# Per 0_Overview.md structure:
+#   4_Model_Results/Outputs/  = raw model outputs (lavaan .txt, CSVs)
+#   4_Model_Results/Figures/  = publication figures (PNG)
+#   4_Model_Results/Tables/   = publication tables (DOCX)
+set_out_base <- function(out_base) {
+  OUT_BASE <<- out_base
+  
+  # Derive parent dir (4_Model_Results) for sibling folders
+  parent_dir <- dirname(out_base)
+
+  # Publication outputs go to sibling folders (per 0_Overview.md)
+  OUT_FIGURES   <<- file.path(parent_dir, "Figures")
+  OUT_TABLES    <<- file.path(parent_dir, "Tables")
+  
+  # Raw outputs stay inside OUT_BASE
+  OUT_SYNTAX    <<- file.path(OUT_BASE, "syntax")
+  OUT_LOGS      <<- file.path(OUT_BASE, "logs")
+  OUT_SENS      <<- file.path(OUT_BASE, "sensitivity")
+
+  for (d in c(OUT_FIGURES, OUT_TABLES, OUT_SYNTAX, OUT_LOGS, OUT_SENS)) {
+    dir.create(d, recursive = TRUE, showWarnings = FALSE)
+  }
+}
+
+set_out_base(Sys.getenv("OUT_BASE", unset = "4_Model_Results/Outputs"))
 
 # Treatment/control definition for official RQs:
 #   X = FASt status (>= 12 transferable credits applied at matriculation)
@@ -148,14 +182,26 @@ if (isTRUE(TABLE_CHECK_MODE)) {
 SMOKE_ONLY_A <- env_flag("SMOKE_ONLY_A", FALSE)
 SMOKE_B_BOOT <- suppressWarnings(as.integer(Sys.getenv(
   "SMOKE_B_BOOT",
-  unset = if (isTRUE(TABLE_CHECK_MODE)) "10" else "50"
+  unset = if (isTRUE(TABLE_CHECK_MODE)) "10" else "10"  # 10 is sufficient for smoke (just verify syntax)
 )))
-if (is.na(SMOKE_B_BOOT) || SMOKE_B_BOOT < 0) SMOKE_B_BOOT <- if (isTRUE(TABLE_CHECK_MODE)) 10 else 50
+if (is.na(SMOKE_B_BOOT) || SMOKE_B_BOOT < 0) SMOKE_B_BOOT <- 10
 SMOKE_BOOT_CI_TYPE <- Sys.getenv("SMOKE_BOOT_CI_TYPE", unset = "perc")
+
+# Skip post-processing stages (plots, tables) for fast smoke tests
+SKIP_POST_PROCESSING <- env_flag("SKIP_POST_PROCESSING", default = FALSE)
+
+# USE_PREPPED_DATA: Skip all data prep, use a previously cleaned+PSW dataset
+# Set to the path of an existing rep_data_with_psw.csv to skip data generation,
+# cleaning, archetype merge, PSW estimation, etc. The bootstrap resampling will
+# use this pre-computed dataset directly.
+USE_PREPPED_DATA <- Sys.getenv("USE_PREPPED_DATA", unset = "")
 
 if (isTRUE(SMOKE_ONLY_A)) {
   # Route smoke test outputs to SmokeTest subfolder
-  OUT_BASE <- file.path(OUT_BASE, "SmokeTest")
+  set_out_base(file.path(OUT_BASE, "SmokeTest"))
+  
+  # Auto-skip post-processing (plots/tables) in smoke mode unless explicitly requested
+  if (!has_env("SKIP_POST_PROCESSING")) SKIP_POST_PROCESSING <- TRUE
   
   B_BOOT_MAIN <- SMOKE_B_BOOT
   B_BOOT_TOTAL <- SMOKE_B_BOOT
@@ -219,9 +265,9 @@ OTHER_LABEL_W_STRUCT <- "Other"
 # Values must match labels in the data AFTER any recoding/cleaning.
 W_REF_LEVEL <- list(
   re_all   = "White",
-  firstgen = "0",           # 0 = continuing-gen (reference)
-  pell     = "0",           # 0 = non-Pell (reference)
-  sex      = "Woman",
+  firstgen = "Continuing-gen",
+  pell     = "Non-Pell",
+  sex      = "Female",
   living18 = "Off-campus (rent/apartment)"
 )
 
@@ -246,12 +292,85 @@ PSW_COVARS <- c("hgrades","bparented_c","hapcl","hprecalc13","hchallenge_c","cSF
 # BASIC CHECKS
 # -------------------------
 stopifnot(file.exists(MODEL_FILE))
+
+# Optional dataset creation step.
+# By default, the pipeline does NOT overwrite an existing rep_data.csv.
+# Enable explicitly when you want an end-to-end run from scratch.
+RUN_DATASET_CREATION <- env_flag(
+  "RUN_DATASET_CREATION",
+  default = !file.exists("1_Dataset/rep_data.csv")
+)
+FORCE_DATASET_CREATION <- env_flag("FORCE_DATASET_CREATION", default = FALSE)
+PYTHON_BIN <- Sys.getenv("PYTHON", unset = "python3")
+DATASET_GENERATOR <- Sys.getenv(
+  "DATASET_GENERATOR",
+  unset = "1_Dataset/generate_empirical_dataset.py"
+)
+
+.can_generate_default_rep_data <- function(rep_data_csv) {
+  rep_norm <- normalizePath(rep_data_csv, winslash = "/", mustWork = FALSE)
+  default_norm <- normalizePath("1_Dataset/rep_data.csv", winslash = "/", mustWork = FALSE)
+  identical(rep_norm, default_norm)
+}
+
+if ((isTRUE(RUN_DATASET_CREATION) || isTRUE(FORCE_DATASET_CREATION)) && .can_generate_default_rep_data(REP_DATA_CSV)) {
+  needs_generate <- isTRUE(FORCE_DATASET_CREATION) || !file.exists(REP_DATA_CSV)
+  if (isTRUE(needs_generate)) {
+    gen_log <- file.path(OUT_LOGS, "dataset_generation.log")
+    cat(
+      sprintf("[%s] Running dataset generator: %s %s\n", Sys.time(), PYTHON_BIN, DATASET_GENERATOR),
+      file = gen_log
+    )
+    rc <- suppressWarnings(system2(
+      command = PYTHON_BIN,
+      args = c(DATASET_GENERATOR),
+      stdout = gen_log,
+      stderr = gen_log
+    ))
+    if (!is.numeric(rc)) rc <- 0
+    if (rc != 0) {
+      stop("Dataset generator failed (exit code = ", rc, "). See: ", gen_log)
+    }
+  }
+}
+
 stopifnot(file.exists(REP_DATA_CSV))
+
+# Dataset provenance (do not modify input; fingerprint for reproducibility)
+REP_DATA_MD5 <- suppressWarnings(as.character(tools::md5sum(REP_DATA_CSV)))
+REP_DATA_MTIME <- suppressWarnings(as.character(file.info(REP_DATA_CSV)$mtime))
 
 dir.create(OUT_BASE, recursive = TRUE, showWarnings = FALSE)
 source(MODEL_FILE)
 
 dat <- read.csv(REP_DATA_CSV, stringsAsFactors = FALSE)
+
+# -------------------------
+# STEP 2: Archetype assignment (immediately after raw load)
+# -------------------------
+ARCHETYPE_ASSIGN_CSV <- "1_Dataset/archetype_assignments.csv"
+if (!file.exists(ARCHETYPE_ASSIGN_CSV)) {
+  stop("Missing archetype assignment file: ", ARCHETYPE_ASSIGN_CSV, " (required before PSW)")
+}
+if (!("id" %in% names(dat))) {
+  stop("rep_data missing required column: id (required to merge archetype assignments)")
+}
+arch <- utils::read.csv(ARCHETYPE_ASSIGN_CSV, stringsAsFactors = FALSE)
+need_arch <- c("id", "archetype_id", "archetype_name")
+miss_arch <- setdiff(need_arch, names(arch))
+if (length(miss_arch) > 0) {
+  stop("archetype_assignments.csv missing required columns: ", paste(miss_arch, collapse = ", "))
+}
+arch$id <- suppressWarnings(as.integer(arch$id))
+dat$id <- suppressWarnings(as.integer(dat$id))
+if (any(is.na(arch$id))) stop("archetype_assignments.csv has non-integer id values")
+if (anyDuplicated(arch$id) > 0) stop("archetype_assignments.csv has duplicated id values")
+idx_arch <- match(dat$id, arch$id)
+if (any(is.na(idx_arch))) {
+  stop("Some rep_data ids are missing from archetype_assignments.csv (n_missing=", sum(is.na(idx_arch)), ")")
+}
+dat$archetype_id <- suppressWarnings(as.integer(arch$archetype_id[idx_arch]))
+dat$archetype_name <- as.character(arch$archetype_name[idx_arch])
 
 # -------------------------
 # DATA PREP (authoritative, rebuilt each run)
@@ -410,10 +529,18 @@ for (v in c("credit_dose_raw", "Z", "Z_c", "XZ")) {
   if (v %in% names(dat)) dat[[v]] <- NULL
 }
 
-# Grades: use existing hgrades (1..9 scale) as a balanced covariate
+# Grades: use existing hgrades (BCSSE scale 3-8 after merge) as a balanced covariate
 # for both PSW and SEM.
+# BCSSE hgrades23 uses 3-9: 3="C+ or below", 4="B-", ..., 8="A", 9="A+", 99="Grades not used"
+# Merge 9 (A+) into 8 (A) to create a clean 3-8 scale.
 if (!("hgrades" %in% names(dat))) stop("rep_data missing required column: hgrades")
 dat$hgrades <- suppressWarnings(as.numeric(dat$hgrades))
+n_hgrades_9 <- sum(dat$hgrades == 9, na.rm = TRUE)
+if (n_hgrades_9 > 0) {
+
+  message("[hgrades] Merging ", n_hgrades_9, " cases with hgrades=9 (A+) into hgrades=8 (A)")
+  dat$hgrades[dat$hgrades == 9] <- 8
+}
 
 # Ensure we only use hgrades (not hgrades_AF). If hgrades_AF is present, drop it.
 had_hgrades_af <- "hgrades_AF" %in% names(dat)
@@ -499,7 +626,7 @@ dat <- tmp$dat; recode_all <- rbind(recode_all, tmp$report)
 tmp <- .enforce_range(dat, qi_items, allowed = 1:7, rule_label = "out_of_range_1_7", treat_9_as_na = FALSE)
 dat <- tmp$dat; recode_all <- rbind(recode_all, tmp$report)
 
-recode_report_path <- file.path(OUT_BASE, "recode_report.tsv")
+recode_report_path <- file.path(OUT_LOGS, "recode_report.tsv")
 if (nrow(recode_all) == 0) {
   recode_all <- data.frame(var = character(0), value = character(0), n = integer(0), rule = character(0), stringsAsFactors = FALSE)
 }
@@ -569,17 +696,24 @@ if (all(c("x_FASt", "credit_dose_c", "XZ_c") %in% names(dat))) {
   int_mx <- suppressWarnings(max(abs((dat$x_FASt * dat$credit_dose_c) - dat$XZ_c), na.rm = TRUE))
 }
 
+# Persist the executed/cleaned analysis dataset used for PSW + SEM.
+# This keeps figures/tables aligned with the exact data actually analyzed,
+# while leaving the original rep_data.csv untouched.
+ANALYSIS_DATA_CSV <- file.path(OUT_LOGS, "analysis_dataset_cleaned.csv")
+utils::write.csv(dat, file = ANALYSIS_DATA_CSV, row.names = FALSE)
+ANALYSIS_DATA_MD5 <- suppressWarnings(as.character(tools::md5sum(ANALYSIS_DATA_CSV)))
+
 # -------------------------
 # Executed SEM syntax (single source) written to run folder
 # -------------------------
-meas_syntax_path <- file.path(OUT_BASE, "executed_measurement_syntax.lav")
+meas_syntax_path <- file.path(OUT_SYNTAX, "executed_measurement_syntax.lav")
 if (exists("get_measurement_syntax_official")) {
   writeLines(get_measurement_syntax_official(), con = meas_syntax_path)
 }
 
-model_parallel_path <- file.path(OUT_BASE, "executed_sem_parallel.lav")
-model_total_path <- file.path(OUT_BASE, "executed_sem_total.lav")
-model_serial_path <- file.path(OUT_BASE, "executed_sem_serial.lav")
+model_parallel_path <- file.path(OUT_SYNTAX, "executed_sem_parallel.lav")
+model_total_path <- file.path(OUT_SYNTAX, "executed_sem_total.lav")
+model_serial_path <- file.path(OUT_SYNTAX, "executed_sem_serial.lav")
 if (exists("build_model_fast_treat_control")) {
   writeLines(build_model_fast_treat_control(dat), con = model_parallel_path)
 }
@@ -593,12 +727,17 @@ if (exists("build_model_fast_treat_control_serial")) {
 # -------------------------
 # Verification checklist (written once at the top-level output directory)
 # -------------------------
-verif_path <- file.path(OUT_BASE, "verification_checklist.txt")
+verif_path <- file.path(OUT_LOGS, "verification_checklist.txt")
 con <- file(verif_path, open = "wt")
 on.exit(close(con), add = TRUE)
 cat("Verification checklist: run_all_RQs_official\n", file = con)
 cat("REP_DATA_CSV=", REP_DATA_CSV, "\n", sep = "", file = con, append = TRUE)
+cat("REP_DATA_MTIME=", REP_DATA_MTIME, "\n", sep = "", file = con, append = TRUE)
+cat("REP_DATA_MD5=", REP_DATA_MD5, "\n", sep = "", file = con, append = TRUE)
 cat("TREATMENT_VAR=", TREATMENT_VAR, "\n\n", sep = "", file = con, append = TRUE)
+
+cat("ANALYSIS_DATA_CSV=", ANALYSIS_DATA_CSV, "\n", sep = "", file = con, append = TRUE)
+cat("ANALYSIS_DATA_MD5=", ANALYSIS_DATA_MD5, "\n\n", sep = "", file = con, append = TRUE)
 
 cat("(0) Executed SEM syntax files\n", file = con, append = TRUE)
 cat("measurement_syntax=", meas_syntax_path, "\n", sep = "", file = con, append = TRUE)
@@ -634,7 +773,8 @@ calc_cd <- (dat$trnsfr_cr - 12) / 10
 mx_cd <- max(abs(dat$credit_dose - calc_cd), na.rm = TRUE)
 cat("max_abs_diff=", format(mx_cd, digits = 12), "\n\n", sep = "", file = con, append = TRUE)
 
-cat("(2) hgrades value distribution (expected scale 1..9)\n", file = con, append = TRUE)
+cat("(2) hgrades value distribution (expected BCSSE scale 3-8 after A+/A merge)\n", file = con, append = TRUE)
+cat("n_hgrades_9_merged=", n_hgrades_9, "\n", sep = "", file = con, append = TRUE)
 cat(paste(capture.output(table(dat$hgrades, useNA = "ifany")), collapse = "\n"), "\n\n", file = con, append = TRUE)
 
 cat("(2a) Grades source check (use hgrades only)\n", file = con, append = TRUE)
@@ -887,13 +1027,26 @@ balance_table <- function(d, x = "x_FASt", covars, wcol = "psw") {
 out_main <- file.path(OUT_BASE, "RQ1_RQ3_main")
 dir.create(out_main, recursive = TRUE, showWarnings = FALSE)
 
-dat_main <- dat
-
-# PSW is always computed and used in the official pipeline.
-dat_main <- compute_psw_overlap(dat_main, x = TREATMENT_VAR, covars = PSW_COVARS, out_txt = file.path(out_main, "psw_stage_report.txt"))
-bal <- balance_table(dat_main, x = TREATMENT_VAR, covars = PSW_COVARS)
-write.table(bal, file.path(out_main, "psw_balance_smd.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
-write.csv(dat_main, file.path(out_main, "rep_data_with_psw.csv"), row.names = FALSE)
+# USE_PREPPED_DATA: Skip data prep if a pre-computed PSW dataset is provided
+if (nzchar(USE_PREPPED_DATA) && file.exists(USE_PREPPED_DATA)) {
+  message("[USE_PREPPED_DATA] Loading pre-computed PSW dataset: ", USE_PREPPED_DATA)
+  dat_main <- read.csv(USE_PREPPED_DATA, stringsAsFactors = FALSE)
+  if (!"psw" %in% names(dat_main)) {
+    stop("USE_PREPPED_DATA file missing 'psw' column: ", USE_PREPPED_DATA)
+  }
+  message("[USE_PREPPED_DATA] Skipping PSW computation (N=", nrow(dat_main), ", psw range: ",
+          round(min(dat_main$psw, na.rm=TRUE), 3), "-", round(max(dat_main$psw, na.rm=TRUE), 3), ")")
+  # Copy prepped data to output folder for reference
+  file.copy(USE_PREPPED_DATA, file.path(out_main, "rep_data_with_psw.csv"), overwrite = TRUE)
+} else {
+  dat_main <- dat
+  
+  # PSW is always computed and used in the official pipeline.
+  dat_main <- compute_psw_overlap(dat_main, x = TREATMENT_VAR, covars = PSW_COVARS, out_txt = file.path(out_main, "psw_stage_report.txt"))
+  bal <- balance_table(dat_main, x = TREATMENT_VAR, covars = PSW_COVARS)
+  write.table(bal, file.path(out_main, "psw_balance_smd.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
+  write.csv(dat_main, file.path(out_main, "rep_data_with_psw.csv"), row.names = FALSE)
+}
 
 # -------------------------
 # Recode grouping vars early (labels only; used for invariance + MG)
@@ -971,7 +1124,7 @@ fit_main <- fit_mg_fast_vs_nonfast_with_outputs(
 # -------------------------
 # Sensitivity: unweighted parallel fit (for Table 12)
 # -------------------------
-out_sens <- file.path(OUT_BASE, "sensitivity_unweighted_parallel")
+out_sens <- file.path(OUT_SENS, "sensitivity_unweighted_parallel")
 dir.create(out_sens, recursive = TRUE, showWarnings = FALSE)
 fit_sens <- fit_mg_fast_vs_nonfast_with_outputs(
   dat = dat_main,
@@ -1279,7 +1432,7 @@ if (!(RACE_VAR %in% names(dat_race_base))) {
 
 }
 
-sink(file.path(OUT_BASE, "run_log.txt"))
+sink(file.path(OUT_LOGS, "run_log.txt"))
 cat("Run complete\n")
 cat("MODEL_FILE: ", MODEL_FILE, "\n", sep = "")
 cat("REP_DATA_CSV: ", REP_DATA_CSV, "\n", sep = "")
@@ -1288,6 +1441,7 @@ cat("TREATMENT_VAR: ", TREATMENT_VAR, "\n", sep = "")
 cat("DO_PSW: ", DO_PSW, "\n", sep = "")
 cat("TABLE_CHECK_MODE: ", TABLE_CHECK_MODE, "\n", sep = "")
 cat("SMOKE_ONLY_A: ", SMOKE_ONLY_A, "\n", sep = "")
+cat("SKIP_POST_PROCESSING: ", SKIP_POST_PROCESSING, "\n", sep = "")
 cat("B_BOOT_MAIN: ", B_BOOT_MAIN, "\n", sep = "")
 cat("BOOT_CI_TYPE_MAIN: ", BOOT_CI_TYPE_MAIN, "\n", sep = "")
 cat("B_BOOT_TOTAL: ", B_BOOT_TOTAL, "\n", sep = "")
@@ -1312,10 +1466,13 @@ sink()
 # =============================================================================
 # Generate Standards Compliance Visualizations (with actual data from this run)
 # =============================================================================
+if (isTRUE(SKIP_POST_PROCESSING)) {
+  message("\n=== SKIP_POST_PROCESSING=TRUE: Skipping plots/tables/standards visualization ===")
+} else {
 message("\n=== Generating Standards Compliance Visualizations ===")
 
 # Extract actual fit measures from the main fit for the visualization
-standards_data_path <- file.path(OUT_BASE, "standards_data.json")
+standards_data_path <- file.path(OUT_FIGURES, "standards_data.json")
 tryCatch({
   # Read fit measures from main structural output
   fm_path <- file.path(out_main, "structural", "structural_fitMeasures.txt")
@@ -1363,15 +1520,18 @@ tryCatch({
   message("Could not extract fit measures for visualization: ", e$message)
 })
 
-# Call visualization script with actual data
+# Call visualization script with actual data (outputs to OUT_FIGURES)
 viz_cmd <- if (file.exists(standards_data_path)) {
-  sprintf("python3 3_Analysis/4_Plots_Code/plot_standards_comparison.py --out '%s' --data '%s'", OUT_BASE, standards_data_path)
+  sprintf(
+    "python3 3_Analysis/4_Plots_Code/plot_standards_comparison.py --out '%s' --data '%s'",
+    OUT_FIGURES, standards_data_path
+  )
 } else {
-  sprintf("python3 3_Analysis/4_Plots_Code/plot_standards_comparison.py --out '%s'", OUT_BASE)
+  sprintf("python3 3_Analysis/4_Plots_Code/plot_standards_comparison.py --out '%s'", OUT_FIGURES)
 }
 viz_result <- system(viz_cmd, intern = FALSE)
 if (viz_result == 0) {
-  message("Standards visualizations saved to: ", OUT_BASE)
+  message("Standards visualizations saved to: ", OUT_FIGURES)
 } else {
   warning("Standards visualization script failed (exit code ", viz_result, ")")
 }
@@ -1386,11 +1546,11 @@ boot_csv_path <- file.path(OUT_BASE, "RQ1_RQ3_main", "structural", "structural_p
 if (file.exists(boot_csv_path)) {
   tables_cmd <- sprintf(
     "python3 3_Analysis/3_Tables_Code/build_bootstrap_tables.py --csv '%s' --B %d --ci_type '%s' --out '%s'",
-    boot_csv_path, B_BOOT_MAIN, BOOT_CI_TYPE_MAIN, OUT_BASE
+    boot_csv_path, B_BOOT_MAIN, BOOT_CI_TYPE_MAIN, OUT_TABLES
   )
   tables_result <- system(tables_cmd, intern = FALSE)
   if (tables_result == 0) {
-    message("Bootstrap tables saved to: ", OUT_BASE)
+    message("Bootstrap tables saved to: ", OUT_TABLES)
   } else {
     warning("Bootstrap tables script failed (exit code ", tables_result, ")")
   }
@@ -1401,31 +1561,44 @@ if (file.exists(boot_csv_path)) {
 # =============================================================================
 # Generate Descriptive Plots (repopulated with fresh data each run)
 # All outputs go to OUT_BASE (same folder as tables, results, figures)
+# Uses PSW-weighted data for causal inference visualizations
 # =============================================================================
 message("\n=== Generating Descriptive Plots ===")
 
-# Run plot_descriptives.py - outputs to OUT_BASE
+# Use PSW-weighted data file which includes the 'psw' column
+PSW_DATA_CSV <- file.path(OUT_RQ1, "rep_data_with_psw.csv")
+if (!file.exists(PSW_DATA_CSV)) {
+  message("PSW data file not found, using analysis data without weights")
+  PSW_DATA_CSV <- ANALYSIS_DATA_CSV
+  PSW_FLAG <- ""
+} else {
+  PSW_FLAG <- "--weights psw"
+}
+
+# Run plot_descriptives.py - outputs to OUT_BASE with PSW weighting
 desc_cmd <- sprintf(
-  "python3 3_Analysis/4_Plots_Code/plot_descriptives.py --data '%s' --outdir '%s'",
-  REP_DATA_CSV, OUT_BASE
+  "python3 3_Analysis/4_Plots_Code/plot_descriptives.py --data '%s' --outdir '%s' %s",
+  PSW_DATA_CSV, OUT_FIGURES, PSW_FLAG
 )
 desc_result <- system(desc_cmd, intern = FALSE)
 if (desc_result == 0) {
-  message("Descriptive plots saved to: ", OUT_BASE)
+  message("Descriptive plots saved to: ", OUT_FIGURES)
 } else {
   warning("plot_descriptives.py failed (exit code ", desc_result, ")")
 }
 
-# Run plot_deep_cuts.py - outputs to OUT_BASE
+# Run plot_deep_cuts.py - outputs to OUT_BASE with PSW weighting
 deep_cmd <- sprintf(
-  "python3 3_Analysis/4_Plots_Code/plot_deep_cuts.py --data '%s' --outdir '%s'",
-  REP_DATA_CSV, OUT_BASE
+  "python3 3_Analysis/4_Plots_Code/plot_deep_cuts.py --data '%s' --outdir '%s' %s",
+  PSW_DATA_CSV, OUT_FIGURES, PSW_FLAG
 )
 deep_result <- system(deep_cmd, intern = FALSE)
 if (deep_result == 0) {
-  message("Deep-cut plots saved to: ", OUT_BASE)
+  message("Deep-cut plots saved to: ", OUT_FIGURES)
 } else {
   warning("plot_deep_cuts.py failed (exit code ", deep_result, ")")
 }
+
+}  # end if (!SKIP_POST_PROCESSING)
 
 message("ALL RQs run complete. Outputs under: ", OUT_BASE)

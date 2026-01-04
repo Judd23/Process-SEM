@@ -1,0 +1,135 @@
+{
+  "mainModel": {
+    "fitMeasures": {
+      "df": 523.0,
+      "chisq": 897.3582,
+      "pvalue": 0.0,
+      "cfi": 0.9966,
+      "tli": 0.9962,
+      "rmsea": 0.012,
+      "srmr": 0.0471,
+      "cfi.scaled": 0.997,
+      "tli.scaled": 0.9966,
+      "rmsea.scaled": 0.0109,
+      "cfi.robust": 0.9971,
+      "tli.robust": 0.9968,
+      "rmsea.robust": 0.0113
+    },
+    "structuralPaths": [
+      {
+        "id": "a1",
+        "from": "x_FASt",
+        "to": "EmoDiss",
+        "estimate": 0.1269,
+        "se": 0.0374,
+        "z": 3.396,
+        "pvalue": 0.0006836017330562,
+        "std_estimate": 0.0585
+      },
+      {
+        "id": "a1z",
+        "from": "XZ_c",
+        "to": "EmoDiss",
+        "estimate": 0.0028,
+        "se": 0.0151,
+        "z": 0.184,
+        "pvalue": 0.853816493240062,
+        "std_estimate": 0.0036
+      },
+      {
+        "id": "g1",
+        "from": "cohort",
+        "to": "EmoDiss",
+        "estimate": 0.002,
+        "se": 0.0311,
+        "z": 0.063,
+        "pvalue": 0.95002105151559,
+        "std_estimate": 0.0009
+      },
+      {
+        "id": "a2",
+        "from": "x_FASt",
+        "to": "QualEngag",
+        "estimate": -0.0103,
+        "se": 0.0365,
+        "z": -0.283,
+        "pvalue": 0.77751730390983,
+        "std_estimate": -0.005
+      },
+      {
+        "id": "a2z",
+        "from": "XZ_c",
+        "to": "QualEngag",
+        "estimate": -0.0142,
+        "se": 0.0143,
+        "z": -0.996,
+        "pvalue": 0.319082579458622,
+        "std_estimate": -0.0194
+      },
+      {
+        "id": "g2",
+        "from": "cohort",
+        "to": "QualEngag",
+        "estimate": -0.0387,
+        "se": 0.03,
+        "z": -1.29,
+        "pvalue": 0.197151641859693,
+        "std_estimate": -0.0186
+      },
+      {
+        "id": "c",
+        "from": "x_FASt",
+        "to": "DevAdj",
+        "estimate": 0.0414,
+        "se": 0.0135,
+        "z": 3.068,
+        "pvalue": 0.0021515633242885,
+        "std_estimate": 0.0552
+      },
+      {
+        "id": "cz",
+        "from": "XZ_c",
+        "to": "DevAdj",
+        "estimate": -0.009,
+        "se": 0.0048,
+        "z": -1.882,
+        "pvalue": 0.0598560129175234,
+        "std_estimate": -0.0342
+      },
+      {
+        "id": "b1",
+        "from": "EmoDiss",
+        "to": "DevAdj",
+        "estimate": -0.2025,
+        "se": 0.0075,
+        "z": -26.974,
+        "pvalue": 0.0,
+        "std_estimate": -0.5863
+      },
+      {
+        "id": "b2",
+        "from": "QualEngag",
+        "to": "DevAdj",
+        "estimate": 0.1599,
+        "se": 0.0069,
+        "z": 23.096,
+        "pvalue": 0.0,
+        "std_estimate": 0.4438
+      },
+      {
+        "id": "g3",
+        "from": "cohort",
+        "to": "DevAdj",
+        "estimate": -0.0063,
+        "se": 0.0113,
+        "z": -0.556,
+        "pvalue": 0.578395303287147,
+        "std_estimate": -0.0084
+      }
+    ]
+  },
+  "bootstrap": {
+    "n_replicates": 2000,
+    "ci_type": "bca.simple"
+  }
+}

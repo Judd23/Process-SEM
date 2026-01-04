@@ -17,26 +17,26 @@ DevAdj ~ c(W3__c_g1,W3__c_g2)*x_FASt + c(W3__cc_g1,W3__cc_g2)*credit_dose_c + c(
          hgrades_c + bparented_c + hapcl + hprecalc13 + hchallenge_c + cSFcareer_c
 
 # conditional direct effects of FASt on DevAdj at Z values (per group)
-W3__dir_z_low_g1 := W3__c_g1 + W3__cz_g1*-1.30278493088
-W3__dir_z_low_g2 := W3__c_g2 + W3__cz_g2*-1.30278493088
+W3__dir_z_low_g1 := W3__c_g1 + W3__cz_g1*-1.88867284425
+W3__dir_z_low_g2 := W3__c_g2 + W3__cz_g2*-1.88867284425
 W3__dir_z_mid_g1 := W3__c_g1 + W3__cz_g1*0
 W3__dir_z_mid_g2 := W3__c_g2 + W3__cz_g2*0
-W3__dir_z_high_g1 := W3__c_g1 + W3__cz_g1*1.30278493088
-W3__dir_z_high_g2 := W3__c_g2 + W3__cz_g2*1.30278493088
+W3__dir_z_high_g1 := W3__c_g1 + W3__cz_g1*1.88867284425
+W3__dir_z_high_g2 := W3__c_g2 + W3__cz_g2*1.88867284425
 
 # conditional a-paths at Z values (per group)
-W3__a1_z_low_g1 := W3__a1_g1 + W3__a1z_g1*-1.30278493088
-W3__a1_z_low_g2 := W3__a1_g2 + W3__a1z_g2*-1.30278493088
+W3__a1_z_low_g1 := W3__a1_g1 + W3__a1z_g1*-1.88867284425
+W3__a1_z_low_g2 := W3__a1_g2 + W3__a1z_g2*-1.88867284425
 W3__a1_z_mid_g1 := W3__a1_g1 + W3__a1z_g1*0
 W3__a1_z_mid_g2 := W3__a1_g2 + W3__a1z_g2*0
-W3__a1_z_high_g1 := W3__a1_g1 + W3__a1z_g1*1.30278493088
-W3__a1_z_high_g2 := W3__a1_g2 + W3__a1z_g2*1.30278493088
-W3__a2_z_low_g1 := W3__a2_g1 + W3__a2z_g1*-1.30278493088
-W3__a2_z_low_g2 := W3__a2_g2 + W3__a2z_g2*-1.30278493088
+W3__a1_z_high_g1 := W3__a1_g1 + W3__a1z_g1*1.88867284425
+W3__a1_z_high_g2 := W3__a1_g2 + W3__a1z_g2*1.88867284425
+W3__a2_z_low_g1 := W3__a2_g1 + W3__a2z_g1*-1.88867284425
+W3__a2_z_low_g2 := W3__a2_g2 + W3__a2z_g2*-1.88867284425
 W3__a2_z_mid_g1 := W3__a2_g1 + W3__a2z_g1*0
 W3__a2_z_mid_g2 := W3__a2_g2 + W3__a2z_g2*0
-W3__a2_z_high_g1 := W3__a2_g1 + W3__a2z_g1*1.30278493088
-W3__a2_z_high_g2 := W3__a2_g2 + W3__a2z_g2*1.30278493088
+W3__a2_z_high_g1 := W3__a2_g1 + W3__a2z_g1*1.88867284425
+W3__a2_z_high_g2 := W3__a2_g2 + W3__a2z_g2*1.88867284425
 
 # conditional indirect effects at Z values (per group)
 W3__ind_EmoDiss_z_low_g1 := W3__a1_z_low_g1*W3__b1_g1

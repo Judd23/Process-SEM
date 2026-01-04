@@ -16,6 +16,8 @@ Author: Claude Code (generated for Judd Johnson dissertation)
 Date: January 2026
 """
 
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -33,11 +35,18 @@ np.random.seed(42)
 N_TOTAL = 5000
 
 # Archetype definitions with prevalence and characteristics
+# Demographics use PROBABILITIES (0.0-1.0) for binary vars to ensure variance within groups
+# pell/firstgen: probability of being 1 (e.g., 0.65 = 65% pell, 35% non-pell)
+#
+# CSU DEMOGRAPHIC TARGETS (2024):
+#   Race: Hispanic 47%, White 21%, Asian 16%, Black 4%, Other/Multiracial 12%
+#   First-gen: ~45%, Pell: ~42%, Female: ~58%
+#   Living: ~52% family, ~23% on-campus, ~25% off-campus
 ARCHETYPES = {
     1: {
         'name': 'Latina Commuter Caretaker',
-        'prevalence': 0.18,
-        'demographics': {'re_all': 'Hispanic/Latino', 'sex': 'Female', 'firstgen': 1, 'pell': 1},
+        'prevalence': 0.22,  # Hispanic target contribution
+        'demographics': {'re_all': 'Hispanic/Latino', 'sex': 'Female', 'firstgen': 0.65, 'pell': 0.60},
         'living': 'With family (commuting)',
         'fast_prob': 0.20,
         'base_responses': {
@@ -47,10 +56,10 @@ ARCHETYPES = {
         'dose_amplify': 1.2,  # Dose makes it worse
     },
     2: {
-        'name': 'Latino First-Gen Striver',
-        'prevalence': 0.12,
-        'demographics': {'re_all': 'Hispanic/Latino', 'sex': 'Male', 'firstgen': 1, 'pell': 1},
-        'living': 'With family (commuting)',
+        'name': 'Latino Off-Campus Working',
+        'prevalence': 0.08,  # Hispanic off-campus segment
+        'demographics': {'re_all': 'Hispanic/Latino', 'sex': 'Male', 'firstgen': 0.60, 'pell': 0.55},
+        'living': 'Off-campus (rent/apartment)',
         'fast_prob': 0.25,
         'base_responses': {
             'EmoDiss': 3.8, 'QualEngag': 4.8, 'Belong': 2.7, 'Gains': 2.8, 'SupportEnv': 2.6, 'Satisf': 2.8
@@ -60,8 +69,8 @@ ARCHETYPES = {
     },
     3: {
         'name': 'Asian High-Pressure Achiever',
-        'prevalence': 0.10,
-        'demographics': {'re_all': 'Asian', 'sex': None, 'firstgen': 0, 'pell': 0},
+        'prevalence': 0.11,  # Asian target contribution
+        'demographics': {'re_all': 'Asian', 'sex': None, 'firstgen': 0.15, 'pell': 0.12},
         'living': 'With family (commuting)',
         'fast_prob': 0.45,
         'base_responses': {
@@ -72,9 +81,9 @@ ARCHETYPES = {
     },
     4: {
         'name': 'Asian First-Gen Navigator',
-        'prevalence': 0.05,
-        'demographics': {'re_all': 'Asian', 'sex': None, 'firstgen': 1, 'pell': 1},
-        'living': 'With family (commuting)',
+        'prevalence': 0.04,  # Asian first-gen segment
+        'demographics': {'re_all': 'Asian', 'sex': None, 'firstgen': 0.65, 'pell': 0.60},
+        'living': 'Off-campus (rent/apartment)',
         'fast_prob': 0.30,
         'base_responses': {
             'EmoDiss': 4.8, 'QualEngag': 4.3, 'Belong': 2.3, 'Gains': 2.9, 'SupportEnv': 2.4, 'Satisf': 2.6
@@ -84,8 +93,8 @@ ARCHETYPES = {
     },
     5: {
         'name': 'Black Campus Connector',
-        'prevalence': 0.03,
-        'demographics': {'re_all': 'Black/African American', 'sex': 'Female', 'firstgen': 1, 'pell': 1},
+        'prevalence': 0.025,  # Black campus segment
+        'demographics': {'re_all': 'Black/African American', 'sex': 'Female', 'firstgen': 0.55, 'pell': 0.50},
         'living': 'On-campus (residence hall)',
         'fast_prob': 0.15,
         'base_responses': {
@@ -96,8 +105,8 @@ ARCHETYPES = {
     },
     6: {
         'name': 'White Residential Traditional',
-        'prevalence': 0.08,
-        'demographics': {'re_all': 'White', 'sex': None, 'firstgen': 0, 'pell': 0},
+        'prevalence': 0.04,  # White campus segment
+        'demographics': {'re_all': 'White', 'sex': None, 'firstgen': 0.12, 'pell': 0.18},
         'living': 'On-campus (residence hall)',
         'fast_prob': 0.35,
         'base_responses': {
@@ -107,9 +116,9 @@ ARCHETYPES = {
         'dose_amplify': -0.5,  # Dose helps
     },
     7: {
-        'name': 'White Commuter Working',
-        'prevalence': 0.05,
-        'demographics': {'re_all': 'White', 'sex': None, 'firstgen': 1, 'pell': 0},
+        'name': 'White Off-Campus Working',
+        'prevalence': 0.04,  # White off-campus segment
+        'demographics': {'re_all': 'White', 'sex': None, 'firstgen': 0.45, 'pell': 0.50},
         'living': 'Off-campus (rent/apartment)',
         'fast_prob': 0.20,
         'base_responses': {
@@ -120,9 +129,9 @@ ARCHETYPES = {
     },
     8: {
         'name': 'Multiracial Bridge-Builder',
-        'prevalence': 0.06,
-        'demographics': {'re_all': 'Other/Multiracial/Unknown', 'sex': None, 'firstgen': None, 'pell': None},
-        'living': None,  # Mixed
+        'prevalence': 0.10,  # Other/Multiracial target contribution
+        'demographics': {'re_all': 'Other/Multiracial/Unknown', 'sex': None, 'firstgen': 0.40, 'pell': 0.42},
+        'living': None,  # Mixed living distribution
         'fast_prob': 0.25,
         'base_responses': {
             'EmoDiss': 3.4, 'QualEngag': 5.1, 'Belong': 2.7, 'Gains': 3.0, 'SupportEnv': 2.8, 'Satisf': 3.0
@@ -132,8 +141,8 @@ ARCHETYPES = {
     },
     9: {
         'name': 'Hispanic On-Campus Transitioner',
-        'prevalence': 0.08,
-        'demographics': {'re_all': 'Hispanic/Latino', 'sex': None, 'firstgen': 1, 'pell': None},
+        'prevalence': 0.17,  # Hispanic campus segment (largest on-campus group)
+        'demographics': {'re_all': 'Hispanic/Latino', 'sex': None, 'firstgen': 0.50, 'pell': 0.45},
         'living': 'On-campus (residence hall)',
         'fast_prob': 0.30,
         'base_responses': {
@@ -144,15 +153,52 @@ ARCHETYPES = {
     },
     10: {
         'name': 'Continuing-Gen Cruiser',
-        'prevalence': 0.25,
-        'demographics': {'re_all': None, 'sex': None, 'firstgen': 0, 'pell': 0},
-        'living': None,  # Any
+        'prevalence': 0.05,  # Mixed race (distributes by population proportions)
+        'demographics': {'re_all': None, 'sex': None, 'firstgen': 0.10, 'pell': 0.15},
+        'living': None,  # Mixed living distribution
         'fast_prob': 0.40,
         'base_responses': {
             'EmoDiss': 2.5, 'QualEngag': 5.5, 'Belong': 3.2, 'Gains': 2.9, 'SupportEnv': 3.1, 'Satisf': 3.3
         },
         'fast_effect': {'a1': -0.12, 'a2': 0.15},  # Beneficial
         'dose_amplify': -0.5,
+    },
+    # Additional archetypes for demographic diversity
+    11: {
+        'name': 'White Rural First-Gen',
+        'prevalence': 0.06,  # White family segment
+        'demographics': {'re_all': 'White', 'sex': None, 'firstgen': 0.60, 'pell': 0.55},
+        'living': 'With family (commuting)',
+        'fast_prob': 0.22,
+        'base_responses': {
+            'EmoDiss': 3.5, 'QualEngag': 4.6, 'Belong': 2.6, 'Gains': 2.8, 'SupportEnv': 2.6, 'Satisf': 2.8
+        },
+        'fast_effect': {'a1': 0.12, 'a2': -0.08},  # Slight harm (equity-impacted)
+        'dose_amplify': 0.8,
+    },
+    12: {
+        'name': 'Black Male Striver',
+        'prevalence': 0.015,  # Black off-campus segment
+        'demographics': {'re_all': 'Black/African American', 'sex': 'Male', 'firstgen': 0.50, 'pell': 0.45},
+        'living': 'Off-campus (rent/apartment)',
+        'fast_prob': 0.18,
+        'base_responses': {
+            'EmoDiss': 3.6, 'QualEngag': 4.7, 'Belong': 2.5, 'Gains': 2.9, 'SupportEnv': 2.5, 'Satisf': 2.7
+        },
+        'fast_effect': {'a1': 0.15, 'a2': -0.10},  # Harmful
+        'dose_amplify': 1.0,
+    },
+    13: {
+        'name': 'White Working-Class Striver',
+        'prevalence': 0.05,  # White off-campus segment
+        'demographics': {'re_all': 'White', 'sex': None, 'firstgen': 0.50, 'pell': 0.45},
+        'living': 'Off-campus (rent/apartment)',
+        'fast_prob': 0.18,
+        'base_responses': {
+            'EmoDiss': 3.8, 'QualEngag': 4.3, 'Belong': 2.4, 'Gains': 2.7, 'SupportEnv': 2.4, 'Satisf': 2.6
+        },
+        'fast_effect': {'a1': 0.10, 'a2': -0.06},  # Slight harm (equity-impacted)
+        'dose_amplify': 0.7,
     },
 }
 
@@ -446,7 +492,7 @@ def apply_missingness(df, archetype_ids):
 # MAIN GENERATION
 # =============================================================================
 
-def generate_dataset():
+def generate_dataset() -> Tuple[pd.DataFrame, np.ndarray]:
     """Generate the full empirically-aligned synthetic dataset."""
 
     print("=" * 60)
@@ -455,13 +501,14 @@ def generate_dataset():
 
     # Calculate archetype sample sizes
     archetype_ns = {}
-    remaining = N_TOTAL
+    total_assigned = 0
+    max_arch_id = max(ARCHETYPES.keys())
     for arch_id, arch in ARCHETYPES.items():
-        if arch_id < 10:
+        if arch_id < max_arch_id:
             n = int(N_TOTAL * arch['prevalence'])
             archetype_ns[arch_id] = n
-            remaining -= n
-    archetype_ns[10] = remaining  # Last archetype gets remainder
+            total_assigned += n
+    archetype_ns[max_arch_id] = N_TOTAL - total_assigned  # Last archetype gets remainder
 
     print(f"\nArchetype sample sizes:")
     for arch_id, n in archetype_ns.items():
@@ -495,17 +542,13 @@ def generate_dataset():
         else:
             sex = np.random.choice(['Female', 'Male'], n, p=[0.58, 0.42])
 
-        # First-gen
-        if demographics['firstgen'] is not None:
-            firstgen = np.array([demographics['firstgen']] * n)
-        else:
-            firstgen = np.random.binomial(1, 0.45, n)
+        # First-gen: now uses probability (0.0-1.0) instead of absolute 0/1
+        firstgen_prob = demographics['firstgen']
+        firstgen = np.random.binomial(1, firstgen_prob, n)
 
-        # Pell
-        if demographics['pell'] is not None:
-            pell = np.array([demographics['pell']] * n)
-        else:
-            pell = np.random.binomial(1, 0.50, n)
+        # Pell: now uses probability (0.0-1.0) instead of absolute 0/1
+        pell_prob = demographics['pell']
+        pell = np.random.binomial(1, pell_prob, n)
 
         # Living situation
         if arch['living'] is not None:
@@ -640,7 +683,7 @@ def generate_dataset():
 
     df = df[col_order]
 
-    return df, archetype_ids
+    return (df, archetype_ids)
 
 
 def print_summary_stats(df):
