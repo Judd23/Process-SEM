@@ -21,6 +21,18 @@ export default function Footer() {
           <span className={styles.badge}>Hayes Model 59</span>
         </div>
       </div>
+
+      <div className={styles.attribution}>
+        <div className={styles.attributionContent}>
+          <span className={styles.attributionText}>
+            Website designed and developed by <strong>J. Johnson</strong>
+          </span>
+          <span className={styles.separator}>|</span>
+          <span className={styles.company}>Echo Analytics</span>
+          <span className={styles.separator}>|</span>
+          <span className={styles.contact}>For inquiries, please contact: <a href="mailto:judd.johnson@gmail.com" className={styles.link}>judd.johnson@gmail.com</a></span>
+        </div>
+      </div>
     </footer>
   );
 }
