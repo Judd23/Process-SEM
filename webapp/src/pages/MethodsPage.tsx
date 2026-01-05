@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useModelData } from '../context/ModelDataContext';
-import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 import styles from './MethodsPage.module.css';
 
 const modelSpecs = [
@@ -18,7 +18,6 @@ export default function MethodsPage() {
   // Scroll reveal refs
   const headerRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
   const fitRef = useScrollReveal<HTMLElement>();
-  const specsRef = useStaggeredReveal<HTMLElement>();
 
   // Build fit measures table dynamically from pipeline data
   const fitMeasures = useMemo(() => {

@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import styles from './Icon.module.css';
 
 type IconName = 'chart' | 'users' | 'network' | 'microscope';
@@ -9,7 +10,7 @@ interface IconProps {
 }
 
 export default function Icon({ name, size = 32, className = '' }: IconProps) {
-  const icons: Record<IconName, JSX.Element> = {
+  const icons: Record<IconName, ReactElement> = {
     chart: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 3v18h18" />

@@ -132,29 +132,33 @@ Pre-configured tasks available (`.vscode/tasks.json`):
 ```
 webapp/src/
 ├── components/
-│   ├── charts/       # PathwayDiagram (D3), DoseResponseCurve, GroupComparison
+│   ├── charts/       # PathwayDiagram (D3, responsive), DoseResponseCurve, GroupComparison
 │   ├── layout/       # Header (with scroll progress bar), Footer, Layout
-│   └── ui/           # StatCard, Slider, Toggle, ThemeToggle
+│   └── ui/           # StatCard, Slider (with tick marks), Toggle, ThemeToggle, Icon, GlossaryTerm
 ├── context/          # ThemeContext, ResearchContext, ModelDataContext
 ├── data/             # JSON from R pipeline (modelResults, doseEffects, etc.)
-├── hooks/            # useScrollReveal (Intersection Observer animations)
+├── hooks/            # useScrollReveal, useStaggeredReveal (Intersection Observer animations)
 ├── pages/            # 7 pages: Landing, Home, Dose, Demographics, Pathway, Methods, Researcher
-└── styles/           # variables.css (design tokens), global.css (animation system)
+└── styles/           # variables.css (design tokens), global.css (bounce animation system)
 ```
 
 ### Design System
 - **Colors**: Semantic construct colors (distress=red, engagement=blue, FASt=orange)
-- **Typography**: Source Serif Pro (headings), Source Sans Pro (body)
-- **Animations**: CSS-only with `useScrollReveal` hook, respects `prefers-reduced-motion`
+- **Typography**: Source Serif Pro (headings), Source Sans Pro (body), Source Code Pro (mono)
+- **Animations**: CSS-only bounce animations (`--ease-out-back` spring easing), respects `prefers-reduced-motion`
 - **Themes**: Light/dark mode with system preference detection
+- **Accessibility**: WCAG 2.1 AA compliant (44px touch targets, keyboard navigation, aria labels)
 
 ### Key Patterns
 - **Data Flow**: R pipeline → JSON exports → React context → components (no hardcoded values)
-- **Editorial/storytelling layout**: Scroll-triggered reveals with `useScrollReveal` hook
-- **Sticky controls**: PathwayPage controls with glassmorphism backdrop-filter
+- **Editorial/storytelling layout**: Scroll-triggered reveals with `useScrollReveal` and `useStaggeredReveal` hooks
+- **Sticky controls**: PathwayPage controls with IntersectionObserver-based `.stuck` class and glassmorphism
 - **Header scroll progress**: Gradient bar (accent → engagement) tracks page position
 - **Responsive breakpoints**: 480px (mobile), 768px (tablet), 1024px (desktop)
 - **Theme switching**: Light/dark mode with CSS custom properties + system preference detection
+- **Interactive elements**: Hover effects with lift animations, focus-visible outlines, active states
+- **Glossary system**: Inline tooltips with auto-positioning (5 key terms on HomePage)
+- **Responsive diagrams**: PathwayDiagram auto-sizes based on container width with aspect ratio preservation
 
 ## Development Workflow
 

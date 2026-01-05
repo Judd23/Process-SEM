@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface ScrollRevealOptions {
   /** Intersection threshold (0-1). Default: 0.1 */

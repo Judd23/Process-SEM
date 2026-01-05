@@ -5,7 +5,6 @@ import { useTheme } from '../../context/ThemeContext';
 import { useModelData } from '../../context/ModelDataContext';
 import { colors } from '../../utils/colorScales';
 import { formatNumber } from '../../utils/formatters';
-import { useScrollReveal } from '../../hooks/useScrollReveal';
 import styles from './PathwayDiagram.module.css';
 
 // Node positions (relative coordinates, will be scaled)

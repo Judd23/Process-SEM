@@ -54,7 +54,7 @@ export default function DemographicsPage() {
           <div className={`${styles.chartContainer} reveal`}>
             <h2>Effect on Stress by {groupingOptions.find((o) => o.value === groupingVariable)?.label}</h2>
             <p className={styles.chartDescription}>
-              Does earning transfer credits lead to different stress levels across student groups?
+              Does earning transfer credits lead to different stress levels across equity groups?
             </p>
             <GroupComparison grouping={groupingVariable} pathway="a1" />
           </div>
@@ -62,7 +62,7 @@ export default function DemographicsPage() {
           <div className={`${styles.chartContainer} reveal`}>
             <h2>Effect on Engagement by {groupingOptions.find((o) => o.value === groupingVariable)?.label}</h2>
             <p className={styles.chartDescription}>
-              Does earning transfer credits change campus engagement differently across groups?
+              Does earning transfer credits change campus engagement differently across equity groups?
             </p>
             <GroupComparison grouping={groupingVariable} pathway="a2" />
           </div>
