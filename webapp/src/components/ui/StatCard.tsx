@@ -1,7 +1,7 @@
 import styles from './StatCard.module.css';
 
 interface StatCardProps {
-  label: string;
+  label: string | React.ReactNode;
   value: string | number;
   subtext?: string;
   color?: 'default' | 'positive' | 'negative' | 'accent';

@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import ThemeToggle from '../ui/ThemeToggle';
 import styles from './Header.module.css';
 
@@ -12,8 +13,38 @@ const navItems = [
 ];
 
 export default function Header() {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const location = useLocation();
+
+  // Don't show progress bar on landing page
+  const showProgress = location.pathname !== '/';
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Initial calculation
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [location.pathname]);
+
   return (
     <header className={styles.header}>
+      {showProgress && (
+        <div
+          className={styles.progressBar}
+          style={{ width: `${scrollProgress * 100}%` }}
+          role="progressbar"
+          aria-valuenow={Math.round(scrollProgress * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Page scroll progress"
+        />
+      )}
       <div className={styles.container}>
         <div className={styles.brand}>
           <h1 className={styles.title}>Dual Credit & Developmental Adjustment</h1>

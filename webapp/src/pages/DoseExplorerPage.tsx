@@ -4,11 +4,18 @@ import Slider from '../components/ui/Slider';
 import Toggle from '../components/ui/Toggle';
 import DoseResponseCurve from '../components/charts/DoseResponseCurve';
 import StatCard from '../components/ui/StatCard';
+import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import styles from './DoseExplorerPage.module.css';
 
 export default function DoseExplorerPage() {
   const { selectedDose, setSelectedDose, showCIs, toggleCIs } = useResearch();
   const { doseCoefficients } = useModelData();
+
+  // Scroll reveal refs
+  const headerRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
+  const effectsRef = useScrollReveal<HTMLElement>();
+  const chartsRef = useStaggeredReveal<HTMLElement>();
+  const interpretRef = useStaggeredReveal<HTMLElement>();
 
   // Calculate conditional effects at selected dose (from dynamic pipeline data)
   // These formulas come from the model: effect = main + (dose * moderation)
@@ -19,7 +26,8 @@ export default function DoseExplorerPage() {
   return (
     <div className={styles.page}>
       <div className="container">
-        <header className={styles.header}>
+        <header ref={headerRef} className={`${styles.header} reveal`}>
+          <span className={styles.eyebrow}>Dose-Response Analysis</span>
           <h1>Does the Number of Credits Matter?</h1>
           <p className="lead">
             Some students earn just a few college credits in high school, while others
@@ -41,6 +49,7 @@ export default function DoseExplorerPage() {
               formatValue={(v) => `${v} credits`}
               showThreshold={12}
               thresholdLabel="12+ = FASt Student"
+              tickMarks={[12, 24, 36, 48, 60]}
             />
           </div>
           <div className={styles.toggleContainer}>
@@ -53,7 +62,7 @@ export default function DoseExplorerPage() {
           </div>
         </section>
 
-        <section className={styles.conditionalEffects}>
+        <section ref={effectsRef} className={`${styles.conditionalEffects} reveal`}>
           <h2>What Happens at {selectedDose} Credits?</h2>
           <div className={styles.effectCards}>
             <StatCard
@@ -71,8 +80,8 @@ export default function DoseExplorerPage() {
           </div>
         </section>
 
-        <section className={styles.charts}>
-          <div className={styles.chartContainer}>
+        <section ref={chartsRef} className={`${styles.charts} stagger-children`}>
+          <div className={`${styles.chartContainer} reveal`}>
             <h3>Stress Levels by Credit Amount</h3>
             <p className={styles.chartDescription}>
               Students with transfer credits report higher stress regardless of how many
@@ -82,7 +91,7 @@ export default function DoseExplorerPage() {
             <DoseResponseCurve outcome="distress" selectedDose={selectedDose} />
           </div>
 
-          <div className={styles.chartContainer}>
+          <div className={`${styles.chartContainer} reveal`}>
             <h3>Campus Engagement by Credit Amount</h3>
             <p className={styles.chartDescription}>
               There's a hint of an interesting pattern here: students with fewer transfer
@@ -93,10 +102,10 @@ export default function DoseExplorerPage() {
           </div>
         </section>
 
-        <section className={styles.interpretation}>
+        <section ref={interpretRef} className={`${styles.interpretation} stagger-children`}>
           <h2>Understanding These Numbers</h2>
           <div className={styles.interpretationContent}>
-            <article className={styles.interpretationCard}>
+            <article className={`${styles.interpretationCard} reveal`}>
               <h3>What Do the Numbers Mean?</h3>
               <p>
                 The effect sizes are in "standard deviation" units. An effect of +0.13
@@ -104,7 +113,7 @@ export default function DoseExplorerPage() {
                 stress measures—a small but meaningful difference in a group of students.
               </p>
             </article>
-            <article className={styles.interpretationCard}>
+            <article className={`${styles.interpretationCard} reveal`}>
               <h3>Why Credit Amount Matters</h3>
               <p>
                 Not all accelerated students are alike. Someone with 12 credits took
@@ -112,7 +121,7 @@ export default function DoseExplorerPage() {
                 nearly an associate degree. Their experiences might differ substantially.
               </p>
             </article>
-            <article className={styles.interpretationCard}>
+            <article className={`${styles.interpretationCard} reveal`}>
               <h3>What This Means for Colleges</h3>
               <p>
                 These findings suggest colleges might need to support transfer students

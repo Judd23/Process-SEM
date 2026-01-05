@@ -5,6 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useModelData } from '../../context/ModelDataContext';
 import { colors } from '../../utils/colorScales';
 import { formatNumber } from '../../utils/formatters';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 import styles from './PathwayDiagram.module.css';
 
 // Node positions (relative coordinates, will be scaled)
@@ -56,14 +57,33 @@ interface PathwayDiagramProps {
 }
 
 export default function PathwayDiagram({
-  width = 700,
-  height = 400,
+  width: initialWidth = 700,
+  height: initialHeight = 400,
   interactive = true,
 }: PathwayDiagramProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
   const { highlightedPath, setHighlightedPath, selectedDose } = useResearch();
   const { resolvedTheme } = useTheme();
   const { paths, doseCoefficients } = useModelData();
+
+  // Responsive sizing
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const responsiveWidth = Math.min(initialWidth, containerWidth - 40);
+        const aspectRatio = initialHeight / initialWidth;
+        const responsiveHeight = responsiveWidth * aspectRatio;
+        setDimensions({ width: responsiveWidth, height: responsiveHeight });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, [initialWidth, initialHeight]);
   const [tooltip, setTooltip] = useState<{
     show: boolean;
     x: number;
@@ -135,6 +155,7 @@ export default function PathwayDiagram({
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
+    const { width, height } = dimensions;
     const margin = { top: 40, right: 40, bottom: 40, left: 40 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
@@ -499,11 +520,11 @@ export default function PathwayDiagram({
         .text(item.label);
     });
 
-  }, [width, height, highlightedPath, interactive, setHighlightedPath, resolvedTheme, selectedDose]);
+  }, [dimensions, highlightedPath, interactive, setHighlightedPath, resolvedTheme, selectedDose, modelData, getAdjustedEstimate]);
 
   return (
-    <div className={styles.container}>
-      <svg ref={svgRef} width={width} height={height} className={styles.svg} />
+    <div ref={containerRef} className={styles.container}>
+      <svg ref={svgRef} width={dimensions.width} height={dimensions.height} className={styles.svg} />
       {tooltip?.show && (
         <div
           className={`${styles.tooltip} ${tooltip.content.type === 'path' ? styles.pathTooltip : styles.nodeTooltip}`}

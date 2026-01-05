@@ -1,14 +1,40 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useResearch } from '../context/ResearchContext';
 import { useModelData } from '../context/ModelDataContext';
 import PathwayDiagram from '../components/charts/PathwayDiagram';
 import Toggle from '../components/ui/Toggle';
 import Slider from '../components/ui/Slider';
+import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import styles from './PathwayPage.module.css';
 
 export default function PathwayPage() {
   const { highlightedPath, setHighlightedPath, showCIs, toggleCIs, selectedDose, setSelectedDose } = useResearch();
   const { paths } = useModelData();
+  const [isStuck, setIsStuck] = useState(false);
+  const controlsRef = useRef<HTMLElement>(null);
+
+  // Scroll reveal refs
+  const headerRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
+  const diagramRef = useScrollReveal<HTMLElement>({ threshold: 0.1 });
+  const doseRef = useScrollReveal<HTMLElement>();
+  const coefficientsRef = useStaggeredReveal<HTMLElement>();
+  const summaryRef = useStaggeredReveal<HTMLElement>();
+
+  // Detect sticky state
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsStuck(!entry.isIntersecting);
+      },
+      { threshold: [1], rootMargin: '-1px 0px 0px 0px' }
+    );
+
+    if (controlsRef.current) {
+      observer.observe(controlsRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   // Build path data dynamically from pipeline outputs
   const pathData = useMemo(() => [
@@ -97,7 +123,8 @@ export default function PathwayPage() {
   return (
     <div className={styles.page}>
       <div className="container">
-        <header className={styles.header}>
+        <header ref={headerRef} className={`${styles.header} reveal`}>
+          <span className={styles.eyebrow}>Interactive Model</span>
           <h1>How Transfer Credits Affect First-Year Success</h1>
           <p className="lead">
             This diagram shows the different ways that earning college credits in high school
@@ -106,7 +133,7 @@ export default function PathwayPage() {
           </p>
         </header>
 
-        <section className={styles.controls}>
+        <section ref={controlsRef} className={`${styles.controls} ${isStuck ? styles.stuck : ''}`}>
           <div className={styles.pathwayButtons}>
             {pathwayButtons.map((btn) => (
               <button
@@ -129,11 +156,11 @@ export default function PathwayPage() {
           </div>
         </section>
 
-        <section className={styles.diagram}>
+        <section ref={diagramRef} className={`${styles.diagram} reveal-scale`}>
           <PathwayDiagram width={800} height={450} interactive />
         </section>
 
-        <section className={styles.doseControl}>
+        <section ref={doseRef} className={`${styles.doseControl} reveal`}>
           <h2>How Many Credits Matter?</h2>
           <p className={styles.doseDescription}>
             Not all students earn the same number of credits. Use the slider to see
@@ -151,11 +178,12 @@ export default function PathwayPage() {
               formatValue={(v) => `${v} credits`}
               showThreshold={12}
               thresholdLabel="12+ = FASt Student"
+              tickMarks={[12, 24, 36, 48, 60]}
             />
           </div>
         </section>
 
-        <section className={styles.coefficients}>
+        <section ref={coefficientsRef} className={`${styles.coefficients} stagger-children`}>
           <h2>Key Findings</h2>
           <div className={styles.coefficientGrid}>
             {pathData.map((path) => {
@@ -172,7 +200,7 @@ export default function PathwayPage() {
               return (
                 <article
                   key={path.id}
-                  className={`${styles.coefficientCard} ${!isHighlighted ? styles.dimmed : ''}`}
+                  className={`${styles.coefficientCard} ${!isHighlighted ? styles.dimmed : ''} reveal`}
                 >
                   <div className={styles.coefficientHeader}>
                     <span className={styles.coefficientLabel}>{path.label}</span>
@@ -188,10 +216,10 @@ export default function PathwayPage() {
           </div>
         </section>
 
-        <section className={styles.summary}>
+        <section ref={summaryRef} className={`${styles.summary} stagger-children`}>
           <h2>The Big Picture</h2>
           <div className={styles.summaryGrid}>
-            <article className={styles.summaryCard}>
+            <article className={`${styles.summaryCard} reveal`}>
               <h3>The Stress Route</h3>
               <p>
                 Students with transfer credits report <strong>higher stress</strong> in their first year.
@@ -199,7 +227,7 @@ export default function PathwayPage() {
                 This is the "cost" side of accelerated credit.
               </p>
             </article>
-            <article className={styles.summaryCard}>
+            <article className={`${styles.summaryCard} reveal`}>
               <h3>The Engagement Route</h3>
               <p>
                 Transfer credits don't clearly change how engaged students are with campus life.
@@ -207,7 +235,7 @@ export default function PathwayPage() {
                 connect more with campus do much better overall.
               </p>
             </article>
-            <article className={styles.summaryCard}>
+            <article className={`${styles.summaryCard} reveal`}>
               <h3>Direct Benefits</h3>
               <p>
                 Beyond stress and engagement, transfer credits provide a <strong>small direct boost</strong>

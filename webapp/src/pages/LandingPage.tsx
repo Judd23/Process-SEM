@@ -37,6 +37,25 @@ export default function LandingPage() {
         <footer className={styles.footer}>
           <p>Ed.D. Dissertation Research · 2026</p>
         </footer>
+
+        <button
+          className={styles.scrollIndicator}
+          onClick={() => navigate('/home')}
+          aria-label="Scroll to explore the research"
+        >
+          <span className={styles.scrollText}>Scroll to explore</span>
+          <svg
+            className={styles.scrollChevron}
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
       </main>
     </div>
   );

@@ -1,11 +1,23 @@
 import { Link } from 'react-router-dom';
 import StatCard from '../components/ui/StatCard';
+import Icon from '../components/ui/Icon';
+import GlossaryTerm from '../components/ui/GlossaryTerm';
 import PathwayDiagram from '../components/charts/PathwayDiagram';
 import { useModelData } from '../context/ModelDataContext';
+import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
   const { sampleSize, fitMeasures, paths, fastPercent } = useModelData();
+
+  // Scroll reveal refs
+  const heroRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
+  const statsRef = useStaggeredReveal<HTMLElement>();
+  const finding1Ref = useScrollReveal<HTMLElement>();
+  const finding2Ref = useScrollReveal<HTMLElement>();
+  const finding3Ref = useScrollReveal<HTMLElement>();
+  const previewRef = useScrollReveal<HTMLElement>();
+  const exploreRef = useStaggeredReveal<HTMLElement>();
 
   // Derive key findings dynamically from pipeline data
   const keyFindings = {
@@ -18,142 +30,192 @@ export default function HomePage() {
   };
   return (
     <div className={styles.page}>
-      <div className="container">
-        {/* Hero Section */}
-        <section className={styles.hero}>
+      {/* Hero Section - Full viewport */}
+      <section ref={heroRef} className={`${styles.hero} reveal`}>
+        <div className="container">
+          <span className={styles.eyebrow}>Research Findings</span>
           <h1 className={styles.title}>
             How College Credits Earned in High School Affect First-Year Success
           </h1>
           <p className={styles.lead}>
-            Explore what happens when students enter college with transfer credits from
+            Explore what happens when students enter college with <GlossaryTerm term="Transfer Credits" definition="College credits earned while in high school through dual enrollment, AP exams, or other programs that can be applied toward a college degree.">transfer credits</GlossaryTerm> from
             high school. We studied California State University students to understand
             how earning credits early affects their stress levels, campus involvement,
-            and overall adjustment to college life.
+            and overall <GlossaryTerm term="Developmental Adjustment" definition="A student's overall success in transitioning to college, including sense of belonging, personal growth, feeling supported, and satisfaction with their college experience.">adjustment to college life</GlossaryTerm>.
           </p>
-        </section>
+        </div>
+      </section>
 
-        {/* Key Stats */}
-        <section className={styles.stats}>
-          <StatCard
-            label="Sample Size"
-            value={keyFindings.totalN.toLocaleString()}
-            subtext="CSU first-year students"
-            size="large"
-          />
-          <StatCard
-            label="Students with Transfer Credits"
-            value={`${keyFindings.fastPct}%`}
-            subtext="12+ credits from high school"
-            size="large"
-            color="accent"
-          />
-          <StatCard
-            label="Study Quality Score"
-            value={keyFindings.cfi.toFixed(3)}
-            subtext="Excellent statistical fit"
-            size="large"
-            color="positive"
-          />
-        </section>
-
-        {/* Key Finding Cards */}
-        <section className={styles.findings}>
-          <h2>Key Findings</h2>
-          <div className={styles.findingCards}>
-            <article className={styles.findingCard}>
-              <div className={styles.findingNumber} style={{ color: 'var(--color-distress)' }}>
-                <span>01</span>
-              </div>
-              <h3>The Stress Connection</h3>
-              <p>
-                Students who earned college credits in high school report <strong>higher stress
-                and anxiety</strong> during their first year, which makes it harder for them
-                to adjust to college.
-              </p>
-              <p className={styles.implication}>
-                Earning credits early can create unexpected pressure that affects how well
-                students settle into college life.
-              </p>
-            </article>
-
-            <article className={styles.findingCard}>
-              <div className={styles.findingNumber} style={{ color: 'var(--color-engagement)' }}>
-                <span>02</span>
-              </div>
-              <h3>Campus Involvement Matters</h3>
-              <p>
-                There's a <strong>sweet spot</strong> for transfer credits: students with a
-                moderate amount engage more on campus, while those with lots of credits
-                tend to be less involved.
-              </p>
-              <p className={styles.implication}>
-                How many credits you earn in high school can shape how connected you feel
-                to your college community.
-              </p>
-            </article>
-
-            <article className={styles.findingCard}>
-              <div className={styles.findingNumber} style={{ color: 'var(--color-fast)' }}>
-                <span>03</span>
-              </div>
-              <h3>More Credits = Bigger Impact</h3>
-              <p>
-                The <strong>amount of credits matters</strong>: having 12 credits affects you
-                differently than having 30+. More credits intensify both the benefits and
-                the challenges.
-              </p>
-              <p className={styles.implication}>
-                Students with 12 credits need different support than those who completed
-                a full year or more of college in high school.
-              </p>
-            </article>
+      {/* Key Stats */}
+      <section ref={statsRef} className={`${styles.stats} stagger-children`}>
+        <div className="container">
+          <div className={styles.statsGrid}>
+            <div className="reveal">
+              <StatCard
+                label="Sample Size"
+                value={keyFindings.totalN.toLocaleString()}
+                subtext="CSU first-year students"
+                size="large"
+              />
+            </div>
+            <div className="reveal">
+              <StatCard
+                label={<span>Students with <GlossaryTerm term="FASt Status" definition="First-year Accelerated Status - students who earned 12 or more transferable college credits before enrolling in their first year of college.">FASt Status</GlossaryTerm></span>}
+                value={`${keyFindings.fastPct}%`}
+                subtext="12+ credits from high school"
+                size="large"
+                color="accent"
+              />
+            </div>
+            <div className="reveal">
+              <StatCard
+                label="Study Quality Score"
+                value={keyFindings.cfi.toFixed(3)}
+                subtext="Excellent statistical fit"
+                size="large"
+                color="positive"
+              />
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Interactive Preview */}
-        <section className={styles.preview}>
+      {/* Key Findings - Editorial Layout */}
+      <section className={styles.findings}>
+        <div className="container">
+          <h2 className={styles.findingsTitle}>Key Findings</h2>
+          <hr className="section-divider" />
+        </div>
+
+        {/* Finding 1 */}
+        <article ref={finding1Ref} className={`${styles.findingSection} reveal`}>
+          <div className="container">
+            <div className={styles.findingContent}>
+              <div className={styles.findingNumber} style={{ color: 'var(--color-distress)' }}>
+                01
+              </div>
+              <div className={styles.findingText}>
+                <h3>The Stress Connection</h3>
+                <p>
+                  Students who earned college credits in high school report <strong>higher stress
+                  and anxiety</strong> during their first year, which makes it harder for them
+                  to adjust to college.
+                </p>
+                <p className={styles.implication}>
+                  Earning credits early can create unexpected pressure that affects how well
+                  students settle into college life.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        {/* Finding 2 */}
+        <article ref={finding2Ref} className={`${styles.findingSection} ${styles.findingSectionAlt} reveal`}>
+          <div className="container">
+            <div className={styles.findingContent}>
+              <div className={styles.findingNumber} style={{ color: 'var(--color-engagement)' }}>
+                02
+              </div>
+              <div className={styles.findingText}>
+                <h3>Campus Involvement Matters</h3>
+                <p>
+                  There's a <strong>sweet spot</strong> for transfer credits: students with a
+                  moderate amount engage more on campus, while those with lots of credits
+                  tend to be less involved. This is called a <GlossaryTerm term="Dose-Response Effect" definition="The relationship between the amount of something (like transfer credits) and its impact. In this study, we examine how different amounts of credits produce different effects on student outcomes.">dose-response effect</GlossaryTerm>.
+                </p>
+                <p className={styles.implication}>
+                  How many credits you earn in high school can shape how connected you feel
+                  to your college community.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        {/* Finding 3 */}
+        <article ref={finding3Ref} className={`${styles.findingSection} reveal`}>
+          <div className="container">
+            <div className={styles.findingContent}>
+              <div className={styles.findingNumber} style={{ color: 'var(--color-fast)' }}>
+                03
+              </div>
+              <div className={styles.findingText}>
+                <h3>More Credits = Bigger Impact</h3>
+                <p>
+                  The <strong>amount of credits matters</strong>: having 12 credits affects you
+                  differently than having 30+. More credits intensify both the benefits and
+                  the challenges.
+                </p>
+                <p className={styles.implication}>
+                  Students with 12 credits need different support than those who completed
+                  a full year or more of college in high school.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      {/* Interactive Preview */}
+      <section ref={previewRef} className={`${styles.preview} reveal-scale`}>
+        <div className="container">
           <h2>How It All Connects</h2>
           <p className={styles.previewText}>
             We studied how earning college credits in high school affects student success
             through two main paths: stress levels and campus involvement. The diagram below
-            shows these connections and how the number of credits changes the story.
+            shows these connections using a <GlossaryTerm term="Mediation Model" definition="A statistical approach that examines how one variable affects another through intermediate pathways. In this study, we test whether transfer credits affect college adjustment indirectly through stress and engagement.">mediation model</GlossaryTerm>, revealing how the number of credits changes the story.
           </p>
           <div className={styles.diagramContainer}>
             <PathwayDiagram />
           </div>
           <div className={styles.actions}>
-            <Link to="/pathway" className={styles.primaryButton}>
+            <Link to="/pathway" className="button button-primary button-lg">
               Explore the Connections
             </Link>
-            <Link to="/dose" className={styles.secondaryButton}>
+            <Link to="/dose" className="button button-secondary button-lg">
               See How Credit Amount Matters
             </Link>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Navigation Cards */}
-        <section className={styles.explore}>
+      {/* Navigation Cards */}
+      <section ref={exploreRef} className={`${styles.explore} stagger-children`}>
+        <div className="container">
           <h2>Explore the Research</h2>
           <div className={styles.exploreCards}>
-            <Link to="/dose" className={styles.exploreCard}>
+            <Link to="/dose" className={`${styles.exploreCard} reveal`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="chart" size={40} />
+              </span>
               <h3>Dose Effects</h3>
               <p>See how credit dose moderates treatment effects with interactive visualizations.</p>
             </Link>
-            <Link to="/demographics" className={styles.exploreCard}>
+            <Link to="/demographics" className={`${styles.exploreCard} reveal`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="users" size={40} />
+              </span>
               <h3>Demographics</h3>
               <p>Compare findings across race, first-generation, Pell, and other subgroups.</p>
             </Link>
-            <Link to="/pathway" className={styles.exploreCard}>
+            <Link to="/pathway" className={`${styles.exploreCard} reveal`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="network" size={40} />
+              </span>
               <h3>Pathways</h3>
               <p>Interact with the full SEM mediation diagram and explore each pathway.</p>
             </Link>
-            <Link to="/methods" className={styles.exploreCard}>
+            <Link to="/methods" className={`${styles.exploreCard} reveal`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="microscope" size={40} />
+              </span>
               <h3>Methods</h3>
               <p>Technical details on model specification, estimation, and diagnostics.</p>
             </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

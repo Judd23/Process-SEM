@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useModelData } from '../context/ModelDataContext';
+import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import styles from './MethodsPage.module.css';
 
 const modelSpecs = [
@@ -13,6 +14,11 @@ const modelSpecs = [
 
 export default function MethodsPage() {
   const { fitMeasures: fits } = useModelData();
+
+  // Scroll reveal refs
+  const headerRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
+  const fitRef = useScrollReveal<HTMLElement>();
+  const specsRef = useStaggeredReveal<HTMLElement>();
 
   // Build fit measures table dynamically from pipeline data
   const fitMeasures = useMemo(() => {
@@ -35,7 +41,8 @@ export default function MethodsPage() {
   return (
     <div className={styles.page}>
       <div className="container">
-        <header className={styles.header}>
+        <header ref={headerRef} className={`${styles.header} reveal`}>
+          <span className={styles.eyebrow}>Technical Methods</span>
           <h1>About This Study</h1>
           <p className="lead">
             This page explains how we analyzed the data and why you can trust the findings.
@@ -43,7 +50,7 @@ export default function MethodsPage() {
           </p>
         </header>
 
-        <section className={styles.section}>
+        <section ref={fitRef} className={`${styles.section} reveal`}>
           <h2>How Well Does the Model Fit?</h2>
           <p className={styles.sectionIntro}>
             These statistics tell us whether our model accurately represents the real patterns

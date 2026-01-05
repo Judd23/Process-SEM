@@ -9,6 +9,17 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* Scroll progress bar */
+.progressBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-engagement) 100%);
+  transition: width 50ms ease-out;
+  z-index: 101;
+}
+
 .container {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -73,6 +84,23 @@
   background: var(--color-accent-light);
 }
 
+/* Tablet breakpoint - reduce nav spacing */
+@media (max-width: 1024px) {
+  .nav {
+    gap: 2px;
+  }
+
+  .navLink {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .nav > :last-child {
+    margin-left: var(--spacing-xs);
+    padding-left: var(--spacing-sm);
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     flex-direction: row;
@@ -86,7 +114,7 @@
     flex: 1;
     min-width: 0;
   }
-  
+
   .title {
     font-size: var(--font-size-base);
     white-space: nowrap;
@@ -105,7 +133,7 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .nav > :last-child {
     margin-left: var(--spacing-xs);
     padding-left: var(--spacing-sm);
@@ -115,5 +143,12 @@
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: var(--font-size-sm);
     white-space: nowrap;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .progressBar {
+    transition: none;
   }
 }

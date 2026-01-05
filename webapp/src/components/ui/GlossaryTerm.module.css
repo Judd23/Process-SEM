@@ -1,0 +1,126 @@
+.container {
+  position: relative;
+  display: inline;
+}
+
+.term {
+  position: relative;
+  display: inline;
+  border-bottom: 1px dotted var(--color-accent);
+  cursor: help;
+  color: var(--color-text);
+  transition: border-color var(--transition-fast);
+}
+
+.term:hover,
+.term:focus {
+  border-bottom-color: var(--color-accent-hover);
+  outline: none;
+}
+
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  background: var(--color-accent);
+  border-radius: 50%;
+  vertical-align: super;
+  line-height: 1;
+}
+
+.tooltip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: max-content;
+  max-width: 320px;
+  padding: var(--spacing-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: fadeIn 200ms ease-out;
+}
+
+.tooltip.bottom {
+  top: calc(100% + 8px);
+}
+
+.tooltip.top {
+  bottom: calc(100% + 8px);
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.tooltip.bottom::before {
+  top: -6px;
+  border-width: 0 6px 6px 6px;
+  border-color: transparent transparent var(--color-border) transparent;
+}
+
+.tooltip.top::before {
+  bottom: -6px;
+  border-width: 6px 6px 0 6px;
+  border-color: var(--color-border) transparent transparent transparent;
+}
+
+.tooltipTerm {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+  margin-bottom: var(--spacing-xs);
+}
+
+.tooltipDefinition {
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--color-text);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .tooltip {
+    max-width: 280px;
+    font-size: var(--font-size-xs);
+  }
+
+  .tooltipTerm {
+    font-size: var(--font-size-xs);
+  }
+
+  .tooltipDefinition {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    animation: none;
+  }
+}

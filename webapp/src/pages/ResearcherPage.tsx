@@ -1,4 +1,5 @@
 import { useTheme } from '../context/ThemeContext';
+import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import styles from './ResearcherPage.module.css';
 
 export default function ResearcherPage() {
@@ -7,9 +8,17 @@ export default function ResearcherPage() {
     ? `${import.meta.env.BASE_URL}researcher/SDSUforDark.png`
     : `${import.meta.env.BASE_URL}researcher/SDSUColor.png`;
 
+  // Scroll reveals
+  const heroRef = useScrollReveal<HTMLElement>({ threshold: 0.1 });
+  const factsRef = useStaggeredReveal<HTMLElement>();
+  const blockARef = useScrollReveal<HTMLElement>();
+  const blockBRef = useScrollReveal<HTMLElement>();
+  const blockCRef = useScrollReveal<HTMLElement>();
+  const blockDRef = useScrollReveal<HTMLElement>();
+
   return (
     <div className={styles.page}>
-      <header className={styles.hero}>
+      <header ref={heroRef} className={`${styles.hero} reveal-fade`}>
         <div className={styles.heroGrid}>
           <figure className={styles.heroFigure}>
             <div className={styles.heroMedia}>
@@ -56,17 +65,17 @@ export default function ResearcherPage() {
       </header>
 
       <main className={styles.main}>
-        <section className={styles.factsStrip}>
+        <section ref={factsRef} className={`${styles.factsStrip} stagger-children`}>
           <div className={styles.factsInner}>
-            <div className={styles.fact}>
+            <div className={`${styles.fact} reveal-up`}>
               <div className={styles.factLabel}>Focus</div>
               <div className={styles.factValue}>Student development | equity | pathways</div>
             </div>
-            <div className={styles.fact}>
+            <div className={`${styles.fact} reveal-up`}>
               <div className={styles.factLabel}>Methods</div>
               <div className={styles.factValue}>SEM, causal inference, process models</div>
             </div>
-            <div className={styles.fact}>
+            <div className={`${styles.fact} reveal-up`}>
               <div className={styles.factLabel}>Email</div>
               <a href="mailto:jjohnson4039@SDSU.edu" className={styles.factLink}>
                 jjohnson4039@SDSU.edu
@@ -76,7 +85,7 @@ export default function ResearcherPage() {
         </section>
 
         <section className={styles.grid}>
-          <article className={styles.blockA}>
+          <article ref={blockARef} className={`${styles.blockA} reveal-left`}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>01</span>
               <h2>Background</h2>
@@ -91,7 +100,7 @@ export default function ResearcherPage() {
             </p>
           </article>
 
-          <aside className={styles.blockB}>
+          <aside ref={blockBRef} className={`${styles.blockB} reveal-right`}>
             <div className={styles.quotePanel}>
               <blockquote className={styles.pullQuote}>
                 <p>
@@ -106,7 +115,7 @@ export default function ResearcherPage() {
             </div>
           </aside>
 
-          <article className={styles.blockC}>
+          <article ref={blockCRef} className={`${styles.blockC} reveal-left`}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>02</span>
               <h2>Research Areas</h2>
@@ -119,7 +128,7 @@ export default function ResearcherPage() {
             </ul>
           </article>
 
-          <article className={styles.blockD}>
+          <article ref={blockDRef} className={`${styles.blockD} reveal-right`}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>03</span>
               <h2>Connect</h2>

@@ -1,5 +1,6 @@
 import { useResearch } from '../context/ResearchContext';
 import GroupComparison from '../components/charts/GroupComparison';
+import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import styles from './DemographicsPage.module.css';
 
 const groupingOptions = [
@@ -13,10 +14,16 @@ const groupingOptions = [
 export default function DemographicsPage() {
   const { groupingVariable, setGroupingVariable } = useResearch();
 
+  // Scroll reveal refs
+  const headerRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
+  const chartsRef = useStaggeredReveal<HTMLElement>();
+  const interpretRef = useStaggeredReveal<HTMLElement>();
+
   return (
     <div className={styles.page}>
       <div className="container">
-        <header className={styles.header}>
+        <header ref={headerRef} className={`${styles.header} reveal`}>
+          <span className={styles.eyebrow}>Equity Framework</span>
           <h1>Do Effects Differ for Different Students?</h1>
           <p className="lead">
             An important question: Do transfer credits affect all students the same way?
@@ -43,8 +50,8 @@ export default function DemographicsPage() {
           </p>
         </section>
 
-        <section className={styles.charts}>
-          <div className={styles.chartContainer}>
+        <section ref={chartsRef} className={`${styles.charts} stagger-children`}>
+          <div className={`${styles.chartContainer} reveal`}>
             <h2>Effect on Stress by {groupingOptions.find((o) => o.value === groupingVariable)?.label}</h2>
             <p className={styles.chartDescription}>
               Does earning transfer credits lead to different stress levels across student groups?
@@ -52,7 +59,7 @@ export default function DemographicsPage() {
             <GroupComparison grouping={groupingVariable} pathway="a1" />
           </div>
 
-          <div className={styles.chartContainer}>
+          <div className={`${styles.chartContainer} reveal`}>
             <h2>Effect on Engagement by {groupingOptions.find((o) => o.value === groupingVariable)?.label}</h2>
             <p className={styles.chartDescription}>
               Does earning transfer credits change campus engagement differently across groups?
@@ -61,10 +68,10 @@ export default function DemographicsPage() {
           </div>
         </section>
 
-        <section className={styles.interpretation}>
+        <section ref={interpretRef} className={`${styles.interpretation} stagger-children`}>
           <h2>Why This Matters for Equity</h2>
           <div className={styles.interpretationGrid}>
-            <article className={styles.interpretationCard}>
+            <article className={`${styles.interpretationCard} reveal`}>
               <h3>Fair Comparisons</h3>
               <p>
                 Before comparing groups, we checked that our survey questions work
@@ -72,7 +79,7 @@ export default function DemographicsPage() {
                 same things across different backgrounds.
               </p>
             </article>
-            <article className={styles.interpretationCard}>
+            <article className={`${styles.interpretationCard} reveal`}>
               <h3>Looking for Differences</h3>
               <p>
                 If the bars look similar across groups, it means transfer credits
@@ -80,7 +87,7 @@ export default function DemographicsPage() {
                 some students might need different support.
               </p>
             </article>
-            <article className={styles.interpretationCard}>
+            <article className={`${styles.interpretationCard} reveal`}>
               <h3>Targeted Support</h3>
               <p>
                 If effects are similar for everyone, universal programs may work best.

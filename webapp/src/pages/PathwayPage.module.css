@@ -1,18 +1,30 @@
 .page {
-  padding-bottom: var(--spacing-3xl);
+  padding-bottom: var(--spacing-4xl);
 }
 
 .header {
   text-align: center;
   max-width: 800px;
   margin: 0 auto var(--spacing-2xl);
+  padding-top: var(--spacing-xl);
 }
 
-.header h1 {
+.eyebrow {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-accent);
   margin-bottom: var(--spacing-md);
 }
 
-/* Controls */
+.header h1 {
+  font-size: clamp(1.75rem, 4vw, var(--font-size-3xl));
+  margin-bottom: var(--spacing-md);
+}
+
+/* Controls - Sticky */
 .controls {
   display: flex;
   justify-content: space-between;
@@ -20,6 +32,20 @@
   gap: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
   flex-wrap: wrap;
+  position: sticky;
+  top: calc(var(--header-height) + var(--spacing-sm));
+  background: color-mix(in srgb, var(--color-background) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: var(--spacing-md) 0;
+  z-index: 10;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.controls.stuck {
+  border-bottom-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .pathwayButtons {
@@ -39,6 +65,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   transition: all var(--transition-fast);
+  min-height: 44px; /* WCAG touch target */
 }
 
 .pathwayButton:hover {
@@ -134,7 +161,13 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
-  transition: opacity var(--transition-fast);
+  transition: opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.coefficientCard:not(.dimmed):hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .coefficientCard.dimmed {
@@ -210,6 +243,13 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.summaryCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .summaryCard h3 {
@@ -232,9 +272,24 @@
   .controls {
     flex-direction: column;
     align-items: stretch;
+    position: static; /* Disable sticky on mobile */
+    background: transparent;
+    backdrop-filter: none;
   }
 
   .pathwayButtons {
     justify-content: center;
+  }
+
+  .header h1 {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .coefficientCard,
+  .summaryCard {
+    transition: none;
   }
 }

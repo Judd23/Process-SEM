@@ -11,6 +11,7 @@ interface SliderProps {
   formatValue?: (value: number) => string;
   showThreshold?: number;
   thresholdLabel?: string;
+  tickMarks?: number[]; // Array of values where tick marks should appear
 }
 
 export default function Slider({
@@ -24,6 +25,7 @@ export default function Slider({
   formatValue = (v) => String(v),
   showThreshold,
   thresholdLabel = 'Threshold',
+  tickMarks = [],
 }: SliderProps) {
   const percentage = ((value - min) / (max - min)) * 100;
   const thresholdPercentage = showThreshold !== undefined
@@ -55,6 +57,23 @@ export default function Slider({
           >
             <span className={styles.thresholdLine} />
             <span className={styles.thresholdLabel}>{thresholdLabel}</span>
+          </div>
+        )}
+        {tickMarks.length > 0 && (
+          <div className={styles.tickMarks}>
+            {tickMarks.map((tick) => {
+              const tickPercentage = ((tick - min) / (max - min)) * 100;
+              return (
+                <div
+                  key={tick}
+                  className={styles.tick}
+                  style={{ left: `${tickPercentage}%` }}
+                >
+                  <span className={styles.tickMark} />
+                  <span className={styles.tickLabel}>{formatValue(tick)}</span>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

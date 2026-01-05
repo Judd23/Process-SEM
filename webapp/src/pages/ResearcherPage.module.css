@@ -155,6 +155,12 @@
 .fact {
   background: var(--color-surface);
   padding: var(--spacing-lg);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.fact:hover {
+  background: var(--color-background);
+  transform: scale(1.02);
 }
 
 .fact:nth-child(1) {
@@ -215,6 +221,15 @@
   color: var(--color-accent);
   font-weight: 700;
   letter-spacing: 0.12em;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.blockA:hover .blockNum,
+.blockB:hover .blockNum,
+.blockC:hover .blockNum,
+.blockD:hover .blockNum {
+  transform: scale(1.1);
+  color: var(--color-accent-hover);
 }
 
 .grid h2 {
@@ -240,6 +255,12 @@
   padding: var(--spacing-2xl);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.blockA:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .blockB {
@@ -247,6 +268,12 @@
   padding: var(--spacing-2xl);
   border: 1px solid var(--color-border);
   background: var(--color-background);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.blockB:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .quotePanel {
@@ -300,6 +327,12 @@
   padding: var(--spacing-2xl);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.blockC:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .list {
@@ -327,6 +360,12 @@
     var(--color-surface) 0%,
     var(--color-background) 100%
   );
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.blockD:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .cta {

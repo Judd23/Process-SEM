@@ -1,14 +1,26 @@
 .page {
-  padding-bottom: var(--spacing-3xl);
+  padding-bottom: var(--spacing-4xl);
 }
 
 .header {
   text-align: center;
   max-width: 800px;
   margin: 0 auto var(--spacing-2xl);
+  padding-top: var(--spacing-xl);
+}
+
+.eyebrow {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-accent);
+  margin-bottom: var(--spacing-md);
 }
 
 .header h1 {
+  font-size: clamp(1.75rem, 4vw, var(--font-size-3xl));
   margin-bottom: var(--spacing-md);
 }
 
@@ -82,6 +94,13 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.chartContainer:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .chartContainer h3 {
@@ -112,6 +131,13 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.interpretationCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .interpretationCard h3 {

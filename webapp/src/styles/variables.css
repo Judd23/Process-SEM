@@ -50,6 +50,8 @@
   --font-size-xl: 1.5rem;      /* 24px */
   --font-size-2xl: 2rem;       /* 32px */
   --font-size-3xl: 2.5rem;     /* 40px */
+  --font-size-4xl: 3.5rem;     /* 56px - editorial headlines */
+  --font-size-5xl: 4.5rem;     /* 72px - dramatic statements */
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -59,6 +61,8 @@
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
   --spacing-3xl: 4rem;
+  --spacing-4xl: 6rem;         /* Editorial sections */
+  --spacing-5xl: 8rem;         /* Large section breaks */
 
   /* Layout */
   --max-width: 1200px;
@@ -69,11 +73,18 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
 
   /* Transitions */
   --transition-fast: 150ms ease-out;
   --transition-normal: 300ms ease-out;
   --transition-slow: 500ms ease-out;
+
+  /* Animation timing */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --reveal-duration: 800ms;
+  --reveal-stagger: 100ms;
 
   /* Border radius */
   --radius-sm: 4px;
@@ -139,6 +150,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
 /* System preference detection */
@@ -179,5 +191,6 @@
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
   }
 }
