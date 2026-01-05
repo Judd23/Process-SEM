@@ -1,5 +1,6 @@
 import { useTheme } from '../context/ThemeContext';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
+import GlossaryTerm from '../components/ui/GlossaryTerm';
 import styles from './ResearcherPage.module.css';
 
 export default function ResearcherPage() {
@@ -67,15 +68,38 @@ export default function ResearcherPage() {
       <main className={styles.main}>
         <section ref={factsRef} className={`${styles.factsStrip} stagger-children`}>
           <div className={styles.factsInner}>
-            <div className={`${styles.fact} reveal-up`}>
+            <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '0ms' }}>
               <div className={styles.factLabel}>Focus</div>
-              <div className={styles.factValue}>Student development | equity | pathways</div>
+              <div className={styles.factValue}>
+                <GlossaryTerm
+                  term="Student Development"
+                  definition="The holistic growth of students during their college experience, encompassing cognitive, psychosocial, and identity development as they navigate higher education."
+                >
+                  Student development
+                </GlossaryTerm>{' '}
+                | equity | pathways
+              </div>
             </div>
-            <div className={`${styles.fact} reveal-up`}>
+            <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '100ms' }}>
               <div className={styles.factLabel}>Methods</div>
-              <div className={styles.factValue}>SEM, causal inference, process models</div>
+              <div className={styles.factValue}>
+                <GlossaryTerm
+                  term="Structural Equation Modeling"
+                  definition="A multivariate statistical technique combining factor analysis and path analysis to test complex relationships between observed and latent variables simultaneously."
+                >
+                  SEM
+                </GlossaryTerm>
+                ,{' '}
+                <GlossaryTerm
+                  term="Causal Inference"
+                  definition="Statistical methods that attempt to estimate the effect of one variable on another, going beyond correlation to understand cause-and-effect relationships using techniques like propensity score matching."
+                >
+                  causal inference
+                </GlossaryTerm>
+                , process models
+              </div>
             </div>
-            <div className={`${styles.fact} reveal-up`}>
+            <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '200ms' }}>
               <div className={styles.factLabel}>Email</div>
               <a href="mailto:jjohnson4039@SDSU.edu" className={styles.factLink}>
                 jjohnson4039@SDSU.edu
@@ -85,7 +109,7 @@ export default function ResearcherPage() {
         </section>
 
         <section className={styles.grid}>
-          <article ref={blockARef} className={`${styles.blockA} reveal-left`}>
+          <article ref={blockARef} className={`${styles.blockA} reveal-left`} style={{ animationDelay: '0ms' }}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>01</span>
               <h2>Background</h2>
@@ -100,7 +124,7 @@ export default function ResearcherPage() {
             </p>
           </article>
 
-          <aside ref={blockBRef} className={`${styles.blockB} reveal-right`}>
+          <aside ref={blockBRef} className={`${styles.blockB} reveal-right`} style={{ animationDelay: '100ms' }}>
             <div className={styles.quotePanel}>
               <blockquote className={styles.pullQuote}>
                 <p>
@@ -115,20 +139,44 @@ export default function ResearcherPage() {
             </div>
           </aside>
 
-          <article ref={blockCRef} className={`${styles.blockC} reveal-left`}>
+          <article ref={blockCRef} className={`${styles.blockC} reveal-left`} style={{ animationDelay: '200ms' }}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>02</span>
               <h2>Research Areas</h2>
             </div>
             <ul className={styles.list}>
-              <li>First-year transition and developmental adjustment</li>
-              <li>Dual enrollment and accelerated credit pathways</li>
+              <li>
+                <GlossaryTerm
+                  term="First-Year Transition"
+                  definition="The critical period when students adjust from high school to college, involving academic, social, and personal adaptation that significantly impacts retention and success."
+                >
+                  First-year transition
+                </GlossaryTerm>{' '}
+                and developmental adjustment
+              </li>
+              <li>
+                <GlossaryTerm
+                  term="Dual Enrollment"
+                  definition="Programs allowing high school students to take college courses for credit, accelerating their path to degree completion and potentially easing the transition to higher education."
+                >
+                  Dual enrollment
+                </GlossaryTerm>{' '}
+                and accelerated credit pathways
+              </li>
               <li>Equity-focused student success research</li>
-              <li>Quantitative methods with latent-variable models</li>
+              <li>
+                Quantitative methods with{' '}
+                <GlossaryTerm
+                  term="Latent Variable Models"
+                  definition="Statistical models that include variables that are not directly observed but inferred from other measured variables, commonly used to measure complex constructs like 'belonging' or 'engagement.'"
+                >
+                  latent-variable models
+                </GlossaryTerm>
+              </li>
             </ul>
           </article>
 
-          <article ref={blockDRef} className={`${styles.blockD} reveal-right`}>
+          <article ref={blockDRef} className={`${styles.blockD} reveal-right`} style={{ animationDelay: '300ms' }}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>03</span>
               <h2>Connect</h2>

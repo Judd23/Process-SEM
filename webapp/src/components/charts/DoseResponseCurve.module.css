@@ -5,16 +5,23 @@
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  padding: var(--spacing-sm) 0;
 }
 
 .svg {
   max-width: 100%;
   height: auto;
-  min-width: 320px;
+  display: block;
+  border-radius: var(--radius-md);
 }
 
 @media (max-width: 640px) {
   .container {
     align-items: flex-start;
+    padding: 0;
+  }
+
+  .svg {
+    min-width: 100%;
   }
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useResearch } from '../context/ResearchContext';
 import GroupComparison from '../components/charts/GroupComparison';
 import Toggle from '../components/ui/Toggle';
+import GlossaryTerm from '../components/ui/GlossaryTerm';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import fastComparison from '../data/fastComparison.json';
 import sampleDescriptives from '../data/sampleDescriptives.json';
@@ -23,6 +24,7 @@ export default function DemographicsPage() {
   // Scroll reveal refs
   const headerRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
   const demographicsRef = useStaggeredReveal<HTMLElement>();
+  const controlsRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
   const chartsRef = useStaggeredReveal<HTMLElement>();
   const interpretRef = useStaggeredReveal<HTMLElement>();
 
@@ -34,7 +36,9 @@ export default function DemographicsPage() {
           <h1>Do Effects Differ for Different Students?</h1>
           <p className="lead">
             An important question: Do transfer credits affect all students the same way?
-            Here you can compare whether stress and engagement patterns differ across
+            We use <GlossaryTerm term="Multi-Group Analysis" definition="A statistical technique that tests whether relationships in our model differ across student groups (e.g., race, income, first-generation status). This helps identify whether some students benefit more or less from transfer credits.">multi-group analysis</GlossaryTerm>{' '}
+            to compare whether <GlossaryTerm term="Emotional Distress" definition="A latent construct measuring students' challenges during their first year, including academic difficulties, loneliness, mental health concerns, exhaustion, sleep problems, and financial stress.">stress</GlossaryTerm>{' '}
+            and <GlossaryTerm term="Quality of Engagement" definition="A latent construct measuring the quality of students' interactions on campus with other students, advisors, faculty, staff, and administrators.">engagement</GlossaryTerm> patterns differ across
             student backgrounds.
           </p>
         </header>
@@ -53,7 +57,7 @@ export default function DemographicsPage() {
 
           <div className={styles.demographicsGrid}>
             {/* Race/Ethnicity Breakdown */}
-            <div className={`${styles.demoCard} reveal`}>
+            <div className={`${styles.demoCard} reveal`} style={{ transitionDelay: '0ms' }}>
               <h3>Race & Ethnicity</h3>
               <div className={styles.demoStats}>
                 {Object.entries(demographics.race).map(([group, data]) => (
@@ -99,7 +103,7 @@ export default function DemographicsPage() {
             </div>
 
             {/* First-Gen & Pell */}
-            <div className={`${styles.demoCard} reveal`}>
+            <div className={`${styles.demoCard} reveal`} style={{ transitionDelay: '100ms' }}>
               <h3>Access & Equity</h3>
               <div className={styles.demoStats}>
                 <div className={styles.demoStat}>
@@ -175,7 +179,7 @@ export default function DemographicsPage() {
           </div>
         </section>
 
-        <section className={styles.controls}>
+        <section ref={controlsRef} className={`${styles.controls} reveal`}>
           <label className={styles.selectLabel}>Compare students by:</label>
           <div className={styles.groupButtons}>
             {groupingOptions.map((option) => (
@@ -194,7 +198,7 @@ export default function DemographicsPage() {
         </section>
 
         <section ref={chartsRef} className={`${styles.charts} stagger-children`}>
-          <div className={`${styles.chartContainer} reveal`}>
+          <div className={`${styles.chartContainer} reveal`} style={{ transitionDelay: '0ms' }}>
             <h2>Effect on Stress by {groupingOptions.find((o) => o.value === groupingVariable)?.label}</h2>
             <p className={styles.chartDescription}>
               Does earning transfer credits lead to different stress levels across equity groups?
@@ -202,7 +206,7 @@ export default function DemographicsPage() {
             <GroupComparison grouping={groupingVariable} pathway="a1" />
           </div>
 
-          <div className={`${styles.chartContainer} reveal`}>
+          <div className={`${styles.chartContainer} reveal`} style={{ transitionDelay: '100ms' }}>
             <h2>Effect on Engagement by {groupingOptions.find((o) => o.value === groupingVariable)?.label}</h2>
             <p className={styles.chartDescription}>
               Does earning transfer credits change campus engagement differently across equity groups?
@@ -214,27 +218,29 @@ export default function DemographicsPage() {
         <section ref={interpretRef} className={`${styles.interpretation} stagger-children`}>
           <h2>Why This Matters for Equity</h2>
           <div className={styles.interpretationGrid}>
-            <article className={`${styles.interpretationCard} reveal`}>
+            <article className={`${styles.interpretationCard} reveal`} style={{ transitionDelay: '0ms' }}>
               <h3>Fair Comparisons</h3>
               <p>
-                Before comparing groups, we checked that our survey questions work
-                the same way for all students. This ensures we're measuring the
-                same things across different backgrounds.
+                Before comparing groups, we tested for{' '}
+                <GlossaryTerm term="Measurement Invariance" definition="A statistical test verifying that survey questions measure the same underlying concepts equally well across different student groups. Without this, group comparisons could be misleading.">measurement invariance</GlossaryTerm>{' '}
+                to ensure our survey questions work the same way for all students.
+                This confirms we're measuring the same things across different backgrounds.
               </p>
             </article>
-            <article className={`${styles.interpretationCard} reveal`}>
+            <article className={`${styles.interpretationCard} reveal`} style={{ transitionDelay: '100ms' }}>
               <h3>Looking for Differences</h3>
               <p>
-                If the bars look similar across groups, it means transfer credits
+                If the <GlossaryTerm term="Effect Size" definition="A standardized measure of how strong a relationship is. In forest plots, effect sizes near zero indicate little to no effect, while larger values (positive or negative) indicate stronger effects.">effect sizes</GlossaryTerm>{' '}
+                look similar across groups, it means transfer credits
                 affect students similarly regardless of background. If they differ,
                 some students might need different support.
               </p>
             </article>
-            <article className={`${styles.interpretationCard} reveal`}>
+            <article className={`${styles.interpretationCard} reveal`} style={{ transitionDelay: '200ms' }}>
               <h3>Targeted Support</h3>
               <p>
                 If effects are similar for everyone, universal programs may work best.
-                If effects differ, colleges might need specialized support for
+                If <GlossaryTerm term="Moderation" definition="When the relationship between two variables changes depending on a third variable. For example, if the effect of transfer credits on stress is stronger for first-generation students than continuing-generation students.">moderation by demographics</GlossaryTerm> exists, colleges might need specialized support for
                 specific student populations.
               </p>
             </article>

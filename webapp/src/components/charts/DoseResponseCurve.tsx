@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { useResearch } from '../../context/ResearchContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -10,24 +10,39 @@ import styles from './DoseResponseCurve.module.css';
 interface DoseResponseCurveProps {
   outcome: 'distress' | 'engagement' | 'adjustment';
   selectedDose: number;
-  width?: number;
-  height?: number;
 }
 
 export default function DoseResponseCurve({
   outcome,
   selectedDose,
-  width = 500,
-  height = 300,
 }: DoseResponseCurveProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const { showCIs } = useResearch();
   const { resolvedTheme } = useTheme();
   const { doseCoefficients } = useModelData();
+  const [dimensions, setDimensions] = useState({ width: 500, height: 300 });
+
+  // Responsive sizing
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const width = Math.max(320, Math.min(containerWidth, 600));
+        const height = Math.max(220, width * 0.6);
+        setDimensions({ width, height });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
 
   useEffect(() => {
     if (!svgRef.current) return;
 
+    const { width, height } = dimensions;
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
@@ -199,11 +214,11 @@ export default function DoseResponseCurve({
       .attr('font-size', 12)
       .text(`Effect on ${outcome === 'distress' ? 'Distress' : outcome === 'engagement' ? 'Engagement' : 'Adjustment'}`);
 
-  }, [outcome, selectedDose, width, height, showCIs, resolvedTheme]);
+  }, [outcome, selectedDose, dimensions, showCIs, resolvedTheme, doseCoefficients]);
 
   return (
-    <div className={styles.container}>
-      <svg ref={svgRef} width={width} height={height} className={styles.svg} />
+    <div ref={containerRef} className={styles.container}>
+      <svg ref={svgRef} width={dimensions.width} height={dimensions.height} className={styles.svg} />
       <DataTimestamp />
     </div>
   );

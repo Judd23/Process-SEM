@@ -1,6 +1,7 @@
 .container {
   position: relative;
   display: inline;
+  z-index: 10000;
 }
 
 .term {
@@ -22,31 +23,39 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
-  margin-left: 2px;
-  font-size: 10px;
+  width: 12px;
+  height: 12px;
+  margin-left: 3px;
+  font-size: 8px;
   font-weight: 700;
   color: white;
   background: var(--color-accent);
   border-radius: 50%;
-  vertical-align: super;
+  vertical-align: middle;
   line-height: 1;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.term:hover .indicator,
+.term:focus .indicator {
+  opacity: 1;
 }
 
 .tooltip {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: 9999;
   width: max-content;
   max-width: 320px;
-  padding: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-accent);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  animation: fadeIn 200ms ease-out;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 200ms var(--ease-out-back);
+  pointer-events: none;
 }
 
 .tooltip.bottom {
@@ -70,13 +79,13 @@
 .tooltip.bottom::before {
   top: -6px;
   border-width: 0 6px 6px 6px;
-  border-color: transparent transparent var(--color-border) transparent;
+  border-color: transparent transparent var(--color-accent) transparent;
 }
 
 .tooltip.top::before {
   bottom: -6px;
   border-width: 6px 6px 0 6px;
-  border-color: var(--color-border) transparent transparent transparent;
+  border-color: var(--color-accent) transparent transparent transparent;
 }
 
 .tooltipTerm {
@@ -105,16 +114,26 @@
 
 @media (max-width: 768px) {
   .tooltip {
-    max-width: 280px;
-    font-size: var(--font-size-xs);
+    position: fixed;
+    left: 50% !important;
+    top: auto !important;
+    bottom: 20px !important;
+    transform: translateX(-50%);
+    max-width: calc(100vw - 32px);
+    width: auto;
+    font-size: var(--font-size-sm);
+  }
+
+  .tooltip::before {
+    display: none;
   }
 
   .tooltipTerm {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
   }
 
   .tooltipDefinition {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
   }
 }
 

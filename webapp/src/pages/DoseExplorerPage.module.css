@@ -6,7 +6,27 @@
   text-align: center;
   max-width: 800px;
   margin: 0 auto var(--spacing-2xl);
-  padding-top: var(--spacing-xl);
+  padding-top: var(--spacing-2xl);
+  position: relative;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    circle,
+    var(--color-accent-light) 0%,
+    transparent 60%
+  );
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .eyebrow {
@@ -29,12 +49,18 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-2xl);
   margin-bottom: var(--spacing-2xl);
   display: flex;
   gap: var(--spacing-xl);
   align-items: flex-end;
   flex-wrap: wrap;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.controls:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
 }
 
 .sliderContainer {
@@ -153,9 +179,20 @@
 }
 
 @media (max-width: 768px) {
+  .header::before {
+    width: 300px;
+    height: 300px;
+    top: -50px;
+  }
+
+  .header h1 {
+    font-size: var(--font-size-2xl);
+  }
+
   .controls {
     flex-direction: column;
     align-items: stretch;
+    padding: var(--spacing-xl);
   }
 
   .sliderContainer {
@@ -164,5 +201,95 @@
 
   .charts {
     grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .chartContainer {
+    padding: var(--spacing-lg);
+  }
+
+  .chartContainer h3 {
+    font-size: var(--font-size-base);
+  }
+
+  .interpretationContent {
+    grid-template-columns: 1fr;
+  }
+
+  .interpretationCard {
+    padding: var(--spacing-lg);
+  }
+
+  .effectCards {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding-top: var(--spacing-lg);
+  }
+
+  .header::before {
+    width: 200px;
+    height: 200px;
+    opacity: 0.3;
+  }
+
+  .header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .controls {
+    padding: var(--spacing-lg);
+    gap: var(--spacing-lg);
+  }
+
+  .chartContainer {
+    padding: var(--spacing-md);
+  }
+
+  .chartDescription {
+    font-size: var(--font-size-xs);
+  }
+
+  .interpretation h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .interpretationCard {
+    padding: var(--spacing-md);
+  }
+
+  .interpretationCard h3 {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Touch states */
+.chartContainer:active,
+.interpretationCard:active {
+  transform: scale(0.99);
+}
+
+@media (hover: none) {
+  .chartContainer:hover,
+  .interpretationCard:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .chartContainer,
+  .interpretationCard {
+    transition: none;
+  }
+
+  .chartContainer:hover,
+  .interpretationCard:hover {
+    transform: none;
   }
 }

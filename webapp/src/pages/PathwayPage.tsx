@@ -5,6 +5,7 @@ import PathwayDiagram from '../components/charts/PathwayDiagram';
 import Toggle from '../components/ui/Toggle';
 import Slider from '../components/ui/Slider';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
+import GlossaryTerm from '../components/ui/GlossaryTerm';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import fastComparison from '../data/fastComparison.json';
 import styles from './PathwayPage.module.css';
@@ -131,8 +132,10 @@ export default function PathwayPage() {
           <h1>How Transfer Credits Affect First-Year Success</h1>
           <p className="lead">
             This diagram shows the different ways that earning college credits in high school
-            can influence a student's first-year college experience. Click the buttons below
-            to highlight different connections.
+            can influence a student's first-year college experience. The model uses {' '}
+            <GlossaryTerm term="Mediation Analysis" definition="A statistical technique that examines whether an independent variable (transfer credits) affects an outcome (adjustment) through intermediate variables (stress and engagement). It reveals the 'how' of cause and effect.">mediation analysis</GlossaryTerm>{' '}
+            to trace effects through <GlossaryTerm term="Emotional Distress" definition="A latent construct measuring students' challenges during their first year, including academic difficulties, loneliness, mental health concerns, exhaustion, sleep problems, and financial stress.">stress</GlossaryTerm>{' '}
+            and <GlossaryTerm term="Quality of Engagement" definition="A latent construct measuring the quality of students' interactions on campus with other students, advisors, faculty, staff, and administrators.">engagement</GlossaryTerm> pathways.
           </p>
         </header>
 
@@ -169,7 +172,7 @@ export default function PathwayPage() {
           <section className={styles.sampleInfo}>
             <h3>Sample Composition: FASt vs Non-FASt Students</h3>
             <div className={styles.sampleGrid}>
-              <div className={styles.sampleCard}>
+              <div className={styles.sampleCard} style={{ transitionDelay: '0ms' }}>
                 <div className={styles.sampleHeader}>
                   <span className={styles.sampleLabel}>FASt Students</span>
                   <span className={styles.sampleCount}>{fastComparison.overall.fast_n.toLocaleString()}</span>
@@ -181,7 +184,7 @@ export default function PathwayPage() {
                   <div>Pell: <strong>{fastComparison.demographics.pell.yes.fast.pct}%</strong></div>
                 </div>
               </div>
-              <div className={styles.sampleCard}>
+              <div className={styles.sampleCard} style={{ transitionDelay: '100ms' }}>
                 <div className={styles.sampleHeader}>
                   <span className={styles.sampleLabel}>Non-FASt Students</span>
                   <span className={styles.sampleCount}>{fastComparison.overall.nonfast_n.toLocaleString()}</span>
@@ -260,26 +263,29 @@ export default function PathwayPage() {
         <section ref={summaryRef} className={`${styles.summary} stagger-children`}>
           <h2>The Big Picture</h2>
           <div className={styles.summaryGrid}>
-            <article className={`${styles.summaryCard} reveal`}>
+            <article className={`${styles.summaryCard} reveal`} style={{ transitionDelay: '0ms' }}>
               <h3>The Stress Route</h3>
               <p>
                 Students with transfer credits report <strong>higher stress</strong> in their first year.
-                Since stress hurts college adjustment, this creates a <strong>negative ripple effect</strong>.
+                Since stress hurts college adjustment, this creates a{' '}
+                <GlossaryTerm term="Indirect Effect" definition="The portion of the total effect that works through an intermediate variable. Here, transfer credits affect adjustment indirectly by first increasing stress, which then reduces adjustment.">negative indirect effect</GlossaryTerm>.
                 This is the "cost" side of accelerated credit.
               </p>
             </article>
-            <article className={`${styles.summaryCard} reveal`}>
+            <article className={`${styles.summaryCard} reveal`} style={{ transitionDelay: '100ms' }}>
               <h3>The Engagement Route</h3>
               <p>
                 Transfer credits don't clearly change how engaged students are with campus life.
-                However, engagement is <strong>really important</strong> for success—students who
-                connect more with campus do much better overall.
+                However, engagement is <strong>really important</strong> for success—the{' '}
+                <GlossaryTerm term="Path Coefficient" definition="A standardized measure of the strength and direction of a relationship between two variables in our model. Values range from -1 to +1, with larger absolute values indicating stronger relationships.">path from engagement to adjustment</GlossaryTerm>{' '}
+                is one of the strongest in our model.
               </p>
             </article>
-            <article className={`${styles.summaryCard} reveal`}>
+            <article className={`${styles.summaryCard} reveal`} style={{ transitionDelay: '200ms' }}>
               <h3>Direct Benefits</h3>
               <p>
-                Beyond stress and engagement, transfer credits provide a <strong>small direct boost</strong>
+                Beyond stress and engagement, transfer credits provide a{' '}
+                <GlossaryTerm term="Direct Effect" definition="The portion of the total effect that doesn't go through the mediators (stress and engagement). It represents other ways transfer credits might help students that we didn't explicitly measure.">small direct boost</GlossaryTerm>{' '}
                 to college success. This might reflect academic preparation, confidence, or
                 other benefits we didn't measure directly.
               </p>

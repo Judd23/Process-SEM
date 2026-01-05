@@ -5,6 +5,7 @@ import Toggle from '../components/ui/Toggle';
 import DoseResponseCurve from '../components/charts/DoseResponseCurve';
 import StatCard from '../components/ui/StatCard';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
+import GlossaryTerm from '../components/ui/GlossaryTerm';
 import DataTimestamp from '../components/ui/DataTimestamp';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import styles from './DoseExplorerPage.module.css';
@@ -15,7 +16,8 @@ export default function DoseExplorerPage() {
 
   // Scroll reveal refs
   const headerRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
-  const effectsRef = useScrollReveal<HTMLElement>();
+  const controlsRef = useScrollReveal<HTMLElement>({ threshold: 0.3 });
+  const effectsRef = useStaggeredReveal<HTMLElement>();
   const chartsRef = useStaggeredReveal<HTMLElement>();
   const interpretRef = useStaggeredReveal<HTMLElement>();
 
@@ -33,12 +35,13 @@ export default function DoseExplorerPage() {
           <h1>Does the Number of Credits Matter?</h1>
           <p className="lead">
             Some students earn just a few college credits in high school, while others
-            earn many. Use the slider below to explore whether more credits lead to
-            different first-year experiences.
+            earn many. This is called the <GlossaryTerm term="Credit Dose" definition="The total number of transferable college credits a student earned before starting college. Our model tests whether effects differ based on dose—a 'dose-response' relationship.">credit dose</GlossaryTerm>. Use the slider below to explore
+            how different doses affect <GlossaryTerm term="Emotional Distress" definition="A latent construct measuring students' challenges during their first year, including academic difficulties, loneliness, mental health concerns, exhaustion, sleep problems, and financial stress.">stress</GlossaryTerm>{' '}
+            and <GlossaryTerm term="Quality of Engagement" definition="A latent construct measuring the quality of students' interactions on campus with other students, advisors, faculty, staff, and administrators.">campus engagement</GlossaryTerm>.
           </p>
         </header>
 
-        <section className={styles.controls}>
+        <section ref={controlsRef} className={`${styles.controls} reveal`}>
           <div className={styles.sliderContainer}>
             <Slider
               id="credit-dose"
@@ -50,8 +53,8 @@ export default function DoseExplorerPage() {
               step={1}
               formatValue={(v) => `${v} credits`}
               showThreshold={12}
-              thresholdLabel="12+ = FASt Student"
-              tickMarks={[12, 24, 36, 48, 60]}
+              thresholdLabel="FASt (12+)"
+              tickMarks={[24, 36, 48, 60]}
             />
           </div>
           <div className={styles.toggleContainer}>
@@ -64,21 +67,25 @@ export default function DoseExplorerPage() {
           </div>
         </section>
 
-        <section ref={effectsRef} className={`${styles.conditionalEffects} reveal`}>
+        <section ref={effectsRef} className={`${styles.conditionalEffects} stagger-children`}>
           <h2>What Happens at {selectedDose} Credits?</h2>
           <div className={styles.effectCards}>
-            <StatCard
-              label="Effect on Stress"
-              value={distressEffect > 0 ? `+${distressEffect.toFixed(2)}` : distressEffect.toFixed(2)}
-              subtext={distressEffect > 0 ? '↑ Higher stress' : '↓ Lower stress'}
-              color={distressEffect > 0 ? 'negative' : 'positive'}
-            />
-            <StatCard
-              label="Effect on Engagement"
-              value={engagementEffect > 0 ? `+${engagementEffect.toFixed(2)}` : engagementEffect.toFixed(2)}
-              subtext={engagementEffect > 0 ? '↑ More engaged' : '↓ Less engaged'}
-              color={engagementEffect > 0 ? 'positive' : 'negative'}
-            />
+            <div className="reveal">
+              <StatCard
+                label="Effect on Stress"
+                value={distressEffect > 0 ? `+${distressEffect.toFixed(2)}` : distressEffect.toFixed(2)}
+                subtext={distressEffect > 0 ? '↑ Higher stress' : '↓ Lower stress'}
+                color={distressEffect > 0 ? 'negative' : 'positive'}
+              />
+            </div>
+            <div className="reveal">
+              <StatCard
+                label="Effect on Engagement"
+                value={engagementEffect > 0 ? `+${engagementEffect.toFixed(2)}` : engagementEffect.toFixed(2)}
+                subtext={engagementEffect > 0 ? '↑ More engaged' : '↓ Less engaged'}
+                color={engagementEffect > 0 ? 'positive' : 'negative'}
+              />
+            </div>
           </div>
           <DataTimestamp />
         </section>
@@ -111,7 +118,7 @@ export default function DoseExplorerPage() {
             <article className={`${styles.interpretationCard} reveal`}>
               <h3>What Do the Numbers Mean?</h3>
               <p>
-                The effect sizes are in "standard deviation" units. An effect of +0.13
+                The <GlossaryTerm term="Effect Size" definition="A standardized measure of how strong a relationship is. Values are in standard deviation units—an effect of 0.10 is small, 0.30 is medium, and 0.50 is large.">effect sizes</GlossaryTerm> are in "standard deviation" units. An effect of +0.13
                 means transfer students score about 0.13 standard deviations higher on
                 stress measures—a small but meaningful difference in a group of students.
               </p>
@@ -119,24 +126,24 @@ export default function DoseExplorerPage() {
             <article className={`${styles.interpretationCard} reveal`}>
               <h3>Why Credit Amount Matters</h3>
               <p>
-                Not all accelerated students are alike. Someone with 12 credits took
-                a few college courses, while someone with 45 credits may have earned
-                nearly an associate degree. Their experiences might differ substantially.
+                This analysis tests for <GlossaryTerm term="Moderated Mediation" definition="A model where the indirect effect (through a mediator like stress) changes depending on a moderator variable (like credit dose). It answers: 'Does the mediation process work differently at different credit levels?'">moderated mediation</GlossaryTerm>—whether
+                the pathway from credits to adjustment changes at different doses.
+                Someone with 12 credits may experience different effects than someone with 45 credits.
               </p>
             </article>
             <article className={`${styles.interpretationCard} reveal`}>
               <h3>What This Means for Colleges</h3>
               <p>
-                These findings suggest colleges might need to support transfer students
-                differently based on how many credits they bring. Students with many
-                credits might need extra help connecting with campus community.
+                The <GlossaryTerm term="Confidence Interval" definition="A range of values within which we're 95% confident the true effect lies. Wider intervals mean more uncertainty. When an interval includes zero, we can't be confident the effect is real.">confidence intervals</GlossaryTerm> help us understand uncertainty.
+                When they don't cross zero, we're more confident the effect is real.
+                Colleges can use this to tailor support based on credit totals.
               </p>
             </article>
           </div>
         </section>
 
         {/* Key Takeaway */}
-        <KeyTakeaway icon="📊">
+        <KeyTakeaway>
           The <strong>amount of transfer credits matters</strong>—12 credits create different effects than 30+ credits, with higher doses amplifying both stress and engagement impacts.
         </KeyTakeaway>
       </div>

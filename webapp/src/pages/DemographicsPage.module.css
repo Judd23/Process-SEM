@@ -6,7 +6,28 @@
   text-align: center;
   max-width: 800px;
   margin: 0 auto var(--spacing-2xl);
-  padding-top: var(--spacing-xl);
+  padding-top: var(--spacing-2xl);
+  position: relative;
+}
+
+/* Hero glow effect - matches HomePage/DoseExplorerPage */
+.header::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    circle,
+    var(--color-accent-light) 0%,
+    transparent 60%
+  );
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .eyebrow {
@@ -32,6 +53,12 @@
   padding: var(--spacing-xl);
   margin-bottom: var(--spacing-2xl);
   text-align: center;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.controls:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
 }
 
 .selectLabel {
@@ -60,11 +87,18 @@
   color: var(--color-text-muted);
   cursor: pointer;
   transition: all var(--transition-fast);
+  min-height: 44px; /* WCAG touch target */
 }
 
 .groupButton:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+}
+
+.groupButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .groupButton.active {
@@ -107,6 +141,13 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.demoCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .demoCard h3 {
@@ -183,6 +224,13 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.chartContainer:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .chartContainer h2 {
@@ -213,6 +261,13 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.interpretationCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .interpretationCard h3 {
@@ -228,6 +283,16 @@
 }
 
 @media (max-width: 768px) {
+  .header::before {
+    width: 300px;
+    height: 300px;
+    top: -50px;
+  }
+
+  .header h1 {
+    font-size: var(--font-size-2xl);
+  }
+
   .demographicsHeader {
     flex-direction: column;
     gap: var(--spacing-md);
@@ -244,5 +309,117 @@
 
   .groupButton {
     width: 100%;
+  }
+
+  .charts {
+    gap: var(--spacing-lg);
+  }
+
+  .chartContainer {
+    padding: var(--spacing-lg);
+  }
+
+  .chartContainer h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .interpretationGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .interpretationCard {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding-top: var(--spacing-lg);
+  }
+
+  .header::before {
+    width: 200px;
+    height: 200px;
+    opacity: 0.3;
+  }
+
+  .header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .controls {
+    padding: var(--spacing-lg);
+  }
+
+  .groupButton {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-base);
+  }
+
+  .demoCard {
+    padding: var(--spacing-lg);
+  }
+
+  .demoCard h3 {
+    font-size: var(--font-size-base);
+  }
+
+  .chartContainer {
+    padding: var(--spacing-md);
+  }
+
+  .chartContainer h2 {
+    font-size: var(--font-size-base);
+  }
+
+  .chartDescription {
+    font-size: var(--font-size-xs);
+  }
+
+  .interpretation h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .interpretationCard {
+    padding: var(--spacing-md);
+  }
+
+  .interpretationCard h3 {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Touch states */
+.demoCard:active,
+.chartContainer:active,
+.interpretationCard:active,
+.groupButton:active {
+  transform: scale(0.99);
+}
+
+@media (hover: none) {
+  .demoCard:hover,
+  .chartContainer:hover,
+  .interpretationCard:hover,
+  .groupButton:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .demoCard,
+  .chartContainer,
+  .interpretationCard,
+  .groupButton,
+  .demoBarFill {
+    transition: none;
+  }
+
+  .demoCard:hover,
+  .chartContainer:hover,
+  .interpretationCard:hover {
+    transform: none;
   }
 }

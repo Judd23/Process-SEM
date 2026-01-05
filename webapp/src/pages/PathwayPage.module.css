@@ -6,7 +6,28 @@
   text-align: center;
   max-width: 800px;
   margin: 0 auto var(--spacing-2xl);
-  padding-top: var(--spacing-xl);
+  padding-top: var(--spacing-2xl);
+  position: relative;
+}
+
+/* Hero glow effect */
+.header::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    circle,
+    var(--color-accent-light) 0%,
+    transparent 60%
+  );
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .eyebrow {
@@ -89,6 +110,12 @@
 .pathwayButton:hover {
   border-color: var(--button-color, var(--color-accent));
   color: var(--button-color, var(--color-accent));
+  background: color-mix(in srgb, var(--button-color, var(--color-accent)) 8%, transparent);
+}
+
+.pathwayButton:focus-visible {
+  outline: 2px solid var(--button-color, var(--color-accent));
+  outline-offset: 2px;
 }
 
 .pathwayButton.active {
@@ -131,6 +158,13 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.sampleCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .sampleHeader {
@@ -233,6 +267,12 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   margin-bottom: var(--spacing-2xl);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.doseControl:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
 }
 
 .doseControl h2 {
@@ -384,6 +424,12 @@
 }
 
 @media (max-width: 768px) {
+  .header::before {
+    width: 300px;
+    height: 300px;
+    top: -50px;
+  }
+
   .controls {
     flex-direction: column;
     align-items: stretch;
@@ -399,12 +445,113 @@
   .header h1 {
     font-size: var(--font-size-2xl);
   }
+
+  .toggleContainer {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .sampleGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .doseControl {
+    padding: var(--spacing-lg);
+  }
+
+  .coefficientGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding-top: var(--spacing-lg);
+  }
+
+  .header::before {
+    width: 200px;
+    height: 200px;
+    opacity: 0.3;
+  }
+
+  .header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .pathwayButton {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-xs);
+  }
+
+  .doseControl {
+    padding: var(--spacing-md);
+  }
+
+  .doseControl h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .coefficients h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .coefficientCard {
+    padding: var(--spacing-md);
+  }
+
+  .coefficientLabel {
+    font-size: var(--font-size-xs);
+  }
+
+  .summary h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .summaryCard {
+    padding: var(--spacing-md);
+  }
+
+  .summaryCard h3 {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Touch states */
+.pathwayButton:active,
+.coefficientCard:active,
+.summaryCard:active,
+.sampleCard:active {
+  transform: scale(0.98);
+}
+
+@media (hover: none) {
+  .pathwayButton:hover,
+  .coefficientCard:not(.dimmed):hover,
+  .summaryCard:hover,
+  .sampleCard:hover {
+    transform: none;
+    box-shadow: none;
+  }
 }
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .coefficientCard,
-  .summaryCard {
+  .summaryCard,
+  .sampleCard,
+  .pathwayButton,
+  .doseControl {
     transition: none;
+  }
+
+  .coefficientCard:not(.dimmed):hover,
+  .summaryCard:hover,
+  .sampleCard:hover {
+    transform: none;
   }
 }

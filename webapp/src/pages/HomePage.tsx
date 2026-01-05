@@ -143,115 +143,125 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* First-Gen & Pell */}
+            {/* FASt Access Equity */}
             <div className={`${styles.demoCard} reveal`}>
-              <h3 className={styles.demoCardTitle}>Socioeconomic Background</h3>
+              <h3 className={styles.demoCardTitle}>FASt Program Access</h3>
+              <p className={styles.demoSubtitle}>
+                {!showComparison 
+                  ? "Percentage of each group participating in FASt"
+                  : "Composition of FASt vs Non-FASt groups"
+                }
+              </p>
               <div className={styles.demoStats}>
                 {!showComparison ? (
                   <>
-                    <div className={styles.demoStat}>
-                      <div className={styles.demoBar}>
-                        <div
-                          className={styles.demoBarFill}
-                          style={{ width: `${demographics.firstgen.yes.pct}%`, backgroundColor: 'var(--color-fast)' }}
-                          aria-label={`First-Generation: ${demographics.firstgen.yes.pct}%`}
-                        />
+                    <div className={styles.donutRow}>
+                      <div className={styles.demoCircle}>
+                        <svg viewBox="0 0 36 36" className={styles.demoDonut}>
+                          <path
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="var(--color-border-light)"
+                            strokeWidth="3"
+                          />
+                          <path
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="var(--color-fast)"
+                            strokeWidth="3"
+                            strokeDasharray={`${Math.round(100 * fastComparison.demographics.firstgen.yes.fast.n / demographics.firstgen.yes.n)}, 100`}
+                          />
+                          <text x="18" y="18" className={styles.demoPercentage}>
+                            {Math.round(100 * fastComparison.demographics.firstgen.yes.fast.n / demographics.firstgen.yes.n)}%
+                          </text>
+                        </svg>
                       </div>
-                      <div className={styles.demoLabel}>
+                      <div className={styles.donutInfo}>
                         <span className={styles.demoGroup}>First-Generation</span>
-                        <span className={styles.demoPct}>{demographics.firstgen.yes.pct}%</span>
+                        <span className={styles.demoCount}>{fastComparison.demographics.firstgen.yes.fast.n.toLocaleString()} of {demographics.firstgen.yes.n.toLocaleString()} are FASt</span>
                       </div>
-                      <div className={styles.demoCount}>{demographics.firstgen.yes.n.toLocaleString()} students</div>
                     </div>
 
-                    <div className={styles.demoStat}>
-                      <div className={styles.demoBar}>
-                        <div
-                          className={styles.demoBarFill}
-                          style={{ width: `${demographics.pell.yes.pct}%`, backgroundColor: 'var(--color-fast)' }}
-                          aria-label={`Pell Grant Recipients: ${demographics.pell.yes.pct}%`}
-                        />
+                    <div className={styles.donutRow}>
+                      <div className={styles.demoCircle}>
+                        <svg viewBox="0 0 36 36" className={styles.demoDonut}>
+                          <path
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="var(--color-border-light)"
+                            strokeWidth="3"
+                          />
+                          <path
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="var(--color-fast)"
+                            strokeWidth="3"
+                            strokeDasharray={`${Math.round(100 * fastComparison.demographics.pell.yes.fast.n / demographics.pell.yes.n)}, 100`}
+                          />
+                          <text x="18" y="18" className={styles.demoPercentage}>
+                            {Math.round(100 * fastComparison.demographics.pell.yes.fast.n / demographics.pell.yes.n)}%
+                          </text>
+                        </svg>
                       </div>
-                      <div className={styles.demoLabel}>
+                      <div className={styles.donutInfo}>
                         <span className={styles.demoGroup}>Pell Grant Recipients</span>
-                        <span className={styles.demoPct}>{demographics.pell.yes.pct}%</span>
+                        <span className={styles.demoCount}>{fastComparison.demographics.pell.yes.fast.n.toLocaleString()} of {demographics.pell.yes.n.toLocaleString()} are FASt</span>
                       </div>
-                      <div className={styles.demoCount}>{demographics.pell.yes.n.toLocaleString()} students</div>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className={styles.demoStat}>
-                      <div className={styles.demoLabel}>
-                        <span className={styles.demoGroup}>First-Generation</span>
-                      </div>
-                      <div className={styles.demoComparison}>
-                        <div className={styles.demoComparisonRow}>
-                          <span className={styles.comparisonLabel}>FASt</span>
-                          <div className={styles.demoBar}>
-                            <div
-                              className={styles.demoBarFill}
-                              style={{
-                                width: `${fastComparison.demographics.firstgen.yes.fast.pct}%`,
-                                backgroundColor: 'var(--color-fast)'
-                              }}
-                            />
+                    {/* Comparison: First-Gen composition within FASt vs Non-FASt */}
+                    <div className={styles.comparisonDonutPair}>
+                      <div className={styles.comparisonDonutLabel}>First-Generation</div>
+                      <div className={styles.comparisonDonutRow}>
+                        <div className={styles.comparisonDonutItem}>
+                          <div className={styles.demoCircle}>
+                            <svg viewBox="0 0 36 36" className={styles.demoDonut}>
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-border-light)" strokeWidth="3" />
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-fast)" strokeWidth="3" strokeDasharray={`${Math.round(100 * fastComparison.demographics.firstgen.yes.fast.n / fastComparison.overall.fast_n)}, 100`} />
+                              <text x="18" y="18" className={styles.demoPercentage}>{Math.round(100 * fastComparison.demographics.firstgen.yes.fast.n / fastComparison.overall.fast_n)}%</text>
+                            </svg>
                           </div>
-                          <span className={styles.demoPct}>{fastComparison.demographics.firstgen.yes.fast.pct}%</span>
+                          <span className={styles.comparisonDonutCaption}>FASt</span>
                         </div>
-                        <div className={styles.demoComparisonRow}>
-                          <span className={styles.comparisonLabel}>Non-FASt</span>
-                          <div className={styles.demoBar}>
-                            <div
-                              className={styles.demoBarFill}
-                              style={{
-                                width: `${fastComparison.demographics.firstgen.yes.nonfast.pct}%`,
-                                backgroundColor: 'var(--color-text-muted)'
-                              }}
-                            />
+                        <div className={styles.comparisonDonutItem}>
+                          <div className={styles.demoCircle}>
+                            <svg viewBox="0 0 36 36" className={styles.demoDonut}>
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-border-light)" strokeWidth="3" />
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-text-muted)" strokeWidth="3" strokeDasharray={`${Math.round(100 * fastComparison.demographics.firstgen.yes.nonfast.n / fastComparison.overall.nonfast_n)}, 100`} />
+                              <text x="18" y="18" className={styles.demoPercentage}>{Math.round(100 * fastComparison.demographics.firstgen.yes.nonfast.n / fastComparison.overall.nonfast_n)}%</text>
+                            </svg>
                           </div>
-                          <span className={styles.demoPct}>{fastComparison.demographics.firstgen.yes.nonfast.pct}%</span>
+                          <span className={styles.comparisonDonutCaption}>Non-FASt</span>
                         </div>
-                      </div>
-                      <div className={styles.demoCount}>
-                        FASt: {fastComparison.demographics.firstgen.yes.fast.n.toLocaleString()} | Non-FASt: {fastComparison.demographics.firstgen.yes.nonfast.n.toLocaleString()}
                       </div>
                     </div>
 
-                    <div className={styles.demoStat}>
-                      <div className={styles.demoLabel}>
-                        <span className={styles.demoGroup}>Pell Grant Recipients</span>
-                      </div>
-                      <div className={styles.demoComparison}>
-                        <div className={styles.demoComparisonRow}>
-                          <span className={styles.comparisonLabel}>FASt</span>
-                          <div className={styles.demoBar}>
-                            <div
-                              className={styles.demoBarFill}
-                              style={{
-                                width: `${fastComparison.demographics.pell.yes.fast.pct}%`,
-                                backgroundColor: 'var(--color-fast)'
-                              }}
-                            />
+                    {/* Comparison: Pell composition within FASt vs Non-FASt */}
+                    <div className={styles.comparisonDonutPair}>
+                      <div className={styles.comparisonDonutLabel}>Pell Grant Recipients</div>
+                      <div className={styles.comparisonDonutRow}>
+                        <div className={styles.comparisonDonutItem}>
+                          <div className={styles.demoCircle}>
+                            <svg viewBox="0 0 36 36" className={styles.demoDonut}>
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-border-light)" strokeWidth="3" />
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-fast)" strokeWidth="3" strokeDasharray={`${Math.round(100 * fastComparison.demographics.pell.yes.fast.n / fastComparison.overall.fast_n)}, 100`} />
+                              <text x="18" y="18" className={styles.demoPercentage}>{Math.round(100 * fastComparison.demographics.pell.yes.fast.n / fastComparison.overall.fast_n)}%</text>
+                            </svg>
                           </div>
-                          <span className={styles.demoPct}>{fastComparison.demographics.pell.yes.fast.pct}%</span>
+                          <span className={styles.comparisonDonutCaption}>FASt</span>
                         </div>
-                        <div className={styles.demoComparisonRow}>
-                          <span className={styles.comparisonLabel}>Non-FASt</span>
-                          <div className={styles.demoBar}>
-                            <div
-                              className={styles.demoBarFill}
-                              style={{
-                                width: `${fastComparison.demographics.pell.yes.nonfast.pct}%`,
-                                backgroundColor: 'var(--color-text-muted)'
-                              }}
-                            />
+                        <div className={styles.comparisonDonutItem}>
+                          <div className={styles.demoCircle}>
+                            <svg viewBox="0 0 36 36" className={styles.demoDonut}>
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-border-light)" strokeWidth="3" />
+                              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--color-text-muted)" strokeWidth="3" strokeDasharray={`${Math.round(100 * fastComparison.demographics.pell.yes.nonfast.n / fastComparison.overall.nonfast_n)}, 100`} />
+                              <text x="18" y="18" className={styles.demoPercentage}>{Math.round(100 * fastComparison.demographics.pell.yes.nonfast.n / fastComparison.overall.nonfast_n)}%</text>
+                            </svg>
                           </div>
-                          <span className={styles.demoPct}>{fastComparison.demographics.pell.yes.nonfast.pct}%</span>
+                          <span className={styles.comparisonDonutCaption}>Non-FASt</span>
                         </div>
-                      </div>
-                      <div className={styles.demoCount}>
-                        FASt: {fastComparison.demographics.pell.yes.fast.n.toLocaleString()} | Non-FASt: {fastComparison.demographics.pell.yes.nonfast.n.toLocaleString()}
                       </div>
                     </div>
                   </>
@@ -264,35 +274,31 @@ export default function HomePage() {
               <h3 className={styles.demoCardTitle}>Student Profile</h3>
               <div className={styles.demoStats}>
                 <div className={styles.demoStat}>
-                  <div className={styles.demoLabel}>
-                    <span className={styles.demoGroup}>Female</span>
-                    <span className={styles.demoPct}>{demographics.sex.women.pct}%</span>
-                  </div>
                   <div className={styles.demoBar}>
                     <div
                       className={styles.demoBarFill}
-                      style={{
-                        width: `${demographics.sex.women.pct}%`,
-                        backgroundColor: 'var(--color-fast)'
-                      }}
+                      style={{ width: `${demographics.sex.women.pct}%` }}
+                      aria-label={`Female: ${demographics.sex.women.pct}%`}
                     />
+                  </div>
+                  <div className={styles.demoLabel}>
+                    <span className={styles.demoGroup}>Female</span>
+                    <span className={styles.demoPct}>{demographics.sex.women.pct}%</span>
                   </div>
                   <div className={styles.demoCount}>{demographics.sex.women.n.toLocaleString()} students</div>
                 </div>
 
                 <div className={styles.demoStat}>
-                  <div className={styles.demoLabel}>
-                    <span className={styles.demoGroup}>Male</span>
-                    <span className={styles.demoPct}>{demographics.sex.men.pct}%</span>
-                  </div>
                   <div className={styles.demoBar}>
                     <div
                       className={styles.demoBarFill}
-                      style={{
-                        width: `${demographics.sex.men.pct}%`,
-                        backgroundColor: 'var(--color-fast)'
-                      }}
+                      style={{ width: `${demographics.sex.men.pct}%` }}
+                      aria-label={`Male: ${demographics.sex.men.pct}%`}
                     />
+                  </div>
+                  <div className={styles.demoLabel}>
+                    <span className={styles.demoGroup}>Male</span>
+                    <span className={styles.demoPct}>{demographics.sex.men.pct}%</span>
                   </div>
                   <div className={styles.demoCount}>{demographics.sex.men.n.toLocaleString()} students</div>
                 </div>

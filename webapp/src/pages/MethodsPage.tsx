@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useModelData } from '../context/ModelDataContext';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
+import GlossaryTerm from '../components/ui/GlossaryTerm';
 import styles from './MethodsPage.module.css';
 
 const modelSpecs = [
@@ -15,9 +16,15 @@ const modelSpecs = [
 export default function MethodsPage() {
   const { fitMeasures: fits } = useModelData();
 
-  // Scroll reveal refs
+  // Scroll reveal refs for each section
   const headerRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
   const fitRef = useScrollReveal<HTMLElement>();
+  const settingsRef = useStaggeredReveal<HTMLElement>();
+  const pswRef = useScrollReveal<HTMLElement>();
+  const measuresRef = useStaggeredReveal<HTMLElement>();
+  const bootstrapRef = useScrollReveal<HTMLElement>();
+  const softwareRef = useStaggeredReveal<HTMLElement>();
+  const referencesRef = useScrollReveal<HTMLElement>();
 
   // Build fit measures table dynamically from pipeline data
   const fitMeasures = useMemo(() => {
@@ -44,7 +51,14 @@ export default function MethodsPage() {
           <span className={styles.eyebrow}>Technical Methods</span>
           <h1>About This Study</h1>
           <p className="lead">
-            This page explains how we analyzed the data and why you can trust the findings.
+            This page explains how we analyzed the data using{' '}
+            <GlossaryTerm
+              term="Structural Equation Modeling"
+              definition="A multivariate statistical technique that tests complex relationships between observed and latent variables simultaneously, combining factor analysis and regression."
+            >
+              structural equation modeling
+            </GlossaryTerm>{' '}
+            and why you can trust the findings.
             Technical details are provided for researchers who want to evaluate our methods.
           </p>
         </header>
@@ -53,8 +67,21 @@ export default function MethodsPage() {
           <h2>How Well Does the Model Fit?</h2>
           <p className={styles.sectionIntro}>
             These statistics tell us whether our model accurately represents the real patterns
-            in the data. Higher CFI/TLI and lower RMSEA/SRMR indicate better fit.
-            Our model meets all recommended standards.
+            in the data. Higher{' '}
+            <GlossaryTerm
+              term="Comparative Fit Index (CFI)"
+              definition="A fit index comparing the model to a baseline (null) model. Values ≥0.95 indicate excellent fit, showing the model explains patterns much better than chance."
+            >
+              CFI/TLI
+            </GlossaryTerm>{' '}
+            and lower{' '}
+            <GlossaryTerm
+              term="Root Mean Square Error of Approximation"
+              definition="Measures the average discrepancy between the model and the data per degree of freedom. Values ≤0.05 indicate close fit; ≤0.08 indicates acceptable fit."
+            >
+              RMSEA/SRMR
+            </GlossaryTerm>{' '}
+            indicate better fit. Our model meets all recommended standards.
           </p>
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
@@ -82,14 +109,14 @@ export default function MethodsPage() {
           </div>
         </section>
 
-        <section className={styles.section}>
-          <h2>Analysis Settings</h2>
-          <p className={styles.sectionIntro}>
+        <section ref={settingsRef} className={`${styles.section} stagger-children`}>
+          <h2 className="reveal">Analysis Settings</h2>
+          <p className={`${styles.sectionIntro} reveal`}>
             These are the technical choices we made when running the analysis.
           </p>
           <div className={styles.specGrid}>
-            {modelSpecs.map((spec) => (
-              <div key={spec.label} className={styles.specCard}>
+            {modelSpecs.map((spec, index) => (
+              <div key={spec.label} className={`${styles.specCard} reveal`} style={{ animationDelay: `${index * 100}ms` }}>
                 <dt className={styles.specLabel}>{spec.label}</dt>
                 <dd className={styles.specValue}>{spec.value}</dd>
                 <dd className={styles.specDescription}>{spec.description}</dd>
@@ -98,12 +125,18 @@ export default function MethodsPage() {
           </div>
         </section>
 
-        <section className={styles.section}>
+        <section ref={pswRef} className={`${styles.section} reveal`}>
           <h2>Making Fair Comparisons</h2>
           <p className={styles.sectionIntro}>
             Students don't randomly choose to earn college credits in high school—those who
-            do tend to have higher GPAs, more educated parents, etc. We used <strong>propensity
-            score weighting</strong> to account for these pre-existing differences and make
+            do tend to have higher GPAs, more educated parents, etc. We used{' '}
+            <GlossaryTerm
+              term="Propensity Score Weighting"
+              definition="A statistical technique that creates pseudo-randomization by weighting observations based on their probability of receiving treatment, reducing selection bias in observational studies."
+            >
+              propensity score weighting
+            </GlossaryTerm>{' '}
+            to account for these pre-existing differences and make
             fairer comparisons.
           </p>
           <div className={styles.codeBlock}>
@@ -121,14 +154,21 @@ export default function MethodsPage() {
           </div>
         </section>
 
-        <section className={styles.section}>
-          <h2>What We Measured</h2>
-          <p className={styles.sectionIntro}>
+        <section ref={measuresRef} className={`${styles.section} stagger-children`}>
+          <h2 className="reveal">What We Measured</h2>
+          <p className={`${styles.sectionIntro} reveal`}>
             Each concept in our model was measured using multiple survey questions.
-            Using multiple questions gives us more reliable measurements than single items.
+            Using multiple questions gives us more reliable{' '}
+            <GlossaryTerm
+              term="Latent Variables"
+              definition="Unobserved constructs (like 'emotional distress') that cannot be measured directly, but are inferred from multiple observable indicators (survey items) that reflect the underlying concept."
+            >
+              latent variable
+            </GlossaryTerm>{' '}
+            measurements than single items.
           </p>
           <div className={styles.constructGrid}>
-            <article className={styles.constructCard}>
+            <article className={`${styles.constructCard} reveal`} style={{ animationDelay: '0ms' }}>
               <h4 style={{ color: 'var(--color-distress)' }}>Emotional Distress</h4>
               <p>6 questions about challenges faced (6-point scale)</p>
               <ul>
@@ -140,7 +180,7 @@ export default function MethodsPage() {
                 <li>Financial stress</li>
               </ul>
             </article>
-            <article className={styles.constructCard}>
+            <article className={`${styles.constructCard} reveal`} style={{ animationDelay: '100ms' }}>
               <h4 style={{ color: 'var(--color-engagement)' }}>Quality of Engagement</h4>
               <p>5 questions about campus interactions (7-point scale)</p>
               <ul>
@@ -151,7 +191,7 @@ export default function MethodsPage() {
                 <li>Interactions with administrators</li>
               </ul>
             </article>
-            <article className={styles.constructCard}>
+            <article className={`${styles.constructCard} reveal`} style={{ animationDelay: '200ms' }}>
               <h4 style={{ color: 'var(--color-belonging)' }}>College Success</h4>
               <p>15 questions across 4 areas</p>
               <ul>
@@ -164,30 +204,44 @@ export default function MethodsPage() {
           </div>
         </section>
 
-        <section className={styles.section}>
+        <section ref={bootstrapRef} className={`${styles.section} reveal`}>
           <h2>How We Calculated Confidence</h2>
           <p className={styles.sectionIntro}>
-            We used <strong>bootstrapping</strong> (2,000 resamples) to calculate how confident
+            We used{' '}
+            <GlossaryTerm
+              term="Bootstrap Resampling"
+              definition="A statistical method that repeatedly resamples from the original data (with replacement) to estimate the sampling distribution of a statistic, providing robust confidence intervals without assuming normality."
+            >
+              bootstrapping
+            </GlossaryTerm>{' '}
+            (2,000 resamples) to calculate how confident
             we are in our findings. This method doesn't assume the data follows a perfect
             bell curve, making it more reliable for complex analyses like ours.
           </p>
           <div className={styles.infoBox}>
             <h4>Why Bootstrap?</h4>
             <p>
-              When we multiply effects together (like in mediation analysis), the math gets
+              When we multiply effects together (like in{' '}
+              <GlossaryTerm
+                term="Mediation Analysis"
+                definition="A statistical approach examining how an independent variable affects a dependent variable through one or more intervening (mediator) variables, decomposing total effects into direct and indirect pathways."
+              >
+                mediation analysis
+              </GlossaryTerm>
+              ), the math gets
               complicated. Bootstrapping lets the data "speak for itself" by repeatedly
               resampling and recalculating, giving us a realistic picture of uncertainty.
             </p>
           </div>
         </section>
 
-        <section className={styles.section}>
-          <h2>Software Used</h2>
-          <p className={styles.sectionIntro}>
+        <section ref={softwareRef} className={`${styles.section} stagger-children`}>
+          <h2 className="reveal">Software Used</h2>
+          <p className={`${styles.sectionIntro} reveal`}>
             All analyses used open-source software for transparency and reproducibility.
           </p>
           <div className={styles.softwareGrid}>
-            <div className={styles.softwareCard}>
+            <div className={`${styles.softwareCard} reveal`} style={{ animationDelay: '0ms' }}>
               <h4>R Packages</h4>
               <ul>
                 <li><code>lavaan</code> — Main statistical modeling</li>
@@ -196,7 +250,7 @@ export default function MethodsPage() {
                 <li><code>parallel</code> — Faster computation</li>
               </ul>
             </div>
-            <div className={styles.softwareCard}>
+            <div className={`${styles.softwareCard} reveal`} style={{ animationDelay: '100ms' }}>
               <h4>Python Packages</h4>
               <ul>
                 <li><code>pandas</code>, <code>numpy</code> — Data processing</li>
@@ -205,12 +259,12 @@ export default function MethodsPage() {
               </ul>
             </div>
           </div>
-          <p className={styles.repoNote}>
+          <p className={`${styles.repoNote} reveal`}>
             All analysis code is available in the project repository for full reproducibility.
           </p>
         </section>
 
-        <section className={styles.section}>
+        <section ref={referencesRef} className={`${styles.section} reveal`}>
           <h2>References</h2>
           <ul className={styles.references}>
             <li>

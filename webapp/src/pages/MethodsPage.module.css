@@ -1,5 +1,24 @@
 .page {
   padding-bottom: var(--spacing-4xl);
+  position: relative;
+}
+
+/* Hero glow effect - matches other pages */
+.page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--color-accent) 15%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 .header {
@@ -7,6 +26,7 @@
   max-width: 800px;
   margin: 0 auto var(--spacing-2xl);
   padding-top: var(--spacing-xl);
+  position: relative;
 }
 
 .eyebrow {
@@ -27,6 +47,7 @@
 /* Sections */
 .section {
   margin-bottom: var(--spacing-3xl);
+  position: relative;
 }
 
 .section h2 {
@@ -79,6 +100,16 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.specCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .specLabel {
@@ -113,6 +144,16 @@
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   margin-top: var(--spacing-lg);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.codeBlock:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .codeBlock h4 {
@@ -145,6 +186,16 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.constructCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .constructCard h4 {
@@ -175,6 +226,16 @@
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   margin-top: var(--spacing-lg);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.infoBox:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .infoBox h4 {
@@ -202,6 +263,16 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.softwareCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
 }
 
 .softwareCard h4 {
@@ -252,5 +323,99 @@
   .constructGrid,
   .softwareGrid {
     grid-template-columns: 1fr;
+  }
+
+  .header h1 {
+    font-size: 1.75rem;
+  }
+
+  .table {
+    font-size: var(--font-size-xs);
+  }
+
+  .table th,
+  .table td {
+    padding: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding-bottom: var(--spacing-2xl);
+  }
+
+  .page::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  .header {
+    padding-top: var(--spacing-md);
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .eyebrow {
+    font-size: var(--font-size-xs);
+  }
+
+  .section {
+    margin-bottom: var(--spacing-2xl);
+  }
+
+  .section h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .specCard,
+  .constructCard,
+  .codeBlock,
+  .infoBox,
+  .softwareCard {
+    padding: var(--spacing-md);
+  }
+
+  .codeList,
+  .constructCard ul,
+  .softwareCard ul {
+    padding-left: var(--spacing-md);
+  }
+
+  .references li {
+    padding-left: var(--spacing-md);
+    text-indent: calc(-1 * var(--spacing-md));
+  }
+}
+
+/* Touch states for mobile */
+@media (hover: none) {
+  .specCard:active,
+  .constructCard:active,
+  .codeBlock:active,
+  .infoBox:active,
+  .softwareCard:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .specCard,
+  .constructCard,
+  .codeBlock,
+  .infoBox,
+  .softwareCard {
+    transition: none;
+  }
+
+  .specCard:hover,
+  .constructCard:hover,
+  .codeBlock:hover,
+  .infoBox:hover,
+  .softwareCard:hover {
+    transform: none;
   }
 }

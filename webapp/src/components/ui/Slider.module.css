@@ -62,23 +62,6 @@
   transform: scale(1.1);
 }
 
-/* Larger touch target on mobile */
-@media (max-width: 768px) {
-  .slider::-webkit-slider-thumb {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .slider::-moz-range-thumb {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .slider {
-    height: 12px;
-  }
-}
-
 .slider::-moz-range-thumb {
   width: 24px;
   height: 24px;
@@ -97,20 +80,26 @@
   flex-direction: column;
   align-items: center;
   pointer-events: none;
+  z-index: 2;
 }
 
 .thresholdLine {
-  width: 2px;
+  width: 3px;
   height: 40px;
   background: var(--color-fast);
+  border-radius: 1px;
 }
 
 .thresholdLabel {
   font-size: var(--font-size-xs);
   color: var(--color-fast);
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   margin-top: var(--spacing-xs);
+  background: var(--color-surface);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-fast);
 }
 
 .range {
@@ -129,6 +118,7 @@
   right: 0;
   height: 100%;
   pointer-events: none;
+  z-index: 1;
 }
 
 .tick {
@@ -142,21 +132,51 @@
 
 .tickMark {
   width: 2px;
-  height: 12px;
-  background: var(--color-border);
-  margin-top: 14px;
+  height: 10px;
+  background: var(--color-text-muted);
+  margin-top: 15px;
+  border-radius: 1px;
+  opacity: 0.5;
 }
 
 .tickLabel {
-  font-size: var(--font-size-xs);
+  font-size: 10px;
   color: var(--color-text-muted);
   font-weight: 500;
-  margin-top: var(--spacing-xs);
+  margin-top: 4px;
   white-space: nowrap;
+  opacity: 0.7;
 }
 
+/* Mobile */
 @media (max-width: 768px) {
+  .slider::-webkit-slider-thumb {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .slider {
+    height: 12px;
+  }
+
+  .sliderWrapper {
+    height: 50px;
+  }
+
+  .thresholdLine {
+    height: 50px;
+  }
+
+  .tickMark {
+    margin-top: 18px;
+  }
+
   .tickLabel {
-    font-size: 10px;
+    font-size: 9px;
   }
 }
