@@ -7,7 +7,8 @@ const navItems = [
   { to: '/dose', label: 'Credit Levels' },
   { to: '/demographics', label: 'Student Groups' },
   { to: '/pathway', label: 'How It Works' },
-  { to: '/methods', label: 'About the Study' },
+  { to: '/methods', label: 'Methods' },
+  { to: '/researcher', label: 'Researcher' },
 ];
 
 export default function Header() {

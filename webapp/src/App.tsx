@@ -8,6 +8,7 @@ import DoseExplorerPage from './pages/DoseExplorerPage';
 import DemographicsPage from './pages/DemographicsPage';
 import PathwayPage from './pages/PathwayPage';
 import MethodsPage from './pages/MethodsPage';
+import ResearcherPage from './pages/ResearcherPage';
 import './styles/global.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
             <Route path="demographics" element={<DemographicsPage />} />
             <Route path="pathway" element={<PathwayPage />} />
             <Route path="methods" element={<MethodsPage />} />
+            <Route path="researcher" element={<ResearcherPage />} />
           </Route>
         </Routes>
         </HashRouter>
