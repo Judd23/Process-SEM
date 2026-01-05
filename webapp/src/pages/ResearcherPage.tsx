@@ -3,112 +3,113 @@ import styles from './ResearcherPage.module.css';
 export default function ResearcherPage() {
   return (
     <div className={styles.page}>
-      {/* Full-width Hero with Photo */}
-      <section className={styles.hero}>
-        <div className={styles.heroImage}>
-          <img 
-            src={`${import.meta.env.BASE_URL}researcher.jpg`}
-            alt="Judd Johnson"
-          />
-          <div className={styles.heroOverlay}></div>
-        </div>
-        <div className={styles.heroContent}>
-          <div className={styles.heroText}>
-            <span className={styles.tagline}>The Researcher</span>
-            <h1>Judd Johnson</h1>
-            <p className={styles.credentials}>M.F.A., Ed.D.-(May '26)</p>
-            <p className={styles.role}>Higher Education Leadership & Policy Scholar</p>
+      <header className={styles.hero}>
+        <div className={styles.heroGrid}>
+          <figure className={styles.heroFigure}>
+            <picture>
+              <source
+                srcSet={
+                  `${import.meta.env.BASE_URL}researcher/researcher-800.jpg 800w, ` +
+                  `${import.meta.env.BASE_URL}researcher/researcher-1600.jpg 1600w, ` +
+                  `${import.meta.env.BASE_URL}researcher/researcher-2400.jpg 2400w, ` +
+                  `${import.meta.env.BASE_URL}researcher/researcher-3200.jpg 3200w`
+                }
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+                type="image/jpeg"
+              />
+              <img
+                src={`${import.meta.env.BASE_URL}researcher/researcher-1600.jpg`}
+                alt="Jay Johnson"
+                loading="eager"
+              />
+            </picture>
+            <div className={styles.heroOverlay} />
+          </figure>
+
+          <div className={styles.heroIntro}>
+            <div className={styles.kicker}>Researcher</div>
+            <h1 className={styles.name}>Jay Johnson</h1>
+            <div className={styles.metaLine}>
+              <span className={styles.credentials}>M.F.A., Ed.D.-(May '26)</span>
+              <span className={styles.dot} aria-hidden="true">•</span>
+              <span className={styles.role}>Higher Education Leadership & Policy Scholar</span>
+            </div>
           </div>
         </div>
-        <div className={styles.scrollIndicator}>
-          <span>Scroll</span>
-          <div className={styles.scrollLine}></div>
-        </div>
-      </section>
+      </header>
 
-      {/* Main Content */}
       <main className={styles.main}>
-        {/* Quote Section - Full Width */}
-        <section className={styles.quoteSection}>
-          <blockquote>
-            <p>
-              "I believe every student deserves to <em>thrive</em> in college, not just survive."
-            </p>
-          </blockquote>
-        </section>
-
-        {/* Story Section */}
-        <section className={styles.storySection}>
-          <div className={styles.storyGrid}>
-            <div className={styles.storyLabel}>
-              <span>01</span>
-              <h2>Background</h2>
+        <section className={styles.factsStrip}>
+          <div className={styles.factsInner}>
+            <div className={styles.fact}>
+              <div className={styles.factLabel}>Focus</div>
+              <div className={styles.factValue}>Student development | equity | pathways</div>
             </div>
-            <div className={styles.storyContent}>
-              <p>
-                Years of working directly with first-generation and low-income students 
-                sparked my fascination with a deceptively simple question: 
-              </p>
-              <p className={styles.highlight}>
-                What makes some students thrive while others struggle?
-              </p>
-              <p>
-                This question became the foundation of my research—exploring not just 
-                academic preparation, but the psychological and social dimensions of 
-                the college transition.
-              </p>
+            <div className={styles.fact}>
+              <div className={styles.factLabel}>Methods</div>
+              <div className={styles.factValue}>SEM, causal inference, process models</div>
             </div>
-          </div>
-        </section>
-
-        {/* Research Interests */}
-        <section className={styles.interestsSection}>
-          <div className={styles.interestsHeader}>
-            <span>02</span>
-            <h2>Research Focus</h2>
-          </div>
-          <div className={styles.interestsGrid}>
-            <div className={styles.interestItem}>
-              <div className={styles.interestNumber}>01</div>
-              <h3>Student Success</h3>
-              <p>Developmental adjustment, belonging, and first-year transitions</p>
-            </div>
-            <div className={styles.interestItem}>
-              <div className={styles.interestNumber}>02</div>
-              <h3>Accelerated Pathways</h3>
-              <p>Dual enrollment, early college, and credit accumulation effects</p>
-            </div>
-            <div className={styles.interestItem}>
-              <div className={styles.interestNumber}>03</div>
-              <h3>Educational Equity</h3>
-              <p>Supporting historically underrepresented students in higher education</p>
-            </div>
-            <div className={styles.interestItem}>
-              <div className={styles.interestNumber}>04</div>
-              <h3>Quantitative Methods</h3>
-              <p>Structural equation modeling, causal inference, and process analysis</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Contact Section */}
-        <section className={styles.contactSection}>
-          <div className={styles.contactInner}>
-            <div className={styles.contactLabel}>
-              <span>03</span>
-              <h2>Connect</h2>
-            </div>
-            <div className={styles.contactContent}>
-              <p>
-                Interested in discussing research, collaboration, or opportunities 
-                in higher education research and policy?
-              </p>
-              <a href="mailto:jjohnson4039@SDSU.edu" className={styles.emailLink}>
-                <span className={styles.emailText}>jjohnson4039@SDSU.edu</span>
-                <span className={styles.emailArrow}>→</span>
+            <div className={styles.fact}>
+              <div className={styles.factLabel}>Email</div>
+              <a href="mailto:jjohnson4039@SDSU.edu" className={styles.factLink}>
+                jjohnson4039@SDSU.edu
               </a>
             </div>
           </div>
+        </section>
+
+        <section className={styles.grid}>
+          <article className={styles.blockA}>
+            <div className={styles.blockHeader}>
+              <span className={styles.blockNum}>01</span>
+              <h2>Background</h2>
+            </div>
+            <p>
+              My work sits at the intersection of faculty practice, applied research, and student-facing
+              administration—with a creative background that keeps the work human, narrative-driven,
+              and grounded in lived experience.
+            </p>
+            <p>
+              I study how accelerated pathways and policy choices shape the transition into college—
+              not just academically, but psychologically and socially—especially for first-generation
+              and low-income students.
+            </p>
+          </article>
+
+          <aside className={styles.blockB}>
+            <blockquote className={styles.pullQuote}>
+              <p>
+                “Every student deserves to <em>thrive</em> in college, not just survive.”
+              </p>
+            </blockquote>
+          </aside>
+
+          <article className={styles.blockC}>
+            <div className={styles.blockHeader}>
+              <span className={styles.blockNum}>02</span>
+              <h2>Research Areas</h2>
+            </div>
+            <ul className={styles.list}>
+              <li>First-year transition and developmental adjustment</li>
+              <li>Dual enrollment and accelerated credit pathways</li>
+              <li>Equity-focused student success research</li>
+              <li>Quantitative methods with latent-variable models</li>
+            </ul>
+          </article>
+
+          <article className={styles.blockD}>
+            <div className={styles.blockHeader}>
+              <span className={styles.blockNum}>03</span>
+              <h2>Connect</h2>
+            </div>
+            <p>
+              For collaboration, speaking, or questions about the work, email me directly.
+            </p>
+            <a href="mailto:jjohnson4039@SDSU.edu" className={styles.cta}>
+              <span>jjohnson4039@SDSU.edu</span>
+              <span className={styles.ctaArrow} aria-hidden="true">→</span>
+            </a>
+          </article>
         </section>
       </main>
     </div>

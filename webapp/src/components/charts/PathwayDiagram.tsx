@@ -101,7 +101,7 @@ export default function PathwayDiagram({
   interactive = true,
 }: PathwayDiagramProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const { highlightedPath, setHighlightedPath } = useResearch();
+  const { highlightedPath, setHighlightedPath, selectedDose } = useResearch();
   const { resolvedTheme } = useTheme();
   const [tooltip, setTooltip] = useState<{
     show: boolean;
@@ -109,6 +109,18 @@ export default function PathwayDiagram({
     y: number;
     content: TooltipContent;
   } | null>(null);
+
+  // Mirror the Dose Explorer convention: interpret the slider in 10-credit units above/below the 12-credit threshold.
+  const doseInUnits = (selectedDose - 12) / 10;
+
+  const getAdjustedEstimate = (pathId: string, baseEstimate: number) => {
+    const moderation =
+      pathId === 'a1' ? 0.003 :
+      pathId === 'a2' ? -0.014 :
+      pathId === 'c' ? -0.009 :
+      0;
+    return baseEstimate + moderation * doseInUnits;
+  };
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -209,7 +221,8 @@ export default function PathwayDiagram({
 
       const isHighlighted = !highlightedPath || highlightedPath === pathType;
       const opacity = isHighlighted ? 1 : 0.15;
-      const strokeWidth = Math.max(2.5, Math.abs(path.estimate) * 12);
+      const adjustedEstimate = getAdjustedEstimate(path.id, path.estimate);
+      const strokeWidth = Math.max(2.5, Math.abs(adjustedEstimate) * 12);
 
       // Calculate path - all straight lines
       const dx = to.x - from.x;
@@ -250,7 +263,7 @@ export default function PathwayDiagram({
                 type: 'path',
                 title: path.title,
                 description: path.description,
-                estimate: path.estimate, 
+                estimate: adjustedEstimate,
                 pvalue: path.pvalue,
                 finding: path.finding
               },
@@ -474,7 +487,7 @@ export default function PathwayDiagram({
         .text(item.label);
     });
 
-  }, [width, height, highlightedPath, interactive, setHighlightedPath, resolvedTheme]);
+  }, [width, height, highlightedPath, interactive, setHighlightedPath, resolvedTheme, selectedDose]);
 
   return (
     <div className={styles.container}>

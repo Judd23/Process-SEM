@@ -22,7 +22,7 @@ export default function LandingPage() {
 
         <div className={styles.authorBlock}>
           <p className={styles.by}>by</p>
-          <p className={styles.author}>Judd Johnson</p>
+          <p className={styles.author}>Jay Johnson</p>
           <p className={styles.affiliation}>San Diego State University</p>
           <p className={styles.degree}>Doctoral Candidate</p>
         </div>
