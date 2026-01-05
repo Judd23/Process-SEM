@@ -67,12 +67,15 @@ export default function PathwayDiagram({
   const { resolvedTheme } = useTheme();
   const { paths, doseCoefficients } = useModelData();
 
-  // Responsive sizing
+  // Responsive sizing with mobile constraints
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        const responsiveWidth = Math.min(initialWidth, containerWidth - 40);
+        const isMobile = containerWidth < 500;
+        // On mobile, enforce minimum width for readability (scrollable container)
+        const minWidth = isMobile ? 500 : 400;
+        const responsiveWidth = Math.max(minWidth, Math.min(initialWidth, containerWidth - 20));
         const aspectRatio = initialHeight / initialWidth;
         const responsiveHeight = responsiveWidth * aspectRatio;
         setDimensions({ width: responsiveWidth, height: responsiveHeight });
@@ -469,14 +472,15 @@ export default function PathwayDiagram({
       });
     });
 
-    // Add legend with better styling
+    // Add legend with better styling - position inside safe area
+    const legendX = Math.min(width - 160, width - 155);
     const legendBg = svg.append('g')
-      .attr('transform', `translate(${width - 160}, 12)`);
+      .attr('transform', `translate(${legendX}, 12)`);
     
     legendBg.append('rect')
       .attr('x', -8)
       .attr('y', -8)
-      .attr('width', 150)
+      .attr('width', 145)
       .attr('height', 80)
       .attr('fill', chartBg)
       .attr('stroke', 'var(--color-border)')

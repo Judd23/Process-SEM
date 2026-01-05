@@ -54,6 +54,13 @@
   flex-wrap: wrap;
 }
 
+@media (max-width: 480px) {
+  .pathwayButtons {
+    gap: var(--spacing-xs);
+    width: 100%;
+  }
+}
+
 .pathwayButton {
   background: var(--color-surface);
   border: 2px solid var(--color-border);
@@ -66,6 +73,16 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   min-height: 44px; /* WCAG touch target */
+}
+
+@media (max-width: 480px) {
+  .pathwayButton {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: center;
+  }
 }
 
 .pathwayButton:hover {
@@ -94,11 +111,26 @@
   justify-content: center;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
 @media (max-width: 768px) {
   .diagram {
     padding: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
+    border-radius: var(--radius-md);
+  }
+
+  .diagram::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to right, transparent, var(--color-surface));
+    pointer-events: none;
+    opacity: 0.7;
   }
   
   .controls {

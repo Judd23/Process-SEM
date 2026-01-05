@@ -6,13 +6,33 @@
   width: 100%;
   min-height: 400px;
   overflow-x: auto;
+  overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
 @media (max-width: 768px) {
   .container {
     min-height: 300px;
     justify-content: flex-start;
+    padding-bottom: var(--spacing-sm);
+    /* Visual hint for scrollability */
+    mask-image: linear-gradient(to right, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
+  }
+
+  .container::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .container::-webkit-scrollbar-track {
+    background: var(--color-border-light);
+    border-radius: 3px;
+  }
+
+  .container::-webkit-scrollbar-thumb {
+    background: var(--color-text-muted);
+    border-radius: 3px;
   }
 }
 
@@ -35,6 +55,13 @@
   z-index: 1000;
   max-width: 320px;
   animation: tooltipFadeIn 0.15s ease-out;
+}
+
+@media (max-width: 768px) {
+  .tooltip {
+    max-width: calc(100vw - 40px);
+    font-size: var(--font-size-sm);
+  }
 }
 
 @keyframes tooltipFadeIn {
