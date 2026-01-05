@@ -5,7 +5,7 @@ import styles from './Header.module.css';
 const navItems = [
   { to: '/home', label: 'Home' },
   { to: '/dose', label: 'Credit Levels' },
-  { to: '/demographics', label: 'Student Groups' },
+  { to: '/demographics', label: 'Equity Frame' },
   { to: '/pathway', label: 'How It Works' },
   { to: '/methods', label: 'Methods' },
   { to: '/researcher', label: 'Researcher' },

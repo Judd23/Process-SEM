@@ -1,7 +1,11 @@
+import { useTheme } from '../context/ThemeContext';
 import styles from './ResearcherPage.module.css';
 
 export default function ResearcherPage() {
-  const sdsuLogo = `${import.meta.env.BASE_URL}researcher/SDSUCCLEAD.png`;
+  const { resolvedTheme } = useTheme();
+  const sdsuLogo = resolvedTheme === 'dark'
+    ? `${import.meta.env.BASE_URL}researcher/SDSUforDark.png`
+    : `${import.meta.env.BASE_URL}researcher/SDSUColor.png`;
 
   return (
     <div className={styles.page}>
@@ -36,7 +40,7 @@ export default function ResearcherPage() {
             <div className={styles.institutionPanel}>
               <img
                 src={sdsuLogo}
-                alt="SDSU College of Education - Community College Leadership Ed.D"
+                alt="San Diego State University - College of Education"
                 className={styles.institutionLogo}
               />
             </div>
