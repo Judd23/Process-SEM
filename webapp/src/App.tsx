@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ResearchProvider } from './context/ResearchContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/layout/Layout';
@@ -25,6 +25,8 @@ function App() {
             <Route path="pathway" element={<PathwayPage />} />
             <Route path="methods" element={<MethodsPage />} />
             <Route path="researcher" element={<ResearcherPage />} />
+            <Route path="about" element={<Navigate to="/researcher" replace />} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
           </Route>
         </Routes>
         </HashRouter>
