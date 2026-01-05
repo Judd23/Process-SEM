@@ -1,4 +1,3 @@
-import { useTheme } from '../context/ThemeContext';
 import styles from './ResearcherPage.module.css';
 
 export default function ResearcherPage() {
