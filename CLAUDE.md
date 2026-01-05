@@ -478,3 +478,81 @@ This session completed a comprehensive UX enhancement sprint including:
 - LandingPage functional scroll indicator
 - HomePage demographics section (new!)
 - All changes deployed to production
+
+---
+
+### January 5, 2026 - ResearcherPage Artistic & Dynamic Enhancements
+
+#### Comprehensive Visual Overhaul
+Made the ResearcherPage significantly more artistic and dynamic with layered animations, gradient effects, shimmer overlays, and glow decorations.
+
+**New Animation Keyframes Added:**
+- `@keyframes floatGlow` - Complex 4-stage movement with rotation and scale (used by background orbs)
+- `@keyframes pulseGlow` - Breathing opacity/blur effect for background orbs
+- `@keyframes shimmer` - Gradient position animation for shine effects (200% sweep)
+- `@keyframes borderGlow` - Pulsing box-shadow for cards
+- `@keyframes textGlow` - Text shadow pulse for name
+- `@keyframes pulse` - Arrow bounce animation for CTA
+
+**Hero Section Enhancements:**
+- **Background orbs**: Increased size (600px/550px), dual-color gradients, added `pulseGlow` breathing effect
+- **Hero glow**: Radial gradient background on `.hero` section
+- **heroFigure**: 
+  - Shimmer top border (4px) that appears on hover with `shimmer` animation
+  - Gradient corner accent (80px) slides in from top-right on hover
+  - Enhanced transform: `translateY(-8px) rotate(-1deg) scale(1.01)`
+  - Glow shadow: `0 0 40px` with accent color
+- **Image**: Brightness/contrast filter boost on hover
+- **Name**: `textGlow` animation on hero hover, shimmer underline with gradient
+
+**Facts Strip Enhancements:**
+- **Shine sweep overlay**: Gradient sweeps left-to-right on hover (`.fact::after`)
+- **Bottom bars**: Increased to 4px, added shimmer animation
+- **Transform**: Enhanced to `scale(1.03) translateY(-2px)` with glow shadow
+
+**Content Blocks (A, B, C, D):**
+- **Block A/C**: 
+  - Side gradient bars (5px) with 3-color gradient and shimmer animation
+  - Corner glow orbs that appear and scale on hover
+  - Background shifts to subtle gradient on hover
+  - Border increased to 2px
+- **Block B**:
+  - Opening + closing quotation marks (10rem) with gradient text (`-webkit-background-clip: text`)
+  - Quotes animate: scale and translate on hover
+  - Engagement-colored glow shadow
+- **Block D**:
+  - Top border animates from center with shimmer
+  - Larger corner glow (200px) with dual-color gradient
+  - Enhanced scale on hover (1.8x)
+
+**Quote Styling:**
+- Emphasized text (`em`) uses gradient text (`background-clip: text`) in both accent→engagement and engagement→accent directions
+- Border thickness increased to 4px
+
+**List Items:**
+- Custom gradient bullet points (8px circles)
+- Bullets glow and scale (1.3x) on hover
+- Items slide 8px (up from 4px) on hover
+
+**CTA Button Complete Redesign:**
+- Full button styling with border (2px), rounded corners (8px), padding
+- Shine sweep overlay on hover
+- Gradient underline (3px) with shimmer animation
+- Pulsing arrow animation (`@keyframes pulse`)
+- Glow shadow effect
+- Transform lift on hover
+
+**Accessibility:**
+- Full `prefers-reduced-motion` support updated for all new animations
+- All new pseudo-elements included in reduced motion query
+- Touch states preserved
+
+**Files Modified:**
+- `webapp/src/pages/ResearcherPage.module.css` - Comprehensive artistic enhancements (~200 lines changed)
+
+**Build Stats:**
+- CSS: 103.09 KB (gzip: 15.39 KB)
+- JS: 406.52 KB (gzip: 125.50 KB)
+- Build time: ~940ms
+
+**Deployed:** https://judd23.github.io/Dissertation-Model-Simulation/#/researcher
