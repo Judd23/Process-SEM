@@ -1,18 +1,22 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import StatCard from '../components/ui/StatCard';
 import Icon from '../components/ui/Icon';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
+import Toggle from '../components/ui/Toggle';
 import PathwayDiagram from '../components/charts/PathwayDiagram';
 import DataTimestamp from '../components/ui/DataTimestamp';
 import { useModelData } from '../context/ModelDataContext';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import sampleDescriptives from '../data/sampleDescriptives.json';
+import fastComparison from '../data/fastComparison.json';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
   const { sampleSize, fitMeasures, paths, fastPercent } = useModelData();
   const demographics = sampleDescriptives.demographics;
+  const [showComparison, setShowComparison] = useState(false);
 
   // Scroll reveal refs
   const heroRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
@@ -55,10 +59,20 @@ export default function HomePage() {
       <section ref={demographicsRef} className={`${styles.demographics} stagger-children`}>
         <div className="container">
           <div className={styles.demographicsHeader}>
-            <h2>Our Student Population</h2>
-            <p className={styles.demographicsLead}>
-              {sampleSize.toLocaleString()} California State University first-year students representing diverse backgrounds and experiences
-            </p>
+            <div className={styles.demographicsHeaderTop}>
+              <div>
+                <h2>Our Student Population</h2>
+                <p className={styles.demographicsLead}>
+                  {sampleSize.toLocaleString()} California State University first-year students representing diverse backgrounds and experiences
+                </p>
+              </div>
+              <Toggle
+                checked={showComparison}
+                onChange={() => setShowComparison(!showComparison)}
+                label="Compare FASt vs Non-FASt"
+                id="demographics-comparison-toggle"
+              />
+            </div>
           </div>
 
           <div className={styles.demographicsGrid}>
@@ -68,18 +82,62 @@ export default function HomePage() {
               <div className={styles.demoStats}>
                 {Object.entries(demographics.race).map(([group, data]) => (
                   <div key={group} className={styles.demoStat}>
-                    <div className={styles.demoBar}>
-                      <div
-                        className={styles.demoBarFill}
-                        style={{ width: `${data.pct}%` }}
-                        aria-label={`${group}: ${data.pct}%`}
-                      />
-                    </div>
-                    <div className={styles.demoLabel}>
-                      <span className={styles.demoGroup}>{group}</span>
-                      <span className={styles.demoPct}>{data.pct}%</span>
-                    </div>
-                    <div className={styles.demoCount}>{data.n.toLocaleString()} students</div>
+                    {!showComparison ? (
+                      <>
+                        <div className={styles.demoBar}>
+                          <div
+                            className={styles.demoBarFill}
+                            style={{ width: `${data.pct}%` }}
+                            aria-label={`${group}: ${data.pct}%`}
+                          />
+                        </div>
+                        <div className={styles.demoLabel}>
+                          <span className={styles.demoGroup}>{group}</span>
+                          <span className={styles.demoPct}>{data.pct}%</span>
+                        </div>
+                        <div className={styles.demoCount}>{data.n.toLocaleString()} students</div>
+                      </>
+                    ) : (
+                      <div className={styles.demoComparison}>
+                        <div className={styles.demoLabel}>
+                          <span className={styles.demoGroup}>{group}</span>
+                        </div>
+                        <div className={styles.demoComparisonRow}>
+                          <span className={styles.comparisonLabel}>FASt</span>
+                          <div className={styles.demoBar}>
+                            <div
+                              className={styles.demoBarFill}
+                              style={{
+                                width: `${(fastComparison.demographics.race as any)[group]?.fast.pct || 0}%`,
+                                backgroundColor: 'var(--color-fast)'
+                              }}
+                            />
+                          </div>
+                          <span className={styles.demoPct}>
+                            {(fastComparison.demographics.race as any)[group]?.fast.pct || 0}%
+                          </span>
+                        </div>
+                        <div className={styles.demoComparisonRow}>
+                          <span className={styles.comparisonLabel}>Non-FASt</span>
+                          <div className={styles.demoBar}>
+                            <div
+                              className={styles.demoBarFill}
+                              style={{
+                                width: `${(fastComparison.demographics.race as any)[group]?.nonfast.pct || 0}%`,
+                                backgroundColor: 'var(--color-text-muted)'
+                              }}
+                            />
+                          </div>
+                          <span className={styles.demoPct}>
+                            {(fastComparison.demographics.race as any)[group]?.nonfast.pct || 0}%
+                          </span>
+                        </div>
+                        <div className={styles.demoCount}>
+                          FASt: {(fastComparison.demographics.race as any)[group]?.fast.n.toLocaleString() || 0} |
+                          Non-FASt: {(fastComparison.demographics.race as any)[group]?.nonfast.n.toLocaleString() || 0}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -87,61 +145,141 @@ export default function HomePage() {
 
             {/* First-Gen & Pell */}
             <div className={`${styles.demoCard} reveal`}>
-              <h3 className={styles.demoCardTitle}>Access & Equity</h3>
+              <h3 className={styles.demoCardTitle}>Socioeconomic Background</h3>
               <div className={styles.demoStats}>
-                <div className={styles.demoStat}>
-                  <div className={styles.demoCircle}>
-                    <svg viewBox="0 0 36 36" className={styles.demoDonut}>
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="var(--color-border-light)"
-                        strokeWidth="3"
-                      />
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="var(--color-accent)"
-                        strokeWidth="3"
-                        strokeDasharray={`${demographics.firstgen.yes.pct}, 100`}
-                      />
-                      <text x="18" y="20.5" className={styles.demoPercentage}>
-                        {demographics.firstgen.yes.pct}%
-                      </text>
-                    </svg>
-                  </div>
-                  <div className={styles.demoLabel}>
-                    <span className={styles.demoGroup}>First-Generation</span>
-                    <span className={styles.demoCount}>{demographics.firstgen.yes.n.toLocaleString()} students</span>
-                  </div>
-                </div>
+                {!showComparison ? (
+                  <>
+                    <div className={styles.demoStat}>
+                      <div className={styles.demoCircle}>
+                        <svg viewBox="0 0 36 36" className={styles.demoDonut}>
+                          <path
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="var(--color-border-light)"
+                            strokeWidth="3"
+                          />
+                          <path
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="var(--color-accent)"
+                            strokeWidth="3"
+                            strokeDasharray={`${demographics.firstgen.yes.pct}, 100`}
+                          />
+                          <text x="18" y="20.5" className={styles.demoPercentage}>
+                            {demographics.firstgen.yes.pct}%
+                          </text>
+                        </svg>
+                      </div>
+                      <div className={styles.demoLabel}>
+                        <span className={styles.demoGroup}>First-Generation</span>
+                        <span className={styles.demoCount}>{demographics.firstgen.yes.n.toLocaleString()} of {(demographics.firstgen.yes.n + demographics.firstgen.no.n).toLocaleString()} students</span>
+                      </div>
+                    </div>
 
-                <div className={styles.demoStat}>
-                  <div className={styles.demoCircle}>
-                    <svg viewBox="0 0 36 36" className={styles.demoDonut}>
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="var(--color-border-light)"
-                        strokeWidth="3"
-                      />
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="var(--color-engagement)"
-                        strokeWidth="3"
-                        strokeDasharray={`${demographics.pell.yes.pct}, 100`}
-                      />
-                      <text x="18" y="20.5" className={styles.demoPercentage}>
-                        {demographics.pell.yes.pct}%
-                      </text>
-                    </svg>
-                  </div>
-                  <div className={styles.demoLabel}>
-                    <span className={styles.demoGroup}>Pell Grant Recipients</span>
-                    <span className={styles.demoCount}>{demographics.pell.yes.n.toLocaleString()} students</span>
-                  </div>
-                </div>
+                    <div className={styles.demoStat}>
+                      <div className={styles.demoCircle}>
+                        <svg viewBox="0 0 36 36" className={styles.demoDonut}>
+                          <path
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="var(--color-border-light)"
+                            strokeWidth="3"
+                          />
+                          <path
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            fill="none"
+                            stroke="var(--color-engagement)"
+                            strokeWidth="3"
+                            strokeDasharray={`${demographics.pell.yes.pct}, 100`}
+                          />
+                          <text x="18" y="20.5" className={styles.demoPercentage}>
+                            {demographics.pell.yes.pct}%
+                          </text>
+                        </svg>
+                      </div>
+                      <div className={styles.demoLabel}>
+                        <span className={styles.demoGroup}>Pell Grant Recipients</span>
+                        <span className={styles.demoCount}>{demographics.pell.yes.n.toLocaleString()} of {(demographics.pell.yes.n + demographics.pell.no.n).toLocaleString()} students</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className={styles.demoStat}>
+                      <div className={styles.demoLabel}>
+                        <span className={styles.demoGroup}>First-Generation</span>
+                      </div>
+                      <div className={styles.demoComparison}>
+                        <div className={styles.demoComparisonRow}>
+                          <span className={styles.comparisonLabel}>FASt</span>
+                          <div className={styles.demoBar}>
+                            <div
+                              className={styles.demoBarFill}
+                              style={{
+                                width: `${fastComparison.demographics.firstgen.yes.fast.pct}%`,
+                                backgroundColor: 'var(--color-fast)'
+                              }}
+                            />
+                          </div>
+                          <span className={styles.demoPct}>{fastComparison.demographics.firstgen.yes.fast.pct}%</span>
+                        </div>
+                        <div className={styles.demoComparisonRow}>
+                          <span className={styles.comparisonLabel}>Non-FASt</span>
+                          <div className={styles.demoBar}>
+                            <div
+                              className={styles.demoBarFill}
+                              style={{
+                                width: `${fastComparison.demographics.firstgen.yes.nonfast.pct}%`,
+                                backgroundColor: 'var(--color-text-muted)'
+                              }}
+                            />
+                          </div>
+                          <span className={styles.demoPct}>{fastComparison.demographics.firstgen.yes.nonfast.pct}%</span>
+                        </div>
+                      </div>
+                      <div className={styles.demoCount}>
+                        FASt: {fastComparison.demographics.firstgen.yes.fast.n.toLocaleString()} | Non-FASt: {fastComparison.demographics.firstgen.yes.nonfast.n.toLocaleString()}
+                      </div>
+                    </div>
+
+                    <div className={styles.demoStat}>
+                      <div className={styles.demoLabel}>
+                        <span className={styles.demoGroup}>Pell Grant Recipients</span>
+                      </div>
+                      <div className={styles.demoComparison}>
+                        <div className={styles.demoComparisonRow}>
+                          <span className={styles.comparisonLabel}>FASt</span>
+                          <div className={styles.demoBar}>
+                            <div
+                              className={styles.demoBarFill}
+                              style={{
+                                width: `${fastComparison.demographics.pell.yes.fast.pct}%`,
+                                backgroundColor: 'var(--color-fast)'
+                              }}
+                            />
+                          </div>
+                          <span className={styles.demoPct}>{fastComparison.demographics.pell.yes.fast.pct}%</span>
+                        </div>
+                        <div className={styles.demoComparisonRow}>
+                          <span className={styles.comparisonLabel}>Non-FASt</span>
+                          <div className={styles.demoBar}>
+                            <div
+                              className={styles.demoBarFill}
+                              style={{
+                                width: `${fastComparison.demographics.pell.yes.nonfast.pct}%`,
+                                backgroundColor: 'var(--color-text-muted)'
+                              }}
+                            />
+                          </div>
+                          <span className={styles.demoPct}>{fastComparison.demographics.pell.yes.nonfast.pct}%</span>
+                        </div>
+                      </div>
+                      <div className={styles.demoCount}>
+                        FASt: {fastComparison.demographics.pell.yes.fast.n.toLocaleString()} | Non-FASt: {fastComparison.demographics.pell.yes.nonfast.n.toLocaleString()}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -183,13 +321,41 @@ export default function HomePage() {
                   <div className={styles.demoCount}>{demographics.sex.men.n.toLocaleString()} students</div>
                 </div>
 
-                <div className={styles.demoHighlight}>
-                  <div className={styles.demoHighlightValue}>{demographics.transferCredits.mean.toFixed(1)}</div>
-                  <div className={styles.demoHighlightLabel}>Average Transfer Credits</div>
-                  <div className={styles.demoHighlightRange}>
-                    Range: {demographics.transferCredits.min}–{demographics.transferCredits.max} credits
+                {!showComparison ? (
+                  <div className={styles.demoHighlight}>
+                    <div className={styles.demoHighlightValue}>{demographics.transferCredits.mean.toFixed(1)}</div>
+                    <div className={styles.demoHighlightLabel}>Average Transfer Credits</div>
+                    <div className={styles.demoHighlightRange}>
+                      Range: {demographics.transferCredits.min}–{demographics.transferCredits.max} credits
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className={styles.demoHighlight}>
+                    <div className={styles.comparisonCreditsGrid}>
+                      <div className={styles.comparisonCreditsItem}>
+                        <div className={styles.comparisonCreditsLabel}>FASt Students</div>
+                        <div className={styles.demoHighlightValue} style={{ fontSize: 'var(--font-size-2xl)' }}>
+                          {fastComparison.demographics.transferCredits.fast.mean.toFixed(1)}
+                        </div>
+                        <div className={styles.demoHighlightRange}>
+                          Range: {fastComparison.demographics.transferCredits.fast.min}–{fastComparison.demographics.transferCredits.fast.max}
+                        </div>
+                      </div>
+                      <div className={styles.comparisonCreditsItem}>
+                        <div className={styles.comparisonCreditsLabel}>Non-FASt Students</div>
+                        <div className={styles.demoHighlightValue} style={{ fontSize: 'var(--font-size-2xl)' }}>
+                          {fastComparison.demographics.transferCredits.nonfast.mean.toFixed(1)}
+                        </div>
+                        <div className={styles.demoHighlightRange}>
+                          Range: {fastComparison.demographics.transferCredits.nonfast.min}–{fastComparison.demographics.transferCredits.nonfast.max}
+                        </div>
+                      </div>
+                    </div>
+                    <div className={styles.demoHighlightLabel} style={{ marginTop: 'var(--spacing-sm)' }}>
+                      Average Transfer Credits
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -332,7 +498,7 @@ export default function HomePage() {
       </section>
 
       {/* Key Takeaway */}
-      <KeyTakeaway icon="🎯">
+      <KeyTakeaway>
         <strong>Bottom Line:</strong> Earning college credits in high school affects first-year students in complex ways—increasing stress while potentially boosting campus engagement, with effects intensifying as credit amounts grow.
       </KeyTakeaway>
 

@@ -79,6 +79,15 @@
   margin-bottom: var(--spacing-3xl);
 }
 
+.demographicsHeaderTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .demographicsHeader h2 {
   font-size: var(--font-size-2xl);
   margin-bottom: var(--spacing-md);
@@ -226,11 +235,58 @@
   color: var(--color-text-muted);
 }
 
+/* Comparison view */
+.demoComparison {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.demoComparisonRow {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.comparisonLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.comparisonCreditsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.comparisonCreditsItem {
+  text-align: center;
+}
+
+.comparisonCreditsLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-xs);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .demographicsGrid {
     grid-template-columns: 1fr;
     gap: var(--spacing-xl);
+  }
+
+  .demographicsHeaderTop {
+    flex-direction: column;
+    text-align: center;
   }
 }
 

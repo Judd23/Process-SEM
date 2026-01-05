@@ -6,12 +6,14 @@ import Toggle from '../components/ui/Toggle';
 import Slider from '../components/ui/Slider';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
+import fastComparison from '../data/fastComparison.json';
 import styles from './PathwayPage.module.css';
 
 export default function PathwayPage() {
   const { highlightedPath, setHighlightedPath, showCIs, toggleCIs, selectedDose, setSelectedDose } = useResearch();
   const { paths } = useModelData();
   const [isStuck, setIsStuck] = useState(false);
+  const [showSampleInfo, setShowSampleInfo] = useState(false);
   const controlsRef = useRef<HTMLElement>(null);
 
   // Scroll reveal refs
@@ -154,8 +156,46 @@ export default function PathwayPage() {
               checked={showCIs}
               onChange={toggleCIs}
             />
+            <Toggle
+              id="show-sample-info-pathway"
+              label="Show Sample Breakdown"
+              checked={showSampleInfo}
+              onChange={() => setShowSampleInfo(!showSampleInfo)}
+            />
           </div>
         </section>
+
+        {showSampleInfo && (
+          <section className={styles.sampleInfo}>
+            <h3>Sample Composition: FASt vs Non-FASt Students</h3>
+            <div className={styles.sampleGrid}>
+              <div className={styles.sampleCard}>
+                <div className={styles.sampleHeader}>
+                  <span className={styles.sampleLabel}>FASt Students</span>
+                  <span className={styles.sampleCount}>{fastComparison.overall.fast_n.toLocaleString()}</span>
+                </div>
+                <div className={styles.sampleDetail}>12+ transfer credits from high school</div>
+                <div className={styles.sampleStats}>
+                  <div>Avg credits: <strong>{fastComparison.demographics.transferCredits.fast.mean}</strong></div>
+                  <div>First-Gen: <strong>{fastComparison.demographics.firstgen.yes.fast.pct}%</strong></div>
+                  <div>Pell: <strong>{fastComparison.demographics.pell.yes.fast.pct}%</strong></div>
+                </div>
+              </div>
+              <div className={styles.sampleCard}>
+                <div className={styles.sampleHeader}>
+                  <span className={styles.sampleLabel}>Non-FASt Students</span>
+                  <span className={styles.sampleCount}>{fastComparison.overall.nonfast_n.toLocaleString()}</span>
+                </div>
+                <div className={styles.sampleDetail}>Fewer than 12 transfer credits</div>
+                <div className={styles.sampleStats}>
+                  <div>Avg credits: <strong>{fastComparison.demographics.transferCredits.nonfast.mean}</strong></div>
+                  <div>First-Gen: <strong>{fastComparison.demographics.firstgen.yes.nonfast.pct}%</strong></div>
+                  <div>Pell: <strong>{fastComparison.demographics.pell.yes.nonfast.pct}%</strong></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section ref={diagramRef} className={`${styles.diagram} reveal-scale`}>
           <PathwayDiagram width={800} height={450} interactive />
@@ -248,7 +288,7 @@ export default function PathwayPage() {
         </section>
 
         {/* Key Takeaway */}
-        <KeyTakeaway icon="🔗">
+        <KeyTakeaway>
           Transfer credits create <strong>competing forces</strong>: they increase stress (hurting adjustment) while offering direct academic benefits—with the balance shifting based on credit dose.
         </KeyTakeaway>
       </div>
