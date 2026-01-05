@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import StatCard from '../components/ui/StatCard';
 import Icon from '../components/ui/Icon';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
+import KeyTakeaway from '../components/ui/KeyTakeaway';
 import PathwayDiagram from '../components/charts/PathwayDiagram';
 import DataTimestamp from '../components/ui/DataTimestamp';
 import { useModelData } from '../context/ModelDataContext';
@@ -329,6 +330,11 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Key Takeaway */}
+      <KeyTakeaway icon="🎯">
+        <strong>Bottom Line:</strong> Earning college credits in high school affects first-year students in complex ways—increasing stress while potentially boosting campus engagement, with effects intensifying as credit amounts grow.
+      </KeyTakeaway>
 
       {/* Navigation Cards */}
       <section ref={exploreRef} className={`${styles.explore} stagger-children`}>

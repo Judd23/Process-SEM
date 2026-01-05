@@ -44,8 +44,9 @@
 }
 
 .controls.stuck {
-  border-bottom-color: var(--color-border);
-  box-shadow: var(--shadow-sm);
+  border-bottom-color: var(--color-accent);
+  box-shadow: var(--shadow-lg);
+  background: color-mix(in srgb, var(--color-background) 95%, transparent);
 }
 
 .pathwayButtons {

@@ -4,6 +4,7 @@ import Slider from '../components/ui/Slider';
 import Toggle from '../components/ui/Toggle';
 import DoseResponseCurve from '../components/charts/DoseResponseCurve';
 import StatCard from '../components/ui/StatCard';
+import KeyTakeaway from '../components/ui/KeyTakeaway';
 import DataTimestamp from '../components/ui/DataTimestamp';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import styles from './DoseExplorerPage.module.css';
@@ -133,6 +134,11 @@ export default function DoseExplorerPage() {
             </article>
           </div>
         </section>
+
+        {/* Key Takeaway */}
+        <KeyTakeaway icon="📊">
+          The <strong>amount of transfer credits matters</strong>—12 credits create different effects than 30+ credits, with higher doses amplifying both stress and engagement impacts.
+        </KeyTakeaway>
       </div>
     </div>
   );

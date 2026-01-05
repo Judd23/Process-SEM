@@ -301,6 +301,10 @@ th {
 .stagger-children > .reveal:nth-child(6) { transition-delay: 500ms; }
 .stagger-children > .reveal:nth-child(7) { transition-delay: 600ms; }
 .stagger-children > .reveal:nth-child(8) { transition-delay: 700ms; }
+.stagger-children > .reveal:nth-child(9) { transition-delay: 800ms; }
+.stagger-children > .reveal:nth-child(10) { transition-delay: 900ms; }
+.stagger-children > .reveal:nth-child(11) { transition-delay: 1000ms; }
+.stagger-children > .reveal:nth-child(12) { transition-delay: 1100ms; }
 
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {

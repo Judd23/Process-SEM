@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import * as d3 from 'd3';
 import { useResearch } from '../../context/ResearchContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -68,15 +68,13 @@ export default function PathwayDiagram({
   const { resolvedTheme } = useTheme();
   const { paths, doseCoefficients } = useModelData();
 
-  // Responsive sizing with mobile constraints
+  // Responsive sizing with mobile-friendly constraints
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        const isMobile = containerWidth < 500;
-        // On mobile, enforce minimum width for readability (scrollable container)
-        const minWidth = isMobile ? 500 : 400;
-        const responsiveWidth = Math.max(minWidth, Math.min(initialWidth, containerWidth - 20));
+        // Allow diagram to shrink to mobile width without horizontal scroll
+        const responsiveWidth = Math.max(320, Math.min(initialWidth, containerWidth - 40));
         const aspectRatio = initialHeight / initialWidth;
         const responsiveHeight = responsiveWidth * aspectRatio;
         setDimensions({ width: responsiveWidth, height: responsiveHeight });
@@ -143,14 +141,14 @@ export default function PathwayDiagram({
   // Mirror the Dose Explorer convention: interpret the slider in 10-credit units above/below the 12-credit threshold.
   const doseInUnits = (selectedDose - 12) / 10;
 
-  const getAdjustedEstimate = (pathId: string, baseEstimate: number) => {
+  const getAdjustedEstimate = useCallback((pathId: string, baseEstimate: number) => {
     const moderation =
       pathId === 'a1' ? doseCoefficients.distress.moderation :
       pathId === 'a2' ? doseCoefficients.engagement.moderation :
       pathId === 'c' ? doseCoefficients.adjustment.moderation :
       0;
     return baseEstimate + moderation * doseInUnits;
-  };
+  }, [doseCoefficients, doseInUnits]);
 
   useEffect(() => {
     if (!svgRef.current) return;

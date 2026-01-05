@@ -4,6 +4,7 @@ import { useModelData } from '../context/ModelDataContext';
 import PathwayDiagram from '../components/charts/PathwayDiagram';
 import Toggle from '../components/ui/Toggle';
 import Slider from '../components/ui/Slider';
+import KeyTakeaway from '../components/ui/KeyTakeaway';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import styles from './PathwayPage.module.css';
 
@@ -245,6 +246,11 @@ export default function PathwayPage() {
             </article>
           </div>
         </section>
+
+        {/* Key Takeaway */}
+        <KeyTakeaway icon="🔗">
+          Transfer credits create <strong>competing forces</strong>: they increase stress (hurting adjustment) while offering direct academic benefits—with the balance shifting based on credit dose.
+        </KeyTakeaway>
       </div>
     </div>
   );
