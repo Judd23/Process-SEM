@@ -219,6 +219,59 @@ export default function MethodsPage() {
             </li>
           </ul>
         </section>
+
+        <section className={styles.aboutSection}>
+          <div className={styles.aboutContent}>
+            <div className={styles.photoContainer}>
+              <img 
+                src={`${import.meta.env.BASE_URL}researcher.jpg`}
+                alt="Dr. Judd Johnson"
+                className={styles.researcherPhoto}
+              />
+              <div className={styles.photoGlow}></div>
+            </div>
+            <div className={styles.bio}>
+              <h2>About the Researcher</h2>
+              <h3 className={styles.researcherName}>Judd Johnson, Ed.D.</h3>
+              <p className={styles.researcherTitle}>
+                Higher Education Leadership & Policy Scholar
+              </p>
+              <p>
+                Dr. Johnson is passionate about understanding how early college experiences 
+                shape student success—particularly for students from backgrounds historically 
+                underrepresented in higher education. This dissertation grew from years of 
+                working directly with first-generation and low-income students, watching them 
+                navigate the complex transition from high school to college.
+              </p>
+              <p>
+                <em>"I believe every student deserves to thrive in college, not just survive. 
+                This research aims to help institutions better support students who arrive 
+                with college credits—understanding both the advantages and the hidden challenges 
+                they face."</em>
+              </p>
+              <div className={styles.researchInterests}>
+                <h4>Research Interests</h4>
+                <ul>
+                  <li>Student success & developmental adjustment</li>
+                  <li>Dual enrollment & accelerated pathways</li>
+                  <li>Equity in higher education</li>
+                  <li>Quantitative methods & SEM</li>
+                </ul>
+              </div>
+              <div className={styles.contactInfo}>
+                <h4>Get in Touch</h4>
+                <p>
+                  Interested in this research or collaboration opportunities? 
+                  I'd love to hear from you.
+                </p>
+                <a href="mailto:jjohnson3@csu.fullerton.edu" className={styles.emailButton}>
+                  <span className={styles.emailIcon}>✉️</span>
+                  jjohnson3@csu.fullerton.edu
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
