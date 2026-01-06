@@ -50,100 +50,102 @@ export default function SoWhatPage() {
       </KeyTakeaway>
 
       {/* Stakeholder Implications */}
-      <section ref={stakeholderRef} className={`${styles.stakeholders} stagger-children`}>
-        <div className="container">
-          <h2 className={`${styles.sectionTitle} reveal`}>Who Should Care?</h2>
+      <SharedElement id="page-panel">
+        <section ref={stakeholderRef} className={`${styles.stakeholders} stagger-children`}>
+          <div className="container">
+            <h2 className={`${styles.sectionTitle} reveal`}>Who Should Care?</h2>
 
-          <div className={styles.stakeholderGrid}>
-            {/* Students */}
-            <article className={`${styles.stakeholderCard} reveal`}>
-              <div className={styles.cardIcon}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </div>
-              <h3>For Students</h3>
-              <p className={styles.cardLead}>
-                Understand how your background shapes your college experience.
-              </p>
-              <ul className={styles.cardList}>
-                <li>
-                  <strong>If you have 12+ credits:</strong> You may experience higher stress than peers without
-                  transfer credits. This isn't a personal failing—it's a documented pattern.
-                </li>
-                <li>
-                  <strong>Seek support early:</strong> Don't wait until you're overwhelmed. Connect with
-                  counseling services, peer mentors, or advising during your first semester.
-                </li>
-                <li>
-                  <strong>Build campus connections:</strong> Transfer credits can sometimes make
-                  campus feel less relevant. Actively engage with student organizations and faculty.
-                </li>
-              </ul>
-            </article>
+            <div className={styles.stakeholderGrid}>
+              {/* Students */}
+              <article className={`${styles.stakeholderCard} reveal`}>
+                <div className={styles.cardIcon}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <h3>For Students</h3>
+                <p className={styles.cardLead}>
+                  Understand how your background shapes your college experience.
+                </p>
+                <ul className={styles.cardList}>
+                  <li>
+                    <strong>If you have 12+ credits:</strong> You may experience higher stress than peers without
+                    transfer credits. This isn't a personal failing—it's a documented pattern.
+                  </li>
+                  <li>
+                    <strong>Seek support early:</strong> Don't wait until you're overwhelmed. Connect with
+                    counseling services, peer mentors, or advising during your first semester.
+                  </li>
+                  <li>
+                    <strong>Build campus connections:</strong> Transfer credits can sometimes make
+                    campus feel less relevant. Actively engage with student organizations and faculty.
+                  </li>
+                </ul>
+              </article>
 
-            {/* Advisors */}
-            <article className={`${styles.stakeholderCard} reveal`}>
-              <div className={styles.cardIcon}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                </svg>
-              </div>
-              <h3>For Advisors & Counselors</h3>
-              <p className={styles.cardLead}>
-                Identify which students may need proactive outreach.
-              </p>
-              <ul className={styles.cardList}>
-                <li>
-                  <strong>Screen by credit dose:</strong> Students with 30+ transfer credits may be at
-                  higher risk for adjustment challenges than those with 12-20 credits.
-                </li>
-                <li>
-                  <strong>Tailor interventions:</strong> FASt students may benefit more from stress management
-                  and belonging interventions than from academic skill-building.
-                </li>
-                <li>
-                  <strong>Monitor engagement:</strong> Watch for signs of disengagement—students
-                  with many credits may feel "above" campus involvement.
-                </li>
-              </ul>
-            </article>
+              {/* Advisors */}
+              <article className={`${styles.stakeholderCard} reveal`}>
+                <div className={styles.cardIcon}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                  </svg>
+                </div>
+                <h3>For Advisors & Counselors</h3>
+                <p className={styles.cardLead}>
+                  Identify which students may need proactive outreach.
+                </p>
+                <ul className={styles.cardList}>
+                  <li>
+                    <strong>Screen by credit dose:</strong> Students with 30+ transfer credits may be at
+                    higher risk for adjustment challenges than those with 12-20 credits.
+                  </li>
+                  <li>
+                    <strong>Tailor interventions:</strong> FASt students may benefit more from stress management
+                    and belonging interventions than from academic skill-building.
+                  </li>
+                  <li>
+                    <strong>Monitor engagement:</strong> Watch for signs of disengagement—students
+                    with many credits may feel "above" campus involvement.
+                  </li>
+                </ul>
+              </article>
 
-            {/* Policy Makers */}
-            <article className={`${styles.stakeholderCard} reveal`}>
-              <div className={styles.cardIcon}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <line x1="3" y1="9" x2="21" y2="9" />
-                  <line x1="9" y1="21" x2="9" y2="9" />
-                </svg>
-              </div>
-              <h3>For Policy Makers</h3>
-              <p className={styles.cardLead}>
-                Make evidence-based decisions about dual enrollment expansion.
-              </p>
-              <ul className={styles.cardList}>
-                <li>
-                  <strong>Dual enrollment isn't neutral:</strong> Expanding access without support
-                  structures may inadvertently increase stress among equity-impacted populations.
-                </li>
-                <li>
-                  <strong>Consider credit caps:</strong> Our data suggests diminishing returns and
-                  increasing stress above ~36 credits. "More" isn't always "better."
-                </li>
-                <li>
-                  <strong>Fund transition support:</strong> Pair dual enrollment expansion with
-                  first-year experience programs tailored for FASt students.
-                </li>
-              </ul>
-            </article>
+              {/* Policy Makers */}
+              <article className={`${styles.stakeholderCard} reveal`}>
+                <div className={styles.cardIcon}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                    <line x1="3" y1="9" x2="21" y2="9" />
+                    <line x1="9" y1="21" x2="9" y2="9" />
+                  </svg>
+                </div>
+                <h3>For Policy Makers</h3>
+                <p className={styles.cardLead}>
+                  Make evidence-based decisions about dual enrollment expansion.
+                </p>
+                <ul className={styles.cardList}>
+                  <li>
+                    <strong>Dual enrollment isn't neutral:</strong> Expanding access without support
+                    structures may inadvertently increase stress among equity-impacted populations.
+                  </li>
+                  <li>
+                    <strong>Consider credit caps:</strong> Our data suggests diminishing returns and
+                    increasing stress above ~36 credits. "More" isn't always "better."
+                  </li>
+                  <li>
+                    <strong>Fund transition support:</strong> Pair dual enrollment expansion with
+                    first-year experience programs tailored for FASt students.
+                  </li>
+                </ul>
+              </article>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </SharedElement>
 
       {/* Actionable Takeaways */}
       <section ref={actionRef} className={`${styles.actions} stagger-children`}>

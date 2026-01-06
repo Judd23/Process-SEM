@@ -146,17 +146,19 @@ export default function LandingPage() {
         </p>
 
         {/* Author Nameplate - FROM BOTTOM */}
-        <div className={`${styles.nameplate} ${styles.fromBottom}`}>
-          <h2 className={styles.authorName}>Jay Johnson</h2>
-          <p className={styles.authorTitle}>Doctoral Candidate</p>
-          <div className={styles.institution}>
-            <img
-              className={styles.logo}
-              src={logoSrc}
-              alt="San Diego State University"
-            />
+        <SharedElement id="page-panel">
+          <div className={`${styles.nameplate} ${styles.fromBottom}`}>
+            <h2 className={styles.authorName}>Jay Johnson</h2>
+            <p className={styles.authorTitle}>Doctoral Candidate</p>
+            <div className={styles.institution}>
+              <img
+                className={styles.logo}
+                src={logoSrc}
+                alt="San Diego State University"
+              />
+            </div>
           </div>
-        </div>
+        </SharedElement>
 
         {/* CTA Button - FROM BOTTOM */}
         <button

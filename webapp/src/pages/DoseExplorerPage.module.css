@@ -108,7 +108,7 @@
   border-radius: calc(var(--radius-lg) - 4px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 .controls:focus-within {
@@ -325,7 +325,7 @@
   border-radius: calc(var(--radius-lg) - 4px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 .chartContainer:hover {

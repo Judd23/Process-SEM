@@ -842,6 +842,33 @@ Made the ResearcherPage significantly more artistic and dynamic with layered ani
 - `webapp/src/components/ui/DataTimestamp.tsx`
 - `webapp/src/components/ui/DataTimestamp.module.css`
 
+### January 7, 2026 (Late) - Accepted Changes
+
+#### Shared-Element Morph (Global)
+- Re-enabled morph transitions via shared elements.
+- Added shared `page-kicker` and `page-title` across all pages for consistent header morphs.
+- Added shared `page-panel` wrapper on a key panel/section per page for visible morphing.
+- Slowed morph timing (spring settings) for a softer transition.
+
+#### Background Richness (All Pages)
+- Increased background and surface color richness/saturation for both light and dark themes.
+- Adjusted chart background token to match the richer base.
+
+#### Files Updated
+- `webapp/src/App.tsx`
+- `webapp/src/components/transitions/SharedElement.tsx`
+- `webapp/src/pages/LandingPage.tsx`
+- `webapp/src/pages/HomePage.tsx`
+- `webapp/src/pages/DemographicsPage.tsx`
+- `webapp/src/pages/MethodsPage.tsx`
+- `webapp/src/pages/PathwayPage.tsx`
+- `webapp/src/pages/DoseExplorerPage.tsx`
+- `webapp/src/pages/SoWhatPage.tsx`
+- `webapp/src/pages/ResearcherPage.tsx`
+- `webapp/src/styles/variables.css`
+
+**Deployed:** https://judd23.github.io/Dissertation-Model-Simulation
+
 ### Design Conventions (Sprint 5 Additions)
 - End each major page with a single primary "Next step" CTA.
 - Use below-chart HTML legends for consistent placement and mobile safety.

@@ -76,47 +76,49 @@ export default function ResearcherPage() {
       </header>
 
       <main className={styles.main}>
-        <section ref={factsRef} className={`${styles.factsStrip} stagger-children`}>
-          <div className={styles.factsInner}>
-            <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '0ms' }}>
-              <div className={styles.factLabel}>Focus</div>
-              <div className={styles.factValue}>
-                <GlossaryTerm
-                  term="Student Development"
-                  definition="The holistic growth of students during their college experience, encompassing cognitive, psychosocial, and identity development as they navigate higher education."
-                >
-                  Student development
-                </GlossaryTerm>{' '}
-                | equity | pathways
+        <SharedElement id="page-panel">
+          <section ref={factsRef} className={`${styles.factsStrip} stagger-children`}>
+            <div className={styles.factsInner}>
+              <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '0ms' }}>
+                <div className={styles.factLabel}>Focus</div>
+                <div className={styles.factValue}>
+                  <GlossaryTerm
+                    term="Student Development"
+                    definition="The holistic growth of students during their college experience, encompassing cognitive, psychosocial, and identity development as they navigate higher education."
+                  >
+                    Student development
+                  </GlossaryTerm>{' '}
+                  | equity | pathways
+                </div>
+              </div>
+              <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '100ms' }}>
+                <div className={styles.factLabel}>Methods</div>
+                <div className={styles.factValue}>
+                  <GlossaryTerm
+                    term="Structural Equation Modeling"
+                    definition="A multivariate statistical technique combining factor analysis and path analysis to test complex relationships between observed and latent variables simultaneously."
+                  >
+                    SEM
+                  </GlossaryTerm>
+                  ,{' '}
+                  <GlossaryTerm
+                    term="Causal Inference"
+                    definition="Statistical methods that attempt to estimate the effect of one variable on another, going beyond correlation to understand cause-and-effect relationships using techniques like propensity score matching."
+                  >
+                    causal inference
+                  </GlossaryTerm>
+                  , process models
+                </div>
+              </div>
+              <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '200ms' }}>
+                <div className={styles.factLabel}>Email</div>
+                <a href="mailto:jjohnson4039@SDSU.edu" className={styles.factLink}>
+                  jjohnson4039@SDSU.edu
+                </a>
               </div>
             </div>
-            <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '100ms' }}>
-              <div className={styles.factLabel}>Methods</div>
-              <div className={styles.factValue}>
-                <GlossaryTerm
-                  term="Structural Equation Modeling"
-                  definition="A multivariate statistical technique combining factor analysis and path analysis to test complex relationships between observed and latent variables simultaneously."
-                >
-                  SEM
-                </GlossaryTerm>
-                ,{' '}
-                <GlossaryTerm
-                  term="Causal Inference"
-                  definition="Statistical methods that attempt to estimate the effect of one variable on another, going beyond correlation to understand cause-and-effect relationships using techniques like propensity score matching."
-                >
-                  causal inference
-                </GlossaryTerm>
-                , process models
-              </div>
-            </div>
-            <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '200ms' }}>
-              <div className={styles.factLabel}>Email</div>
-              <a href="mailto:jjohnson4039@SDSU.edu" className={styles.factLink}>
-                jjohnson4039@SDSU.edu
-              </a>
-            </div>
-          </div>
-        </section>
+          </section>
+        </SharedElement>
 
         <section className={styles.grid}>
           <article ref={blockARef} className={`${styles.blockA} reveal-left`} style={{ animationDelay: '0ms' }}>
