@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useResearch } from '../context/ResearchContext';
 import GroupComparison from '../components/charts/GroupComparison';
 import Toggle from '../components/ui/Toggle';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
+import useParallax from '../hooks/useParallax';
 import fastComparison from '../data/fastComparison.json';
 import sampleDescriptives from '../data/sampleDescriptives.json';
 import styles from './DemographicsPage.module.css';
@@ -28,11 +30,16 @@ export default function DemographicsPage() {
   const controlsRef = useScrollReveal<HTMLElement>({ threshold: 0.2 });
   const chartsRef = useStaggeredReveal<HTMLElement>();
   const interpretRef = useStaggeredReveal<HTMLElement>();
+  const parallaxOffset = useParallax({ speed: 0.1, max: 28 });
 
   return (
     <div className={styles.page}>
       <div className="container">
-        <header ref={headerRef} className={`${styles.header} reveal`}>
+        <header
+          ref={headerRef}
+          className={`${styles.header} reveal`}
+          style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
+        >
           <span className={styles.eyebrow}>Equity Framework</span>
           <h1>Do Effects Differ for Different Students?</h1>
           <p className="lead">
@@ -229,6 +236,9 @@ export default function DemographicsPage() {
           <p className={styles.groupDescription}>
             {groupingOptions.find((o) => o.value === groupingVariable)?.description}
           </p>
+          <p className={styles.plainTalk}>
+            Plain talk: we’re checking whether the same credit effect looks different for each group.
+          </p>
         </section>
 
         <section ref={chartsRef} className={`${styles.charts} stagger-children`}>
@@ -279,6 +289,16 @@ export default function DemographicsPage() {
               </p>
             </article>
           </div>
+        </section>
+
+        <section className={styles.nextStep}>
+          <h2>Next: How We Ran the Study</h2>
+          <p>
+            See the step-by-step method we used to make fair comparisons and test the model.
+          </p>
+          <Link to="/methods" className="button button-primary button-lg">
+            Go to Methods
+          </Link>
         </section>
       </div>
     </div>

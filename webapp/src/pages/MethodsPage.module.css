@@ -9,7 +9,7 @@
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(var(--parallax-offset, 0px));
   width: 500px;
   height: 500px;
   background: radial-gradient(
@@ -25,7 +25,7 @@
 .page::after {
   content: '';
   position: absolute;
-  top: 600px;
+  top: calc(600px + var(--parallax-offset, 0px));
   right: -200px;
   width: 400px;
   height: 400px;
@@ -101,6 +101,12 @@
 .sectionIntro {
   color: var(--color-text-muted);
   margin-bottom: var(--spacing-lg);
+}
+
+.plainTalk {
+  margin: calc(var(--spacing-sm) * -1) 0 var(--spacing-lg);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
 }
 
 .fitRings {
@@ -428,6 +434,26 @@
   font-style: italic;
 }
 
+/* Next step CTA */
+.nextStep {
+  text-align: center;
+  padding: var(--spacing-3xl) 0 var(--spacing-4xl);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.nextStep h2 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.nextStep p {
+  max-width: 640px;
+  margin: 0 auto var(--spacing-xl);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  line-height: 1.7;
+}
+
 @media (max-width: 768px) {
   .specGrid,
   .constructGrid,
@@ -446,6 +472,10 @@
   .table th,
   .table td {
     padding: var(--spacing-sm);
+  }
+
+  .nextStep {
+    padding: var(--spacing-2xl) 0 var(--spacing-3xl);
   }
 }
 
@@ -477,6 +507,14 @@
 
   .section h2 {
     font-size: var(--font-size-lg);
+  }
+
+  .nextStep h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .nextStep p {
+    font-size: var(--font-size-base);
   }
 
   .specCard,

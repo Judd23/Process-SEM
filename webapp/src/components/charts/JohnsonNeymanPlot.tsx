@@ -16,6 +16,7 @@ export default function JohnsonNeymanPlot({
   width = 600,
   height = 350,
 }: JohnsonNeymanPlotProps) {
+  const tooltipId = `jn-tooltip-${outcome}`;
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [tooltip, setTooltip] = useState<{
@@ -26,6 +27,7 @@ export default function JohnsonNeymanPlot({
     ciLower: number;
     ciUpper: number;
   } | null>(null);
+  const outcomeLabel = outcome === 'distress' ? 'Emotional Distress' : 'Campus Engagement';
 
   // Get the JN point for this outcome
   const jnPoint = useMemo(() => {
@@ -273,75 +275,33 @@ export default function JohnsonNeymanPlot({
       .attr('font-size', '13px')
       .text('Effect Size (β)');
 
-    // Legend
-    const legend = g.append('g').attr('transform', `translate(${innerWidth - 150}, 10)`);
-
-    legend
-      .append('rect')
-      .attr('width', 145)
-      .attr('height', 70)
-      .attr('fill', 'var(--color-surface)')
-      .attr('stroke', 'var(--color-border)')
-      .attr('rx', 4);
-
-    legend
-      .append('line')
-      .attr('x1', 10)
-      .attr('x2', 30)
-      .attr('y1', 20)
-      .attr('y2', 20)
-      .attr('stroke', color.main)
-      .attr('stroke-width', 3);
-
-    legend
-      .append('text')
-      .attr('x', 35)
-      .attr('y', 24)
-      .attr('font-size', '11px')
-      .attr('fill', 'var(--color-text)')
-      .text('Effect');
-
-    legend
-      .append('rect')
-      .attr('x', 10)
-      .attr('y', 35)
-      .attr('width', 20)
-      .attr('height', 10)
-      .attr('fill', color.light);
-
-    legend
-      .append('text')
-      .attr('x', 35)
-      .attr('y', 44)
-      .attr('font-size', '11px')
-      .attr('fill', 'var(--color-text)')
-      .text('95% CI');
-
-    legend
-      .append('line')
-      .attr('x1', 10)
-      .attr('x2', 30)
-      .attr('y1', 58)
-      .attr('y2', 58)
-      .attr('stroke', 'var(--color-text-muted)')
-      .attr('stroke-width', 2)
-      .attr('stroke-dasharray', '6,4');
-
-    legend
-      .append('text')
-      .attr('x', 35)
-      .attr('y', 62)
-      .attr('font-size', '11px')
-      .attr('fill', 'var(--color-text)')
-      .text('Zero (null)');
-
     const overlay = g.append('rect')
       .attr('x', 0)
       .attr('y', 0)
       .attr('width', innerWidth)
       .attr('height', innerHeight)
       .attr('fill', 'transparent')
-      .attr('cursor', 'crosshair');
+      .attr('cursor', 'crosshair')
+      .attr('tabindex', 0)
+      .attr('role', 'img')
+      .attr(
+        'aria-label',
+        `Johnson-Neyman plot for ${outcomeLabel}. Focus to read values at the selected dose.`
+      )
+      .attr('aria-describedby', tooltipId);
+
+    const showTooltipForDose = (dose: number) => {
+      const point = data.find((d) => d.dose === dose);
+      if (!point) return;
+      setTooltip({
+        x: margin.left + xScale(point.dose) + 12,
+        y: margin.top + yScale(point.effect) + 12,
+        dose: point.dose,
+        effect: point.effect,
+        ciLower: point.ciLower,
+        ciUpper: point.ciUpper,
+      });
+    };
 
     overlay
       .on('mousemove', (event) => {
@@ -359,10 +319,15 @@ export default function JohnsonNeymanPlot({
           ciUpper: point.ciUpper,
         });
       })
-      .on('mouseleave', () => setTooltip(null));
-  }, [data, width, height, outcome, selectedDose, jnPoint, color]);
-
-  const outcomeLabel = outcome === 'distress' ? 'Emotional Distress' : 'Campus Engagement';
+      .on('mouseleave', () => setTooltip(null))
+      .on('focus', () => showTooltipForDose(selectedDose))
+      .on('blur', () => setTooltip(null))
+      .on('keydown', (event) => {
+        if (event.key === 'Escape') {
+          setTooltip(null);
+        }
+      });
+  }, [data, width, height, outcome, selectedDose, jnPoint, color, outcomeLabel]);
   const interpretation = useMemo(() => {
     if (outcome === 'engagement' && jnPoint !== null) {
       return `The effect on ${outcomeLabel.toLowerCase()} becomes statistically significant at ${jnPoint} credits. Below this point, the confidence interval crosses zero.`;
@@ -382,7 +347,13 @@ export default function JohnsonNeymanPlot({
       </div>
       <svg ref={svgRef} width={width} height={height} className={styles.svg} />
       {tooltip && (
-        <div className={styles.tooltip} style={{ left: tooltip.x, top: tooltip.y }}>
+        <div
+          className={styles.tooltip}
+          style={{ left: tooltip.x, top: tooltip.y }}
+          id={tooltipId}
+          role="tooltip"
+          aria-live="polite"
+        >
           <div className={styles.tooltipTitle}>{tooltip.dose} credits</div>
           <div className={styles.tooltipRow}>Effect: {tooltip.effect.toFixed(3)}</div>
           <div className={styles.tooltipRow}>
@@ -390,6 +361,23 @@ export default function JohnsonNeymanPlot({
           </div>
         </div>
       )}
+      <div className={styles.legend}>
+        <div className={styles.legendItem}>
+          <span className={styles.legendLine} style={{ background: color.main }} />
+          <span className={styles.legendLabel}>Effect</span>
+        </div>
+        <div className={styles.legendItem}>
+          <span
+            className={styles.legendBand}
+            style={{ background: color.light, borderColor: color.main }}
+          />
+          <span className={styles.legendLabel}>95% CI</span>
+        </div>
+        <div className={styles.legendItem}>
+          <span className={styles.legendLineMuted} />
+          <span className={styles.legendLabel}>Zero (null)</span>
+        </div>
+      </div>
       <div className={styles.interpretation}>
         <div className={styles.interpretationIcon}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

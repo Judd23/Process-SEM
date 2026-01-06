@@ -71,6 +71,7 @@ export default function PathwayDiagram({
   interactive = true,
   showLegend = true,
 }: PathwayDiagramProps) {
+  const tooltipId = 'pathway-diagram-tooltip';
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [dimensions, setDimensions] = useState({ width: initialWidth, height: initialHeight });
@@ -257,6 +258,10 @@ export default function PathwayDiagram({
 
     // Draw paths
     const pathsGroup = g.append('g').attr('class', 'paths');
+    const getFocusPosition = (element: Element) => {
+      const rect = element.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    };
 
     modelData.paths.forEach((path) => {
       const from = getNode(path.from);
@@ -307,7 +312,14 @@ export default function PathwayDiagram({
         .attr('marker-end', `url(#arrow-${pathType})`)
         .attr('cursor', interactive ? 'pointer' : 'default')
         .attr('filter', selectedFilter)
-        .style('transition', 'opacity 0.2s ease, filter 0.2s ease, stroke-width 0.2s ease');
+        .style('transition', 'opacity 0.2s ease, filter 0.2s ease, stroke-width 0.2s ease')
+        .attr('tabindex', interactive ? 0 : null)
+        .attr('role', interactive ? 'button' : null)
+        .attr(
+          'aria-label',
+          `${path.title}. ${path.description} Effect ${formatNumber(adjustedEstimate)}. ${path.pvalue < 0.05 ? 'Statistically significant.' : 'Not statistically significant.'}`
+        )
+        .attr('aria-describedby', interactive ? tooltipId : null);
 
       if (interactive) {
         pathElement
@@ -340,6 +352,42 @@ export default function PathwayDiagram({
               setHighlightedPath(null);
             }
             setTooltip(null);
+          })
+          .on('focus', function() {
+            const { x, y } = getFocusPosition(this);
+            d3.select(this)
+              .attr('filter', 'url(#glow)')
+              .attr('stroke-width', baseStrokeWidth + 2);
+            if (allowHoverHighlight) {
+              setHighlightedPath(pathType);
+            }
+            setTooltip({
+              show: true,
+              x,
+              y,
+              content: { 
+                type: 'path',
+                title: path.title,
+                description: path.description,
+                estimate: adjustedEstimate,
+                pvalue: path.pvalue,
+                finding: path.finding
+              },
+            });
+          })
+          .on('blur', function() {
+            d3.select(this)
+              .attr('filter', selectedFilter)
+              .attr('stroke-width', baseStrokeWidth);
+            if (allowHoverHighlight) {
+              setHighlightedPath(null);
+            }
+            setTooltip(null);
+          })
+          .on('keydown', function(event) {
+            if (event.key === 'Escape') {
+              setTooltip(null);
+            }
           });
       }
 
@@ -401,9 +449,15 @@ export default function PathwayDiagram({
 
     nodeData.forEach((node) => {
       const pos = getNode(node.id);
+      const nodeDesc = nodeDescriptions[node.id];
+      const nodeAriaLabel = nodeDesc ? `${nodeDesc.title}. ${nodeDesc.description}` : node.label;
       const nodeG = nodesGroup.append('g')
         .attr('transform', `translate(${pos.x}, ${pos.y})`)
-        .attr('cursor', interactive ? 'pointer' : 'default');
+        .attr('cursor', interactive ? 'pointer' : 'default')
+        .attr('tabindex', interactive ? 0 : null)
+        .attr('role', interactive ? 'button' : null)
+        .attr('aria-label', nodeAriaLabel)
+        .attr('aria-describedby', interactive ? tooltipId : null);
 
       // Add invisible hit area for better interaction
       nodeG.append('ellipse')
@@ -477,6 +531,36 @@ export default function PathwayDiagram({
               .duration(150)
               .attr('stroke-width', node.id === 'Adjustment' ? 3 : 2.5);
             setTooltip(null);
+          })
+          .on('focus', function() {
+            d3.select(this).selectAll('ellipse, rect')
+              .transition()
+              .duration(150)
+              .attr('stroke-width', 4);
+            const { x, y } = getFocusPosition(this);
+            const desc = nodeDescriptions[node.id];
+            setTooltip({
+              show: true,
+              x,
+              y,
+              content: {
+                type: 'node',
+                title: desc.title,
+                description: desc.description
+              }
+            });
+          })
+          .on('blur', function() {
+            d3.select(this).selectAll('ellipse, rect')
+              .transition()
+              .duration(150)
+              .attr('stroke-width', node.id === 'Adjustment' ? 3 : 2.5);
+            setTooltip(null);
+          })
+          .on('keydown', function(event) {
+            if (event.key === 'Escape') {
+              setTooltip(null);
+            }
           });
       }
 
@@ -572,6 +656,9 @@ export default function PathwayDiagram({
       {tooltip?.show && (
         <div
           className={`${styles.tooltip} ${tooltip.content.type === 'path' ? styles.pathTooltip : styles.nodeTooltip}`}
+          id={tooltipId}
+          role="tooltip"
+          aria-live="polite"
           style={{ left: tooltip.x + 15, top: tooltip.y + 15 }}
         >
           <div className={styles.tooltipTitle}>{tooltip.content.title}</div>

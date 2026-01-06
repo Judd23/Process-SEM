@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useResearch } from '../context/ResearchContext';
 import { useModelData } from '../context/ModelDataContext';
 import Slider from '../components/ui/Slider';
@@ -10,6 +11,7 @@ import KeyTakeaway from '../components/ui/KeyTakeaway';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import DataTimestamp from '../components/ui/DataTimestamp';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
+import useParallax from '../hooks/useParallax';
 import styles from './DoseExplorerPage.module.css';
 
 // Dose zone definitions
@@ -37,6 +39,7 @@ export default function DoseExplorerPage() {
   const chartsRef = useStaggeredReveal<HTMLElement>();
   const jnRef = useStaggeredReveal<HTMLElement>();
   const interpretRef = useStaggeredReveal<HTMLElement>();
+  const parallaxOffset = useParallax({ speed: 0.1, max: 28 });
 
   // Current dose zone
   const currentZone = useMemo(() => getDoseZone(selectedDose), [selectedDose]);
@@ -50,7 +53,11 @@ export default function DoseExplorerPage() {
   return (
     <div className={styles.page}>
       <div className="container">
-        <header ref={headerRef} className={`${styles.header} reveal`}>
+        <header
+          ref={headerRef}
+          className={`${styles.header} reveal`}
+          style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
+        >
           <span className={styles.eyebrow}>Dose-Response Analysis</span>
           <h1>Does the Number of Credits Matter?</h1>
           <p className="lead">
@@ -154,6 +161,9 @@ export default function DoseExplorerPage() {
             The <GlossaryTerm term="Johnson-Neyman Technique" definition="A statistical method that identifies the exact point(s) where a conditional effect becomes statistically significant. It shows where the confidence interval crosses zero.">Johnson-Neyman technique</GlossaryTerm> identifies
             the exact credit threshold where effects become statistically significant—where we can be confident the effect isn't just random variation.
           </p>
+          <p className={`${styles.jnNote} reveal`}>
+            Significance is based on 95% confidence intervals that do not cross zero.
+          </p>
           <div className={styles.jnCharts}>
             <div className="reveal">
               <JohnsonNeymanPlot outcome="engagement" selectedDose={selectedDose} />
@@ -198,6 +208,17 @@ export default function DoseExplorerPage() {
         <KeyTakeaway>
           The <strong>amount of dual enrollment credits matters</strong>—12 credits create different effects than 30+ credits, with higher doses amplifying both stress and engagement impacts.
         </KeyTakeaway>
+
+        <section className={styles.nextStep}>
+          <h2>Next: See the Practical Implications</h2>
+          <p>
+            Translate the dose-response patterns into concrete recommendations for students,
+            advisors, and policy leaders.
+          </p>
+          <Link to="/so-what" className="button button-primary button-lg">
+            Go to So, What?
+          </Link>
+        </section>
       </div>
     </div>
   );

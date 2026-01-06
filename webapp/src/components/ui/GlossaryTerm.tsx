@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './GlossaryTerm.module.css';
 
@@ -14,6 +14,7 @@ export default function GlossaryTerm({ term, definition, children }: GlossaryTer
   const [coords, setCoords] = useState<{ left: number; top: number }>({ left: 0, top: 0 });
   const termRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const tooltipId = useId();
 
   useLayoutEffect(() => {
     if (!isOpen || !termRef.current || !tooltipRef.current) return;
@@ -62,9 +63,20 @@ export default function GlossaryTerm({ term, definition, children }: GlossaryTer
         onMouseLeave={() => setIsOpen(false)}
         onFocus={() => setIsOpen(true)}
         onBlur={() => setIsOpen(false)}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            setIsOpen(false);
+          }
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            setIsOpen((prev) => !prev);
+          }
+        }}
         tabIndex={0}
         role="button"
         aria-label={`Definition: ${definition}`}
+        aria-expanded={isOpen}
+        aria-describedby={isOpen ? tooltipId : undefined}
       >
         {children}
         <span className={styles.indicator} aria-hidden="true">?</span>
@@ -75,6 +87,7 @@ export default function GlossaryTerm({ term, definition, children }: GlossaryTer
             ref={tooltipRef}
             className={`${styles.tooltip} ${styles[position]}`}
             role="tooltip"
+            id={tooltipId}
             style={{ left: coords.left, top: coords.top }}
           >
             <div className={styles.tooltipTerm}>{term}</div>

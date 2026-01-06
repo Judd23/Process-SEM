@@ -35,6 +35,17 @@
   }
 }
 
+@media (max-width: 480px) {
+  .mobileLegend {
+    padding: var(--spacing-xs);
+    gap: var(--spacing-xs);
+  }
+
+  .legendItem {
+    font-size: 0.7rem;
+  }
+}
+
 .svg {
   max-width: 100%;
   height: auto;

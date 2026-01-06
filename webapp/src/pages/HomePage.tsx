@@ -7,6 +7,7 @@ import PathwayDiagram from '../components/charts/PathwayDiagram';
 import DataTimestamp from '../components/ui/DataTimestamp';
 import { useModelData } from '../context/ModelDataContext';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
+import useParallax from '../hooks/useParallax';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
@@ -20,6 +21,7 @@ export default function HomePage() {
   const finding3Ref = useScrollReveal<HTMLElement>();
   const previewRef = useScrollReveal<HTMLElement>();
   const exploreRef = useStaggeredReveal<HTMLElement>();
+  const parallaxOffset = useParallax({ speed: 0.1, max: 32 });
 
   // Derive key findings dynamically from pipeline data
   const keyFindings = {
@@ -34,7 +36,11 @@ export default function HomePage() {
   return (
     <div className={styles.page}>
       {/* Hero Section - Full viewport */}
-      <section ref={heroRef} className={`${styles.hero} reveal`}>
+      <section
+        ref={heroRef}
+        className={`${styles.hero} reveal`}
+        style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
+      >
         <div className="container">
           <span className={styles.eyebrow}>Research Findings</span>
           <h1 className={styles.title}>
@@ -196,33 +202,12 @@ export default function HomePage() {
         <div className="container">
           <h2>Explore the Research</h2>
           <div className={styles.exploreCards}>
-            <Link to="/so-what" className={`${styles.exploreCard} reveal`}>
-              <span className={styles.exploreIcon}>
-                <Icon name="lightbulb" size={40} />
-              </span>
-              <h3>So, What?</h3>
-              <p>Practical implications for students, advisors, and policy makers.</p>
-            </Link>
-            <Link to="/dose" className={`${styles.exploreCard} reveal`}>
-              <span className={styles.exploreIcon}>
-                <Icon name="chart" size={40} />
-              </span>
-              <h3>Dose Effects</h3>
-              <p>See how credit dose moderates treatment effects with interactive visualizations.</p>
-            </Link>
             <Link to="/demographics" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="users" size={40} />
               </span>
               <h3>Demographics</h3>
               <p>Compare findings across race, first-generation, Pell, and other subgroups.</p>
-            </Link>
-            <Link to="/pathway" className={`${styles.exploreCard} reveal`}>
-              <span className={styles.exploreIcon}>
-                <Icon name="network" size={40} />
-              </span>
-              <h3>Pathways</h3>
-              <p>Interact with the full SEM mediation diagram and explore each pathway.</p>
             </Link>
             <Link to="/methods" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
@@ -231,7 +216,41 @@ export default function HomePage() {
               <h3>Methods</h3>
               <p>Technical details on model specification, estimation, and diagnostics.</p>
             </Link>
+            <Link to="/pathway" className={`${styles.exploreCard} reveal`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="network" size={40} />
+              </span>
+              <h3>Pathways</h3>
+              <p>Interact with the full SEM mediation diagram and explore each pathway.</p>
+            </Link>
+            <Link to="/dose" className={`${styles.exploreCard} reveal`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="chart" size={40} />
+              </span>
+              <h3>Credit Levels</h3>
+              <p>See how credit dose moderates treatment effects with interactive visualizations.</p>
+            </Link>
+            <Link to="/so-what" className={`${styles.exploreCard} reveal`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="lightbulb" size={40} />
+              </span>
+              <h3>So, What?</h3>
+              <p>Practical implications for students, advisors, and policy makers.</p>
+            </Link>
           </div>
+        </div>
+      </section>
+
+      <section className={styles.nextStep}>
+        <div className="container">
+          <h2>Next: Explore Equity Differences</h2>
+          <p>
+            Start with the equity frame to see how effects differ across race, first-generation status,
+            financial need, and living situations.
+          </p>
+          <Link to="/demographics" className="button button-primary button-lg">
+            Go to Demographics
+          </Link>
         </div>
       </section>
     </div>

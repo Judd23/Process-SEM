@@ -16,7 +16,7 @@
   position: absolute;
   top: -100px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(var(--parallax-offset, 0px));
   width: 600px;
   height: 600px;
   background: radial-gradient(

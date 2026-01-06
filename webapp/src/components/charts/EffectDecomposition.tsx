@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useModelData } from '../../context/ModelDataContext';
 import { colors } from '../../utils/colorScales';
 import styles from './EffectDecomposition.module.css';
@@ -16,6 +16,8 @@ interface Bar extends Segment {
 
 export default function EffectDecomposition() {
   const { paths } = useModelData();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 520, height: 80 });
 
   const metrics = useMemo(() => {
     const indirectStress = (paths.a1?.estimate ?? 0) * (paths.b1?.estimate ?? 0);
@@ -37,9 +39,26 @@ export default function EffectDecomposition() {
     { key: 'Direct', value: metrics.direct, color: colors.nonfast },
   ], [metrics]);
 
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const update = () => {
+      const nextWidth = Math.max(280, Math.min(containerRef.current?.clientWidth || 520, 640));
+      setDimensions({ width: nextWidth, height: 80 });
+    };
+    update();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(update);
+      observer.observe(containerRef.current);
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   const { width, height, bars, zeroX, min, max } = useMemo(() => {
-    const width = 520;
-    const height = 80;
+    const { width, height } = dimensions;
     const positiveTotal = segments.filter((s) => s.value >= 0).reduce((sum, s) => sum + s.value, 0);
     const negativeTotal = segments.filter((s) => s.value < 0).reduce((sum, s) => sum + s.value, 0);
     const min = Math.min(0, negativeTotal);
@@ -79,10 +98,10 @@ export default function EffectDecomposition() {
       min,
       max,
     };
-  }, [segments]);
+  }, [segments, dimensions]);
 
   return (
-    <div className={styles.container}>
+    <div ref={containerRef} className={styles.container}>
       <div className={styles.header}>
         <h3>Effect Decomposition</h3>
         <p>

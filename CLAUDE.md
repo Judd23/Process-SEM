@@ -798,3 +798,57 @@ Made the ResearcherPage significantly more artistic and dynamic with layered ani
 | PathwayPage | ⚠️ 8/10 | ⚠️ Needs indirect calc | ⚠️ Scroll issues |
 | MethodsPage | ⚠️ 8/10 | ⏳ Needs flowchart | ✅ |
 | ResearcherPage | ✅ 10/10 | ✅ Complete | ✅ |
+
+---
+
+### January 7, 2026 - Sprint 5 (In Progress)
+
+#### Narrative Cohesion Updates
+- Added a single "Next step" CTA section to **Home**, **Pathway**, and **Credit Levels** pages.
+- Simplified **So, What?** to one clear CTA (next page: Researcher).
+- Reordered HomePage explore cards to mirror the navigation sequence.
+
+#### Chart Consistency + Legend Polish
+- Standardized chart legends as HTML blocks beneath charts for consistent placement.
+- Added legends to DoseResponseCurve and JohnsonNeymanPlot.
+- Added significance legend for non-race group comparisons.
+
+#### Accessibility Improvements
+- Glossary tooltip now uses `aria-describedby`, `aria-expanded`, and keyboard toggle/escape support.
+- Chart tooltips are keyboard reachable via focusable SVG overlays/marks.
+- Header nav links have explicit focus-visible outlines.
+
+#### Data Integrity Indicators
+- DataTimestamp now includes a "Simulated data" note alongside the generated timestamp.
+- Significance explanations added where interpretive language depends on p-values.
+
+#### Files Updated (Sprint 5)
+- `webapp/src/pages/HomePage.tsx`
+- `webapp/src/pages/HomePage.module.css`
+- `webapp/src/pages/PathwayPage.tsx`
+- `webapp/src/pages/PathwayPage.module.css`
+- `webapp/src/pages/DoseExplorerPage.tsx`
+- `webapp/src/pages/DoseExplorerPage.module.css`
+- `webapp/src/pages/SoWhatPage.tsx`
+- `webapp/src/components/charts/PathwayDiagram.tsx`
+- `webapp/src/components/charts/DoseResponseCurve.tsx`
+- `webapp/src/components/charts/DoseResponseCurve.module.css`
+- `webapp/src/components/charts/JohnsonNeymanPlot.tsx`
+- `webapp/src/components/charts/JohnsonNeymanPlot.module.css`
+- `webapp/src/components/charts/GroupComparison.tsx`
+- `webapp/src/components/charts/GroupComparison.module.css`
+- `webapp/src/components/ui/GlossaryTerm.tsx`
+- `webapp/src/components/layout/Header.module.css`
+- `webapp/src/components/ui/DataTimestamp.tsx`
+- `webapp/src/components/ui/DataTimestamp.module.css`
+
+### Design Conventions (Sprint 5 Additions)
+- End each major page with a single primary "Next step" CTA.
+- Use below-chart HTML legends for consistent placement and mobile safety.
+- Keyboard-accessible chart tooltips for exploratory elements.
+
+### Release QA Checklist (Short)
+- Tab through glossary terms and chart overlays; tooltip appears and Esc dismisses.
+- Verify chart legends never overlap plots on 320–480px width.
+- Confirm single final CTA per page and correct "next" route.
+- Spot-check simulated data note appears under charts and stats.

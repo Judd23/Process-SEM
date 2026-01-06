@@ -10,6 +10,7 @@
   padding-top: 0.5rem;
   width: 100%;
   opacity: 0.7;
+  flex-wrap: wrap;
 }
 
 .label {
@@ -24,6 +25,13 @@
   color: var(--color-text-secondary, #4b5563);
 }
 
+.note {
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Mobile adjustments */
 @media (max-width: 640px) {
   .timestamp {
@@ -33,6 +41,10 @@
   }
 
   .label {
+    font-size: 0.55rem;
+  }
+
+  .note {
     font-size: 0.55rem;
   }
 }
@@ -50,5 +62,10 @@
 
 [data-theme="dark"] .time,
 .dark .time {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .note,
+.dark .note {
   color: #9ca3af;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useResearch } from '../../context/ResearchContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,6 +16,7 @@ export default function DoseResponseCurve({
   outcome,
   selectedDose,
 }: DoseResponseCurveProps) {
+  const tooltipId = `dose-response-tooltip-${outcome}`;
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const { showCIs } = useResearch();
@@ -30,6 +31,19 @@ export default function DoseResponseCurve({
     ciLower: number;
     ciUpper: number;
   } | null>(null);
+  const outcomeColor =
+    outcome === 'distress' ? colors.distress :
+    outcome === 'engagement' ? colors.engagement : colors.belonging;
+  const data = useMemo(() => {
+    const coef = doseCoefficients[outcome];
+    const doseRange = d3.range(0, 81, 1);
+    return doseRange.map((dose) => {
+      const doseUnits = (dose - 12) / 10;
+      const effect = coef.main + doseUnits * coef.moderation;
+      const ci = 1.96 * coef.se * (1 + Math.abs(doseUnits) * 0.1);
+      return { dose, effect, ciLower: effect - ci, ciUpper: effect + ci };
+    });
+  }, [doseCoefficients, outcome]);
 
   // Responsive sizing
   useEffect(() => {
@@ -69,17 +83,6 @@ export default function DoseResponseCurve({
     const g = svg
       .append('g')
       .attr('transform', `translate(${margin.left}, ${margin.top})`);
-
-    // Generate data points (from dynamic context)
-    const coef = doseCoefficients[outcome];
-    const doseRange = d3.range(0, 81, 1);
-    const data = doseRange.map((dose) => {
-      const doseUnits = (dose - 12) / 10;
-      const effect = coef.main + doseUnits * coef.moderation;
-      // Approximate CI based on SE (simplified)
-      const ci = 1.96 * coef.se * (1 + Math.abs(doseUnits) * 0.1);
-      return { dose, effect, ciLower: effect - ci, ciUpper: effect + ci };
-    });
 
     // Scales
     const xScale = d3.scaleLinear().domain([0, 80]).range([0, innerWidth]);
@@ -296,7 +299,27 @@ export default function DoseResponseCurve({
       .attr('width', innerWidth)
       .attr('height', innerHeight)
       .attr('fill', 'transparent')
-      .attr('cursor', 'crosshair');
+      .attr('cursor', 'crosshair')
+      .attr('tabindex', 0)
+      .attr('role', 'img')
+      .attr(
+        'aria-label',
+        `Dose-response chart for ${outcome}. Focus to read values at the selected dose.`
+      )
+      .attr('aria-describedby', tooltipId);
+
+    const showTooltipForDose = (dose: number) => {
+      const point = data.find((d) => d.dose === dose);
+      if (!point) return;
+      setTooltip({
+        x: margin.left + xScale(point.dose) + 12,
+        y: margin.top + yScale(point.effect) + 12,
+        dose: point.dose,
+        effect: point.effect,
+        ciLower: point.ciLower,
+        ciUpper: point.ciUpper,
+      });
+    };
 
     overlay
       .on('mousemove', (event) => {
@@ -314,15 +337,28 @@ export default function DoseResponseCurve({
           ciUpper: point.ciUpper,
         });
       })
-      .on('mouseleave', () => setTooltip(null));
+      .on('mouseleave', () => setTooltip(null))
+      .on('focus', () => showTooltipForDose(selectedDose))
+      .on('blur', () => setTooltip(null))
+      .on('keydown', (event) => {
+        if (event.key === 'Escape') {
+          setTooltip(null);
+        }
+      });
 
-  }, [outcome, selectedDose, dimensions, showCIs, resolvedTheme, doseCoefficients]);
+  }, [outcome, selectedDose, dimensions, showCIs, resolvedTheme, doseCoefficients, data]);
 
   return (
     <div ref={containerRef} className={styles.container}>
       <svg ref={svgRef} width={dimensions.width} height={dimensions.height} className={styles.svg} />
       {tooltip && (
-        <div className={styles.tooltip} style={{ left: tooltip.x, top: tooltip.y }}>
+        <div
+          className={styles.tooltip}
+          style={{ left: tooltip.x, top: tooltip.y }}
+          id={tooltipId}
+          role="tooltip"
+          aria-live="polite"
+        >
           <div className={styles.tooltipTitle}>{tooltip.dose} credits</div>
           <div className={styles.tooltipRow}>Effect: {tooltip.effect.toFixed(3)}</div>
           {showCIs && (
@@ -332,6 +368,28 @@ export default function DoseResponseCurve({
           )}
         </div>
       )}
+      <div className={styles.legend}>
+        <div className={styles.legendItem}>
+          <span className={styles.legendLine} style={{ background: outcomeColor }} />
+          <span className={styles.legendLabel}>Effect</span>
+        </div>
+        {showCIs && (
+          <div className={styles.legendItem}>
+            <span
+              className={styles.legendBand}
+              style={{
+                background: `${outcomeColor}26`,
+                borderColor: `${outcomeColor}55`,
+              }}
+            />
+            <span className={styles.legendLabel}>95% CI</span>
+          </div>
+        )}
+        <div className={styles.legendItem}>
+          <span className={styles.legendMarker} style={{ borderColor: outcomeColor }} />
+          <span className={styles.legendLabel}>Selected dose</span>
+        </div>
+      </div>
       <DataTimestamp />
     </div>
   );

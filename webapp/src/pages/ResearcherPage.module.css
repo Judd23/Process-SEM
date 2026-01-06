@@ -9,7 +9,7 @@
 .page::before {
   content: '';
   position: absolute;
-  top: -20%;
+  top: calc(-20% + var(--parallax-offset, 0px));
   right: -15%;
   width: 600px;
   height: 600px;
@@ -28,7 +28,7 @@
 .page::after {
   content: '';
   position: absolute;
-  bottom: 10%;
+  bottom: calc(10% - var(--parallax-offset, 0px));
   left: -12%;
   width: 550px;
   height: 550px;
@@ -245,7 +245,10 @@
 .heroIntro {
   grid-column: 8 / -1;
   padding-bottom: var(--spacing-sm);
-  text-align: center;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .institutionPanel {

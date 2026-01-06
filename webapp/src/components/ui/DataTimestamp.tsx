@@ -3,9 +3,10 @@ import styles from './DataTimestamp.module.css';
 
 interface DataTimestampProps {
   className?: string;
+  note?: string;
 }
 
-export default function DataTimestamp({ className }: DataTimestampProps) {
+export default function DataTimestamp({ className, note = 'Simulated data' }: DataTimestampProps) {
   const timestamp = dataMetadata.generatedAtShort || 'Unknown';
 
   return (
@@ -14,6 +15,7 @@ export default function DataTimestamp({ className }: DataTimestampProps) {
       <time dateTime={dataMetadata.generatedAt} className={styles.time}>
         {timestamp}
       </time>
+      <span className={styles.note}>{note}</span>
     </div>
   );
 }

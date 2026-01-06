@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useResearch } from '../context/ResearchContext';
 import { useModelData } from '../context/ModelDataContext';
 import PathwayDiagram from '../components/charts/PathwayDiagram';
@@ -7,6 +8,7 @@ import Toggle from '../components/ui/Toggle';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
+import useParallax from '../hooks/useParallax';
 import styles from './PathwayPage.module.css';
 
 export default function PathwayPage() {
@@ -21,6 +23,7 @@ export default function PathwayPage() {
   const coefficientsRef = useStaggeredReveal<HTMLElement>();
   const indirectRef = useStaggeredReveal<HTMLElement>();
   const summaryRef = useStaggeredReveal<HTMLElement>();
+  const parallaxOffset = useParallax({ speed: 0.1, max: 28 });
 
   // Detect sticky state (using -10px rootMargin for reliable triggering across zoom levels)
   useEffect(() => {
@@ -132,7 +135,11 @@ export default function PathwayPage() {
   return (
     <div className={styles.page}>
       <div className="container">
-        <header ref={headerRef} className={`${styles.header} reveal`}>
+        <header
+          ref={headerRef}
+          className={`${styles.header} reveal`}
+          style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
+        >
           <span className={styles.eyebrow}>Interactive Model</span>
           <h1>How Dual Enrollment Credits Affect First-Year Success</h1>
           <p className="lead">
@@ -176,6 +183,9 @@ export default function PathwayPage() {
 
         <section ref={coefficientsRef} className={`${styles.coefficients} stagger-children`}>
           <h2>Key Findings</h2>
+          <p className={styles.coefficientNote}>
+            Evidence badges reflect p-value thresholds (p &lt; .05 = good evidence, p &lt; .001 = strong evidence).
+          </p>
           <div className={styles.coefficientGrid}>
             {pathData.map((path) => {
               const isHighlighted = !highlightedPath ||
@@ -318,6 +328,16 @@ export default function PathwayPage() {
         <KeyTakeaway>
           Dual enrollment credits create <strong>competing forces</strong>: they increase stress (hurting adjustment) while offering direct academic benefits—with the balance shifting based on credit dose.
         </KeyTakeaway>
+
+        <section className={styles.nextStep}>
+          <h2>Next: Explore Credit Levels</h2>
+          <p>
+            See how different credit doses change the stress and engagement pathways in the model.
+          </p>
+          <Link to="/dose" className="button button-primary button-lg">
+            Go to Credit Levels
+          </Link>
+        </section>
       </div>
     </div>
   );

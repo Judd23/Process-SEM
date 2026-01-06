@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useModelData } from '../context/ModelDataContext';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import ProgressRing from '../components/ui/ProgressRing';
 import Accordion from '../components/ui/Accordion';
 import AnalysisPipeline from '../components/charts/AnalysisPipeline';
+import useParallax from '../hooks/useParallax';
 import styles from './MethodsPage.module.css';
 
 const modelSpecs = [
@@ -102,6 +104,7 @@ export default function MethodsPage() {
   const bootstrapRef = useScrollReveal<HTMLElement>();
   const softwareRef = useStaggeredReveal<HTMLElement>();
   const referencesRef = useScrollReveal<HTMLElement>();
+  const parallaxOffset = useParallax({ speed: 0.1, max: 32 });
 
   // Build fit measures table dynamically from pipeline data
   const fitMeasures = useMemo(() => {
@@ -147,7 +150,10 @@ export default function MethodsPage() {
     ];
   }, [fits]);
   return (
-    <div className={styles.page}>
+    <div
+      className={styles.page}
+      style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
+    >
       <div className="container">
         <header ref={headerRef} className={`${styles.header} reveal`}>
           <span className={styles.eyebrow}>Technical Methods</span>
@@ -171,6 +177,10 @@ export default function MethodsPage() {
             Our analysis follows a three-stage process to ensure valid causal inferences
             from observational data. Each stage builds on the previous one.
           </p>
+          <p className={styles.plainTalk}>
+            Plain talk: we first make the FASt and non‑FASt groups comparable, then run the model,
+            then check how stable the results are.
+          </p>
           <AnalysisPipeline />
         </section>
 
@@ -193,6 +203,9 @@ export default function MethodsPage() {
               RMSEA/SRMR
             </GlossaryTerm>{' '}
             indicate better fit. Our model meets all recommended standards.
+          </p>
+          <p className={styles.plainTalk}>
+            Plain talk: these checks tell us if the model is a good match for the data or not.
           </p>
           <div className={styles.fitRings}>
             {fitRings.map((ring) => (
@@ -260,6 +273,10 @@ export default function MethodsPage() {
             </GlossaryTerm>{' '}
             to account for these pre-existing differences and make
             fairer comparisons.
+          </p>
+          <p className={styles.plainTalk}>
+            Plain talk: we compare students who look similar on background factors, so the credit effect
+            isn’t just about who they were before college.
           </p>
           <div className={styles.codeBlock}>
             <h4>Factors We Controlled For</h4>
@@ -349,6 +366,9 @@ export default function MethodsPage() {
             we are in our findings. This method doesn't assume the data follows a perfect
             bell curve, making it more reliable for complex analyses like ours.
           </p>
+          <p className={styles.plainTalk}>
+            Plain talk: we rerun the analysis many times to see how much the results could move around.
+          </p>
           <div className={styles.infoBox}>
             <h4>Why Bootstrap?</h4>
             <p>
@@ -421,6 +441,16 @@ export default function MethodsPage() {
               Research Methods, 40</em>(3), 879–891.
             </li>
           </ul>
+        </section>
+
+        <section className={styles.nextStep}>
+          <h2>Next: See the Model in Action</h2>
+          <p>
+            Explore the pathway diagram to see how stress and engagement connect to success.
+          </p>
+          <Link to="/pathway" className="button button-primary button-lg">
+            Go to Pathway
+          </Link>
         </section>
       </div>
     </div>

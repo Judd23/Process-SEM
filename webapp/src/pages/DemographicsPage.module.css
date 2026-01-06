@@ -16,7 +16,7 @@
   position: absolute;
   top: -80px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(var(--parallax-offset, 0px));
   width: 500px;
   height: 500px;
   background: radial-gradient(
@@ -112,6 +112,12 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   margin: 0;
+}
+
+.plainTalk {
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
 }
 
 /* Demographics Breakdown */
@@ -382,6 +388,26 @@
   margin: 0;
 }
 
+/* Next step CTA */
+.nextStep {
+  text-align: center;
+  padding: var(--spacing-3xl) 0 var(--spacing-4xl);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.nextStep h2 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.nextStep p {
+  max-width: 640px;
+  margin: 0 auto var(--spacing-xl);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  line-height: 1.7;
+}
+
 @media (max-width: 768px) {
   .header::before {
     width: 300px;
@@ -501,6 +527,14 @@
   }
 
   .interpretationCard h3 {
+    font-size: var(--font-size-base);
+  }
+
+  .nextStep h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .nextStep p {
     font-size: var(--font-size-base);
   }
 }

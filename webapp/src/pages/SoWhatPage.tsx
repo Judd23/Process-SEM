@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import { useModelData } from '../context/ModelDataContext';
+import useParallax from '../hooks/useParallax';
 import styles from './SoWhatPage.module.css';
 
 export default function SoWhatPage() {
@@ -11,6 +12,7 @@ export default function SoWhatPage() {
   const stakeholderRef = useStaggeredReveal<HTMLElement>();
   const actionRef = useStaggeredReveal<HTMLElement>();
   const limitRef = useScrollReveal<HTMLElement>();
+  const parallaxOffset = useParallax({ speed: 0.1, max: 28 });
 
   // Get effect directions from data
   const distressEffect = paths.a1?.estimate ?? 0;
@@ -19,7 +21,11 @@ export default function SoWhatPage() {
   return (
     <div className={styles.page}>
       {/* Hero */}
-      <section ref={heroRef} className={`${styles.hero} reveal`}>
+      <section
+        ref={heroRef}
+        className={`${styles.hero} reveal`}
+        style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
+      >
         <div className="container">
           <span className={styles.eyebrow}>Research Implications</span>
           <h1 className={styles.title}>So, What Does This Mean?</h1>
@@ -220,20 +226,14 @@ export default function SoWhatPage() {
       {/* Call to Action */}
       <section className={styles.cta}>
         <div className="container">
-          <h2>Ready to Explore the Data?</h2>
+          <h2>Next: Meet the Researcher</h2>
           <p>
-            Dive deeper into the statistical model, examine effects by demographic groups,
-            or see how credit dose moderates the findings.
+            Learn more about the researcher's background, dissertation focus, and the
+            equity motivation behind this study.
           </p>
           <div className={styles.ctaButtons}>
-            <Link to="/pathway" className="button button-primary button-lg">
-              Explore the Model
-            </Link>
-            <Link to="/dose" className="button button-secondary button-lg">
-              See Dose Effects
-            </Link>
-            <Link to="/demographics" className="button button-secondary button-lg">
-              View by Demographics
+            <Link to="/researcher" className="button button-primary button-lg">
+              Meet the Researcher
             </Link>
           </div>
         </div>

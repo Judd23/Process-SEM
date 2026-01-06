@@ -118,6 +118,7 @@ export default function GroupComparison({
   grouping,
   pathway,
 }: GroupComparisonProps) {
+  const tooltipId = `group-comparison-tooltip-${grouping}-${pathway}`;
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { resolvedTheme } = useTheme();
@@ -256,7 +257,14 @@ export default function GroupComparison({
         .attr('fill', color)
         .attr('stroke', 'white')
         .attr('stroke-width', 2)
-        .attr('cursor', 'pointer');
+        .attr('cursor', 'pointer')
+        .attr('tabindex', 0)
+        .attr('role', 'button')
+        .attr(
+          'aria-label',
+          `${d.label}. Effect ${d.estimate.toFixed(3)}. SE ${d.se.toFixed(3)}. p ${d.pvalue.toFixed(3)}. n ${d.n.toLocaleString()}.`
+        )
+        .attr('aria-describedby', tooltipId);
 
       point
         .on('mouseenter', (event) => {
@@ -272,7 +280,26 @@ export default function GroupComparison({
             n: d.n,
           });
         })
-        .on('mouseleave', () => setTooltip(null));
+        .on('mouseleave', () => setTooltip(null))
+        .on('focus', () => {
+          const rect = containerRef.current?.getBoundingClientRect();
+          if (!rect) return;
+          setTooltip({
+            x: margin.left + xScale(d.estimate) + 12,
+            y: margin.top + y + 12,
+            label: d.label,
+            estimate: d.estimate,
+            se: d.se,
+            pvalue: d.pvalue,
+            n: d.n,
+          });
+        })
+        .on('blur', () => setTooltip(null))
+        .on('keydown', (event) => {
+          if (event.key === 'Escape') {
+            setTooltip(null);
+          }
+        });
 
       // Value label
       g.append('text')
@@ -330,7 +357,13 @@ export default function GroupComparison({
     <div ref={containerRef} className={styles.container}>
       <svg ref={svgRef} width={dimensions.width} height={dimensions.height} className={styles.svg} />
       {tooltip && (
-        <div className={styles.tooltip} style={{ left: tooltip.x, top: tooltip.y }}>
+        <div
+          className={styles.tooltip}
+          style={{ left: tooltip.x, top: tooltip.y }}
+          id={tooltipId}
+          role="tooltip"
+          aria-live="polite"
+        >
           <div className={styles.tooltipTitle}>{tooltip.label}</div>
           <div className={styles.tooltipRow}>Effect: {tooltip.estimate.toFixed(3)}</div>
           <div className={styles.tooltipRow}>SE: {tooltip.se.toFixed(3)}</div>
@@ -338,8 +371,20 @@ export default function GroupComparison({
           <div className={styles.tooltipRow}>n: {tooltip.n.toLocaleString()}</div>
         </div>
       )}
+      {grouping !== 'race' && (
+        <div className={styles.legend}>
+          <div className={styles.legendItem}>
+            <span className={styles.legendSwatch} style={{ background: 'var(--color-significant)' }} />
+            <span className={styles.legendLabel}>Significant (p &lt; .05)</span>
+          </div>
+          <div className={styles.legendItem}>
+            <span className={styles.legendSwatch} style={{ background: 'var(--color-text-muted)' }} />
+            <span className={styles.legendLabel}>Not significant</span>
+          </div>
+        </div>
+      )}
       <p className={styles.note}>
-        * p &lt; .05. Error bars represent 95% confidence intervals.
+        * p &lt; .05. Error bars represent 95% confidence intervals. For race comparisons, color encodes group.
       </p>
       <DataTimestamp />
     </div>

@@ -95,6 +95,12 @@
   text-decoration: none;
 }
 
+.navLink:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-md);
+}
+
 .navLink.active {
   color: var(--color-accent);
   background: var(--color-accent-light);
