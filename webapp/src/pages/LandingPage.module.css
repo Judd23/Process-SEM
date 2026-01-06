@@ -21,17 +21,18 @@
     radial-gradient(ellipse 80% 60% at 15% 25%, rgba(0, 102, 204, 0.18) 0%, transparent 55%),
     radial-gradient(ellipse 70% 50% at 85% 75%, rgba(44, 160, 44, 0.14) 0%, transparent 55%),
     radial-gradient(ellipse 90% 40% at 50% 95%, rgba(214, 39, 40, 0.10) 0%, transparent 60%);
+  transform: translate3d(0, var(--parallax-offset, 0px), 0) scale(var(--gradient-scale, 1));
   animation: gradientShift 15s ease-in-out infinite alternate;
 }
 
 @keyframes gradientShift {
   0% {
     opacity: 0.7;
-    transform: scale(1);
+    --gradient-scale: 1;
   }
   100% {
     opacity: 1;
-    transform: scale(1.05);
+    --gradient-scale: 1.05;
   }
 }
 
@@ -126,7 +127,7 @@
 }
 
 .longTitle {
-  font-size: var(--font-size-sm);
+  font-size: calc(var(--font-size-sm) + 2px);
   color: var(--color-text-muted);
   max-width: 700px;
   margin: 0;
@@ -142,12 +143,14 @@
   border-bottom: 1px solid var(--color-border);
   width: 100%;
   max-width: 400px;
+  text-align: center;
+  align-items: center;
   animation: slideFromBottom 1.6s ease-out both;
   animation-delay: 0.3s;
 }
 
 .by {
-  font-size: var(--font-size-sm);
+  font-size: calc(var(--font-size-sm) + 2px);
   color: var(--color-text-muted);
   text-transform: lowercase;
   letter-spacing: 0.1em;
@@ -169,7 +172,7 @@
 }
 
 .degree {
-  font-size: var(--font-size-sm);
+  font-size: calc(var(--font-size-sm) + 2px);
   color: var(--color-text-muted);
   font-style: italic;
   margin: 0;
@@ -185,8 +188,8 @@
   background: transparent;
   animation:
     slideFromBottom 1.6s ease-out both,
-    logoGlow 2.8s ease-in-out 2.1s both;
-  animation-delay: 0.7s, 2.3s;
+    logoGlow 2.8s ease-in-out 2.9s both;
+  animation-delay: 1.8s, 3.2s;
 }
 
 .logo {
@@ -294,7 +297,7 @@
 }
 
 .footer p {
-  font-size: var(--font-size-sm);
+  font-size: calc(var(--font-size-sm) + 2px);
   color: var(--color-text-muted);
   margin: 0;
   letter-spacing: 0.05em;
@@ -341,7 +344,7 @@
 }
 
 .scrollText {
-  font-size: var(--font-size-xs);
+  font-size: calc(var(--font-size-xs) + 2px);
   text-transform: uppercase;
   letter-spacing: 0.15em;
   opacity: 0.7;
