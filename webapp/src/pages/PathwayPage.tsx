@@ -6,10 +6,10 @@ import EffectDecomposition from '../components/charts/EffectDecomposition';
 import Toggle from '../components/ui/Toggle';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
+import SharedElement from '../components/transitions/SharedElement';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import useParallax from '../hooks/useParallax';
-import { TransitionLink } from '../components/transitions';
-import SharedElement from '../components/transitions/SharedElement';
+import { Link } from 'react-router-dom';
 import styles from './PathwayPage.module.css';
 
 export default function PathwayPage() {
@@ -134,18 +134,19 @@ export default function PathwayPage() {
   ];
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} page-fade`}>
       <div className="container">
         <header
           ref={headerRef}
           className={styles.header}
           style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
         >
-          <SharedElement id="page-hero">
-            <span className="morph-anchor" aria-hidden="true" />
+          <SharedElement id="page-kicker" className={styles.eyebrow}>
+            Interactive Model
           </SharedElement>
-          <span className={styles.eyebrow}>Interactive Model</span>
-          <h1>How Dual Enrollment Credits Affect First-Year Success</h1>
+          <SharedElement id="page-title">
+            <h1>How Dual Enrollment Credits Affect First-Year Success</h1>
+          </SharedElement>
           <p className="lead">
             This diagram shows the different ways that earning college credits in high school
             can influence a student's first-year college experience. The model uses {' '}
@@ -155,31 +156,33 @@ export default function PathwayPage() {
           </p>
         </header>
 
-        <section ref={controlsRef} className={`${styles.controls} ${isStuck ? styles.stuck : ''}`}>
-          <div className={styles.pathwayButtons}>
-            {pathwayButtons.map((btn) => (
-              <button
-                key={btn.id || 'all'}
-                className={`${styles.pathwayButton} ${highlightedPath === btn.id ? styles.active : ''}`}
-                onClick={() => setHighlightedPath(btn.id)}
-                style={{
-                  '--button-color': btn.color,
-                  '--button-text': btn.textColor ?? 'white',
-                } as React.CSSProperties}
-              >
-                {btn.label}
-              </button>
-            ))}
-          </div>
-          <div className={styles.toggleContainer}>
-            <Toggle
-              id="show-path-labels"
-              label="Show Path Labels"
-              checked={showPathLabels}
-              onChange={togglePathLabels}
-            />
-          </div>
-        </section>
+        <SharedElement id="page-panel">
+          <section ref={controlsRef} className={`${styles.controls} ${isStuck ? styles.stuck : ''}`}>
+            <div className={styles.pathwayButtons}>
+              {pathwayButtons.map((btn) => (
+                <button
+                  key={btn.id || 'all'}
+                  className={`${styles.pathwayButton} ${highlightedPath === btn.id ? styles.active : ''}`}
+                  onClick={() => setHighlightedPath(btn.id)}
+                  style={{
+                    '--button-color': btn.color,
+                    '--button-text': btn.textColor ?? 'white',
+                  } as React.CSSProperties}
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+            <div className={styles.toggleContainer}>
+              <Toggle
+                id="show-path-labels"
+                label="Show Path Labels"
+                checked={showPathLabels}
+                onChange={togglePathLabels}
+              />
+            </div>
+          </section>
+        </SharedElement>
 
         <section ref={diagramRef} className={`${styles.diagram} reveal-scale`}>
           <PathwayDiagram width={800} height={450} interactive />
@@ -338,9 +341,9 @@ export default function PathwayPage() {
           <p>
             See how different credit doses change the stress and engagement pathways in the model.
           </p>
-          <TransitionLink to="/dose" className="button button-primary button-lg">
+          <Link to="/dose" className="button button-primary button-lg">
             Go to Credit Levels
-          </TransitionLink>
+          </Link>
         </section>
       </div>
     </div>

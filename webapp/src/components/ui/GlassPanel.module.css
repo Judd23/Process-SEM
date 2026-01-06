@@ -57,8 +57,8 @@
 
 /* Ultra Thin - Maximum translucency */
 .thickness-ultraThin {
-  -webkit-backdrop-filter: saturate(105%) blur(2px);
-  backdrop-filter: saturate(105%) blur(2px);
+  -webkit-backdrop-filter: saturate(130%) blur(8px);
+  backdrop-filter: saturate(130%) blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow: 
     0 1px 8px rgba(0, 0, 0, 0.02),
@@ -67,8 +67,8 @@
 
 /* Thin - Light blur, high translucency */
 .thickness-thin {
-  -webkit-backdrop-filter: saturate(108%) blur(4px);
-  backdrop-filter: saturate(108%) blur(4px);
+  -webkit-backdrop-filter: saturate(135%) blur(12px);
+  backdrop-filter: saturate(135%) blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 
     0 2px 12px rgba(0, 0, 0, 0.03),
@@ -78,8 +78,8 @@
 
 /* Regular - Balanced (default) */
 .thickness-regular {
-  -webkit-backdrop-filter: saturate(110%) blur(6px);
-  backdrop-filter: saturate(110%) blur(6px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: saturate(140%) blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 
     0 4px 20px rgba(0, 0, 0, 0.04),
@@ -90,8 +90,8 @@
 
 /* Thick - More opacity, stronger blur */
 .thickness-thick {
-  -webkit-backdrop-filter: saturate(115%) blur(10px);
-  backdrop-filter: saturate(115%) blur(10px);
+  -webkit-backdrop-filter: saturate(150%) blur(20px);
+  backdrop-filter: saturate(150%) blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 
     0 6px 30px rgba(0, 0, 0, 0.06),
@@ -105,9 +105,7 @@
    ============================================ */
 
 /* Neutral - Adapts to theme (no tint override) */
-.tint-neutral {
-  /* Uses base variant background */
-}
+/* .tint-neutral uses base variant background by default */
 
 /* Navy blue tint */
 .tint-navy.variant-regular {
@@ -267,9 +265,7 @@
    Creates depth with inner glass panel
    ============================================ */
 
-.doubleLayer {
-  /* Outer layer is the base panel */
-}
+/* .doubleLayer outer layer is the base panel */
 
 .doubleLayer .innerGlass {
   position: absolute;
@@ -280,8 +276,8 @@
     rgba(255, 255, 255, 0.008) 50%,
     rgba(255, 255, 255, 0.01) 100%
   );
-  -webkit-backdrop-filter: saturate(105%) blur(2px);
-  backdrop-filter: saturate(105%) blur(2px);
+  -webkit-backdrop-filter: saturate(130%) blur(8px);
+  backdrop-filter: saturate(130%) blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: calc(var(--glass-radius, 16px) - 4px);
   box-shadow: 
@@ -522,29 +518,29 @@
 
 @media (max-width: 768px) {
   .glassPanel {
-    /* Reduce blur for mobile performance */
-    -webkit-backdrop-filter: saturate(110%) blur(4px) !important;
-    backdrop-filter: saturate(110%) blur(4px) !important;
+    /* Clear glass on mobile */
+    -webkit-backdrop-filter: saturate(140%) blur(12px) !important;
+    backdrop-filter: saturate(140%) blur(12px) !important;
   }
   
   .thickness-ultraThin {
-    -webkit-backdrop-filter: saturate(100%) blur(2px);
-    backdrop-filter: saturate(100%) blur(2px);
+    -webkit-backdrop-filter: saturate(130%) blur(6px);
+    backdrop-filter: saturate(130%) blur(6px);
   }
   
   .thickness-thin {
-    -webkit-backdrop-filter: saturate(105%) blur(4px);
-    backdrop-filter: saturate(105%) blur(4px);
+    -webkit-backdrop-filter: saturate(135%) blur(8px);
+    backdrop-filter: saturate(135%) blur(8px);
   }
   
   .thickness-regular {
-    -webkit-backdrop-filter: saturate(110%) blur(6px);
-    backdrop-filter: saturate(110%) blur(6px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    backdrop-filter: saturate(140%) blur(10px);
   }
   
   .thickness-thick {
-    -webkit-backdrop-filter: saturate(115%) blur(10px);
-    backdrop-filter: saturate(115%) blur(10px);
+    -webkit-backdrop-filter: saturate(145%) blur(14px);
+    backdrop-filter: saturate(145%) blur(14px);
   }
   
   /* Stronger backgrounds to compensate */
@@ -569,8 +565,8 @@
   /* Double layer mobile optimization */
   .doubleLayer .innerGlass {
     inset: 6px;
-    -webkit-backdrop-filter: saturate(105%) blur(2px);
-    backdrop-filter: saturate(105%) blur(2px);
+    -webkit-backdrop-filter: saturate(130%) blur(6px);
+    backdrop-filter: saturate(130%) blur(6px);
     background: linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.04) 0%,

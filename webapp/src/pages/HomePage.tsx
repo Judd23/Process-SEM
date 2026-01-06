@@ -4,8 +4,8 @@ import GlossaryTerm from '../components/ui/GlossaryTerm';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import PathwayDiagram from '../components/charts/PathwayDiagram';
 import DataTimestamp from '../components/ui/DataTimestamp';
-import { TransitionLink } from '../components/transitions';
 import SharedElement from '../components/transitions/SharedElement';
+import { Link } from 'react-router-dom';
 import { useModelData } from '../context/ModelDataContext';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import useParallax from '../hooks/useParallax';
@@ -35,7 +35,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} page-fade`}>
       {/* Hero Section - Full viewport */}
       <section
         ref={heroRef}
@@ -43,13 +43,14 @@ export default function HomePage() {
         style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
       >
         <div className="container">
-          <SharedElement id="page-hero">
-            <span className="morph-anchor" aria-hidden="true" />
+          <SharedElement id="page-kicker" className={styles.eyebrow}>
+            Research Findings
           </SharedElement>
-          <span className={styles.eyebrow}>Research Findings</span>
-          <h1 className={styles.title}>
-            How College Credits Earned in High School Affect First-Year Success
-          </h1>
+          <SharedElement id="page-title">
+            <h1 className={styles.title}>
+              How College Credits Earned in High School Affect First-Year Success
+            </h1>
+          </SharedElement>
           <p className={styles.lead}>
             Explore what happens when students enter college with <GlossaryTerm term="Dual Enrollment Credits" definition="College credits earned while in high school through dual enrollment programs, allowing students to take college courses before graduating high school.">dual enrollment credits</GlossaryTerm> from
             high school. We studied California State University students to understand
@@ -61,41 +62,43 @@ export default function HomePage() {
 
 
       {/* Key Stats */}
-      <section ref={statsRef} className={`${styles.stats} stagger-children`}>
-        <div className="container">
-          <div className={styles.statsGrid}>
-            <div className="reveal">
-              <StatCard
-                label="Sample Size"
-                value={keyFindings.totalN.toLocaleString()}
-                subtext="CSU first-year students"
-                size="large"
-                layoutId="stat-sample-size"
-              />
+      <SharedElement id="page-panel">
+        <section ref={statsRef} className={`${styles.stats} stagger-children`}>
+          <div className="container">
+            <div className={styles.statsGrid}>
+              <div className="reveal">
+                <StatCard
+                  label="Sample Size"
+                  value={keyFindings.totalN.toLocaleString()}
+                  subtext="CSU first-year students"
+                  size="large"
+                  layoutId="stat-sample-size"
+                />
+              </div>
+              <div className="reveal">
+                <StatCard
+                  label={<span>Students with <GlossaryTerm term="FASt Status" definition="First-year Accelerated Status - students who earned 12 or more transferable college credits before enrolling in their first year of college.">FASt Status</GlossaryTerm></span>}
+                  value={`${keyFindings.fastPct}%`}
+                  subtext="12+ credits from high school"
+                  size="large"
+                  color="accent"
+                  layoutId="stat-fast-percent"
+                />
+              </div>
+              <div className="reveal">
+                <StatCard
+                  label="Study Quality Score"
+                  value={keyFindings.cfi.toFixed(3)}
+                  subtext="Excellent statistical fit"
+                  size="large"
+                  color="positive"
+                />
+              </div>
             </div>
-            <div className="reveal">
-              <StatCard
-                label={<span>Students with <GlossaryTerm term="FASt Status" definition="First-year Accelerated Status - students who earned 12 or more transferable college credits before enrolling in their first year of college.">FASt Status</GlossaryTerm></span>}
-                value={`${keyFindings.fastPct}%`}
-                subtext="12+ credits from high school"
-                size="large"
-                color="accent"
-                layoutId="stat-fast-percent"
-              />
-            </div>
-            <div className="reveal">
-              <StatCard
-                label="Study Quality Score"
-                value={keyFindings.cfi.toFixed(3)}
-                subtext="Excellent statistical fit"
-                size="large"
-                color="positive"
-              />
-            </div>
+            <DataTimestamp />
           </div>
-          <DataTimestamp />
-        </div>
-      </section>
+        </section>
+      </SharedElement>
 
       {/* Key Findings - Editorial Layout */}
       <section className={styles.findings}>
@@ -187,12 +190,12 @@ export default function HomePage() {
             <PathwayDiagram />
           </div>
           <div className={styles.actions}>
-            <TransitionLink to="/pathway" className="button button-primary button-lg">
+            <Link to="/pathway" className="button button-primary button-lg">
               Explore the Connections
-            </TransitionLink>
-            <TransitionLink to="/dose" className="button button-secondary button-lg">
+            </Link>
+            <Link to="/dose" className="button button-secondary button-lg">
               See How Credit Amount Matters
-            </TransitionLink>
+            </Link>
           </div>
         </div>
       </section>
@@ -200,9 +203,9 @@ export default function HomePage() {
       {/* Key Takeaway */}
       <KeyTakeaway>
         <strong>Bottom Line:</strong> Earning college credits in high school affects first-year students in complex ways—increasing stress while potentially boosting campus engagement.{' '}
-        <TransitionLink to="/so-what" style={{ color: 'var(--color-accent)', fontWeight: 600 }}>
+        <Link to="/so-what" style={{ color: 'var(--color-accent)', fontWeight: 600 }}>
           See what this means for students, advisors, and policy.
-        </TransitionLink>
+        </Link>
       </KeyTakeaway>
 
       {/* Navigation Cards */}
@@ -210,41 +213,41 @@ export default function HomePage() {
         <div className="container">
           <h2>Explore the Research</h2>
           <div className={styles.exploreCards}>
-            <TransitionLink to="/demographics" className={`${styles.exploreCard} reveal`}>
+            <Link to="/demographics" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="users" size={40} />
               </span>
               <h3>Demographics</h3>
               <p>Compare findings across race, first-generation, Pell, and other subgroups.</p>
-            </TransitionLink>
-            <TransitionLink to="/methods" className={`${styles.exploreCard} reveal`}>
+            </Link>
+            <Link to="/methods" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="microscope" size={40} />
               </span>
               <h3>Methods</h3>
               <p>Technical details on model specification, estimation, and diagnostics.</p>
-            </TransitionLink>
-            <TransitionLink to="/pathway" className={`${styles.exploreCard} reveal`}>
+            </Link>
+            <Link to="/pathway" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="network" size={40} />
               </span>
               <h3>Pathways</h3>
               <p>Interact with the full SEM mediation diagram and explore each pathway.</p>
-            </TransitionLink>
-            <TransitionLink to="/dose" className={`${styles.exploreCard} reveal`}>
+            </Link>
+            <Link to="/dose" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="chart" size={40} />
               </span>
               <h3>Credit Levels</h3>
               <p>See how credit dose moderates treatment effects with interactive visualizations.</p>
-            </TransitionLink>
-            <TransitionLink to="/so-what" className={`${styles.exploreCard} reveal`}>
+            </Link>
+            <Link to="/so-what" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="lightbulb" size={40} />
               </span>
               <h3>So, What?</h3>
               <p>Practical implications for students, advisors, and policy makers.</p>
-            </TransitionLink>
+            </Link>
           </div>
         </div>
       </section>
@@ -256,9 +259,9 @@ export default function HomePage() {
             Start with the equity frame to see how effects differ across race, first-generation status,
             financial need, and living situations.
           </p>
-          <TransitionLink to="/demographics" className="button button-primary button-lg">
+          <Link to="/demographics" className="button button-primary button-lg">
             Go to Demographics
-          </TransitionLink>
+          </Link>
         </div>
       </section>
     </div>

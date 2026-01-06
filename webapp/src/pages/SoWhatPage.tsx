@@ -2,7 +2,7 @@ import KeyTakeaway from '../components/ui/KeyTakeaway';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import { useModelData } from '../context/ModelDataContext';
 import useParallax from '../hooks/useParallax';
-import { TransitionLink } from '../components/transitions';
+import { Link } from 'react-router-dom';
 import SharedElement from '../components/transitions/SharedElement';
 import styles from './SoWhatPage.module.css';
 
@@ -20,7 +20,7 @@ export default function SoWhatPage() {
   const engagementEffect = paths.a2?.estimate ?? 0;
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} page-fade`}>
       {/* Hero */}
       <section
         ref={heroRef}
@@ -28,11 +28,12 @@ export default function SoWhatPage() {
         style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
       >
         <div className="container">
-          <SharedElement id="page-hero">
-            <span className="morph-anchor" aria-hidden="true" />
+          <SharedElement id="page-kicker" className={styles.eyebrow}>
+            Research Implications
           </SharedElement>
-          <span className={styles.eyebrow}>Research Implications</span>
-          <h1 className={styles.title}>So, What Does This Mean?</h1>
+          <SharedElement id="page-title">
+            <h1 className={styles.title}>So, What Does This Mean?</h1>
+          </SharedElement>
           <p className={styles.lead}>
             Research findings are only valuable if they can be translated into action.
             Here's what our study means for students, advisors, and policy makers.
@@ -236,9 +237,9 @@ export default function SoWhatPage() {
             equity motivation behind this study.
           </p>
           <div className={styles.ctaButtons}>
-            <TransitionLink to="/researcher" className="button button-primary button-lg">
+            <Link to="/researcher" className="button button-primary button-lg">
               Meet the Researcher
-            </TransitionLink>
+            </Link>
           </div>
         </div>
       </section>

@@ -209,8 +209,8 @@
     rgba(255, 255, 255, 0.01) 50%,
     rgba(255, 255, 255, 0.015) 100%
   );
-  -webkit-backdrop-filter: saturate(110%) blur(4px);
-  backdrop-filter: saturate(110%) blur(4px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: saturate(140%) blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
@@ -306,8 +306,8 @@
     rgba(255, 255, 255, 0.01) 50%,
     rgba(255, 255, 255, 0.015) 100%
   );
-  -webkit-backdrop-filter: saturate(110%) blur(4px);
-  backdrop-filter: saturate(110%) blur(4px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: saturate(140%) blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
@@ -551,8 +551,8 @@
   .specCard,
   .codeBlock,
   .tableWrapper {
-    -webkit-backdrop-filter: saturate(110%) blur(4px);
-    backdrop-filter: saturate(110%) blur(4px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    backdrop-filter: saturate(140%) blur(12px);
   }
 
   .specCard:hover,

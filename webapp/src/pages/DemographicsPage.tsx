@@ -3,10 +3,10 @@ import { useResearch } from '../context/ResearchContext';
 import GroupComparison from '../components/charts/GroupComparison';
 import Toggle from '../components/ui/Toggle';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
+import SharedElement from '../components/transitions/SharedElement';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import useParallax from '../hooks/useParallax';
-import { TransitionLink } from '../components/transitions';
-import SharedElement from '../components/transitions/SharedElement';
+import { Link } from 'react-router-dom';
 import fastComparison from '../data/fastComparison.json';
 import sampleDescriptives from '../data/sampleDescriptives.json';
 import styles from './DemographicsPage.module.css';
@@ -34,18 +34,19 @@ export default function DemographicsPage() {
   const parallaxOffset = useParallax({ speed: 0.1, max: 28 });
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} page-fade`}>
       <div className="container">
         <header
           ref={headerRef}
           className={styles.header}
           style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
         >
-          <SharedElement id="page-hero">
-            <span className="morph-anchor" aria-hidden="true" />
+          <SharedElement id="page-kicker" className={styles.eyebrow}>
+            Equity Framework
           </SharedElement>
-          <span className={styles.eyebrow}>Equity Framework</span>
-          <h1>Do Effects Differ for Different Students?</h1>
+          <SharedElement id="page-title">
+            <h1>Do Effects Differ for Different Students?</h1>
+          </SharedElement>
           <p className="lead">
             An important question: Do dual enrollment credits affect all students the same way?
             We use <GlossaryTerm term="Multi-Group Analysis" definition="A statistical technique that tests whether relationships in our model differ across student groups (e.g., race, income, first-generation status). This helps identify whether some students benefit more or less from dual enrollment credits.">multi-group analysis</GlossaryTerm>{' '}
@@ -56,140 +57,142 @@ export default function DemographicsPage() {
         </header>
 
         {/* Demographics Breakdown with Comparison Toggle */}
-        <section ref={demographicsRef} className={`${styles.demographicsBreakdown} stagger-children`}>
-          <div className={styles.demographicsHeader}>
-            <h2>Sample Demographics</h2>
-            <Toggle
-              checked={showComparison}
-              onChange={() => setShowComparison(!showComparison)}
-              label="Compare FASt vs Non-FASt"
-              id="demographics-page-comparison-toggle"
-            />
-          </div>
+        <SharedElement id="page-panel">
+          <section ref={demographicsRef} className={`${styles.demographicsBreakdown} stagger-children`}>
+            <div className={styles.demographicsHeader}>
+              <h2>Sample Demographics</h2>
+              <Toggle
+                checked={showComparison}
+                onChange={() => setShowComparison(!showComparison)}
+                label="Compare FASt vs Non-FASt"
+                id="demographics-page-comparison-toggle"
+              />
+            </div>
 
-          <div className={styles.demographicsGrid}>
-            {/* Race/Ethnicity Breakdown */}
-            <div className={`${styles.demoCard} reveal`} style={{ transitionDelay: '0ms' }}>
-              <h3>Race & Ethnicity</h3>
-              <div className={styles.demoStats}>
-                {Object.entries(demographics.race).map(([group, data]) => (
-                  <div key={group} className={styles.demoStat}>
+            <div className={styles.demographicsGrid}>
+              {/* Race/Ethnicity Breakdown */}
+              <div className={`${styles.demoCard} reveal`} style={{ transitionDelay: '0ms' }}>
+                <h3>Race & Ethnicity</h3>
+                <div className={styles.demoStats}>
+                  {Object.entries(demographics.race).map(([group, data]) => (
+                    <div key={group} className={styles.demoStat}>
+                      {!showComparison ? (
+                        <>
+                          <div className={styles.demoLabel}>
+                            <span>{group}</span>
+                            <span>{data.pct}%</span>
+                          </div>
+                          <div className={styles.demoBar}>
+                            <div className={styles.demoBarFill} style={{ width: `${data.pct}%` }} />
+                          </div>
+                        </>
+                      ) : (
+                        <div className={styles.demoComparison}>
+                          <div className={styles.demoLabel}><span>{group}</span></div>
+                          <div className={styles.comparisonRow}>
+                            <span className={styles.comparisonLabel}>FASt</span>
+                            <div className={styles.demoBar}>
+                              <div className={styles.demoBarFill} style={{
+                                width: `${(fastComparison.demographics.race as any)[group]?.fast.pct || 0}%`,
+                                backgroundColor: 'var(--color-fast)'
+                              }} />
+                            </div>
+                            <span>{(fastComparison.demographics.race as any)[group]?.fast.pct || 0}%</span>
+                          </div>
+                          <div className={styles.comparisonRow}>
+                            <span className={styles.comparisonLabel}>Non-FASt</span>
+                            <div className={styles.demoBar}>
+                              <div className={styles.demoBarFill} style={{
+                                width: `${(fastComparison.demographics.race as any)[group]?.nonfast.pct || 0}%`,
+                                backgroundColor: 'var(--color-text-muted)'
+                              }} />
+                            </div>
+                            <span>{(fastComparison.demographics.race as any)[group]?.nonfast.pct || 0}%</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* First-Gen & Pell */}
+              <div className={`${styles.demoCard} reveal`} style={{ transitionDelay: '100ms' }}>
+                <h3>Access & Equity</h3>
+                <div className={styles.demoStats}>
+                  <div className={styles.demoStat}>
+                    <div className={styles.demoLabel}>
+                      <span>First-Generation</span>
+                      <span>{!showComparison ? `${demographics.firstgen.yes.pct}%` : ''}</span>
+                    </div>
                     {!showComparison ? (
-                      <>
-                        <div className={styles.demoLabel}>
-                          <span>{group}</span>
-                          <span>{data.pct}%</span>
-                        </div>
-                        <div className={styles.demoBar}>
-                          <div className={styles.demoBarFill} style={{ width: `${data.pct}%` }} />
-                        </div>
-                      </>
+                      <div className={styles.demoBar}>
+                        <div className={styles.demoBarFill} style={{ width: `${demographics.firstgen.yes.pct}%` }} />
+                      </div>
                     ) : (
                       <div className={styles.demoComparison}>
-                        <div className={styles.demoLabel}><span>{group}</span></div>
                         <div className={styles.comparisonRow}>
                           <span className={styles.comparisonLabel}>FASt</span>
                           <div className={styles.demoBar}>
                             <div className={styles.demoBarFill} style={{
-                              width: `${(fastComparison.demographics.race as any)[group]?.fast.pct || 0}%`,
+                              width: `${fastComparison.demographics.firstgen.yes.fast.pct}%`,
                               backgroundColor: 'var(--color-fast)'
                             }} />
                           </div>
-                          <span>{(fastComparison.demographics.race as any)[group]?.fast.pct || 0}%</span>
+                          <span>{fastComparison.demographics.firstgen.yes.fast.pct}%</span>
                         </div>
                         <div className={styles.comparisonRow}>
                           <span className={styles.comparisonLabel}>Non-FASt</span>
                           <div className={styles.demoBar}>
                             <div className={styles.demoBarFill} style={{
-                              width: `${(fastComparison.demographics.race as any)[group]?.nonfast.pct || 0}%`,
+                              width: `${fastComparison.demographics.firstgen.yes.nonfast.pct}%`,
                               backgroundColor: 'var(--color-text-muted)'
                             }} />
                           </div>
-                          <span>{(fastComparison.demographics.race as any)[group]?.nonfast.pct || 0}%</span>
+                          <span>{fastComparison.demographics.firstgen.yes.nonfast.pct}%</span>
                         </div>
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* First-Gen & Pell */}
-            <div className={`${styles.demoCard} reveal`} style={{ transitionDelay: '100ms' }}>
-              <h3>Access & Equity</h3>
-              <div className={styles.demoStats}>
-                <div className={styles.demoStat}>
-                  <div className={styles.demoLabel}>
-                    <span>First-Generation</span>
-                    <span>{!showComparison ? `${demographics.firstgen.yes.pct}%` : ''}</span>
+                  <div className={styles.demoStat}>
+                    <div className={styles.demoLabel}>
+                      <span>Pell Grant Recipients</span>
+                      <span>{!showComparison ? `${demographics.pell.yes.pct}%` : ''}</span>
+                    </div>
+                    {!showComparison ? (
+                      <div className={styles.demoBar}>
+                        <div className={styles.demoBarFill} style={{ width: `${demographics.pell.yes.pct}%` }} />
+                      </div>
+                    ) : (
+                      <div className={styles.demoComparison}>
+                        <div className={styles.comparisonRow}>
+                          <span className={styles.comparisonLabel}>FASt</span>
+                          <div className={styles.demoBar}>
+                            <div className={styles.demoBarFill} style={{
+                              width: `${fastComparison.demographics.pell.yes.fast.pct}%`,
+                              backgroundColor: 'var(--color-fast)'
+                            }} />
+                          </div>
+                          <span>{fastComparison.demographics.pell.yes.fast.pct}%</span>
+                        </div>
+                        <div className={styles.comparisonRow}>
+                          <span className={styles.comparisonLabel}>Non-FASt</span>
+                          <div className={styles.demoBar}>
+                            <div className={styles.demoBarFill} style={{
+                              width: `${fastComparison.demographics.pell.yes.nonfast.pct}%`,
+                              backgroundColor: 'var(--color-text-muted)'
+                            }} />
+                          </div>
+                          <span>{fastComparison.demographics.pell.yes.nonfast.pct}%</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {!showComparison ? (
-                    <div className={styles.demoBar}>
-                      <div className={styles.demoBarFill} style={{ width: `${demographics.firstgen.yes.pct}%` }} />
-                    </div>
-                  ) : (
-                    <div className={styles.demoComparison}>
-                      <div className={styles.comparisonRow}>
-                        <span className={styles.comparisonLabel}>FASt</span>
-                        <div className={styles.demoBar}>
-                          <div className={styles.demoBarFill} style={{
-                            width: `${fastComparison.demographics.firstgen.yes.fast.pct}%`,
-                            backgroundColor: 'var(--color-fast)'
-                          }} />
-                        </div>
-                        <span>{fastComparison.demographics.firstgen.yes.fast.pct}%</span>
-                      </div>
-                      <div className={styles.comparisonRow}>
-                        <span className={styles.comparisonLabel}>Non-FASt</span>
-                        <div className={styles.demoBar}>
-                          <div className={styles.demoBarFill} style={{
-                            width: `${fastComparison.demographics.firstgen.yes.nonfast.pct}%`,
-                            backgroundColor: 'var(--color-text-muted)'
-                          }} />
-                        </div>
-                        <span>{fastComparison.demographics.firstgen.yes.nonfast.pct}%</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className={styles.demoStat}>
-                  <div className={styles.demoLabel}>
-                    <span>Pell Grant Recipients</span>
-                    <span>{!showComparison ? `${demographics.pell.yes.pct}%` : ''}</span>
-                  </div>
-                  {!showComparison ? (
-                    <div className={styles.demoBar}>
-                      <div className={styles.demoBarFill} style={{ width: `${demographics.pell.yes.pct}%` }} />
-                    </div>
-                  ) : (
-                    <div className={styles.demoComparison}>
-                      <div className={styles.comparisonRow}>
-                        <span className={styles.comparisonLabel}>FASt</span>
-                        <div className={styles.demoBar}>
-                          <div className={styles.demoBarFill} style={{
-                            width: `${fastComparison.demographics.pell.yes.fast.pct}%`,
-                            backgroundColor: 'var(--color-fast)'
-                          }} />
-                        </div>
-                        <span>{fastComparison.demographics.pell.yes.fast.pct}%</span>
-                      </div>
-                      <div className={styles.comparisonRow}>
-                        <span className={styles.comparisonLabel}>Non-FASt</span>
-                        <div className={styles.demoBar}>
-                          <div className={styles.demoBarFill} style={{
-                            width: `${fastComparison.demographics.pell.yes.nonfast.pct}%`,
-                            backgroundColor: 'var(--color-text-muted)'
-                          }} />
-                        </div>
-                        <span>{fastComparison.demographics.pell.yes.nonfast.pct}%</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </SharedElement>
 
         <section ref={sampleRef} className={`${styles.sampleInfo} reveal`}>
           <h2>FASt vs Non-FASt Snapshot</h2>
@@ -300,9 +303,9 @@ export default function DemographicsPage() {
           <p>
             See the step-by-step method we used to make fair comparisons and test the model.
           </p>
-          <TransitionLink to="/methods" className="button button-primary button-lg">
+          <Link to="/methods" className="button button-primary button-lg">
             Go to Methods
-          </TransitionLink>
+          </Link>
         </section>
       </div>
     </div>

@@ -53,9 +53,9 @@ export default function SharedElement({
       layout
       transition={{
         type: 'spring',
-        stiffness: 220,
-        damping: 26,
-        mass: 0.9,
+        stiffness: 120,
+        damping: 22,
+        mass: 1.4,
       }}
       {...motionProps}
     >

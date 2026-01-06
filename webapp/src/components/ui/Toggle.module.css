@@ -17,9 +17,12 @@
   position: relative;
   width: 44px;
   height: 24px;
-  background: var(--color-border);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   transition: background var(--transition-fast);
+  -webkit-backdrop-filter: saturate(150%) blur(12px);
+  backdrop-filter: saturate(150%) blur(12px);
 }
 
 .slider::before {
@@ -27,16 +30,17 @@
   position: absolute;
   width: 18px;
   height: 18px;
-  left: 3px;
-  top: 3px;
-  background: var(--color-surface);
+  left: 2px;
+  top: 2px;
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   transition: transform var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .input:checked + .slider {
-  background: var(--color-accent);
+  background: rgba(37, 99, 235, 0.75);
+  border-color: rgba(37, 99, 235, 0.4);
 }
 
 .input:checked + .slider::before {
@@ -51,4 +55,20 @@
 .label {
   font-size: var(--font-size-sm);
   color: var(--color-text);
+}
+
+/* Light mode */
+:global([data-theme="light"]) .slider {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+:global([data-theme="light"]) .slider::before {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+:global([data-theme="light"]) .input:checked + .slider {
+  background: rgba(37, 99, 235, 0.85);
+  border-color: rgba(37, 99, 235, 0.5);
 }

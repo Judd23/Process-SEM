@@ -3,7 +3,7 @@ import { ResearchProvider } from './context/ResearchContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ModelDataProvider } from './context/ModelDataContext';
 import { TransitionProvider } from './context/TransitionContext';
-import { MorphProvider, TransitionOverlay } from './components/transitions';
+import { MorphProvider } from './components/transitions';
 import Layout from './components/layout/Layout';
 import ScrollToTop from './components/ui/ScrollToTop';
 import LandingPage from './pages/LandingPage';
@@ -24,7 +24,6 @@ function App() {
           <HashRouter>
             <TransitionProvider>
               <ScrollToTop />
-              <TransitionOverlay />
               <MorphProvider>
                 <Routes>
                   <Route index element={<LandingPage />} />

@@ -1,7 +1,7 @@
 .footer {
   background: color-mix(in srgb, var(--color-surface) 90%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
   border-top: 1px solid var(--color-border);
   padding: var(--spacing-2xl) 0;
   margin-top: auto;

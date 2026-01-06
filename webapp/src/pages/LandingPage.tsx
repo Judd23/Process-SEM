@@ -1,6 +1,6 @@
 import { useTheme } from '../context/ThemeContext';
 import { useEffect, useState, useMemo } from 'react';
-import { usePageTransition } from '../hooks/usePageTransition';
+import { useNavigate } from 'react-router-dom';
 import SharedElement from '../components/transitions/SharedElement';
 import styles from './LandingPage.module.css';
 
@@ -29,7 +29,7 @@ function generateDustParticles(count: number) {
 }
 
 export default function LandingPage() {
-  const { navigate } = usePageTransition();
+  const navigate = useNavigate();
   const { resolvedTheme } = useTheme();
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -50,11 +50,11 @@ export default function LandingPage() {
   }, []);
 
   const handleEnter = () => {
-    void navigate('/home');
+    navigate('/home');
   };
 
   return (
-    <div className={`${styles.landing} ${isLoaded ? styles.loaded : ''}`}>
+    <div className={`${styles.landing} ${isLoaded ? styles.loaded : ''} page-fade`}>
       {/* Tiny Dust Particles */}
       <div className={styles.particles} aria-hidden="true">
         {dustParticles.map((p) => (
@@ -111,24 +111,25 @@ export default function LandingPage() {
 
       {/* Main Content */}
       <main className={styles.content}>
-        <SharedElement id="page-hero">
-          <span className="morph-anchor" aria-hidden="true" />
-        </SharedElement>
         {/* Kicker - FROM TOP */}
-        <p className={`${styles.kicker} ${styles.fromTop}`}>Ed.D. Dissertation Research</p>
+        <SharedElement id="page-kicker">
+          <p className={`${styles.kicker} ${styles.fromTop}`}>Ed.D. Dissertation Research</p>
+        </SharedElement>
 
         {/* Title - FROM TOP */}
-        <h1 className={`${styles.title} ${styles.fromTop}`}>
-          <span className={styles.titleLine}>Dual Credit &</span>
-          <span className={styles.titleLine}>
-            <span
-              className={styles.titleAccent}
-              data-text="Developmental Adjustment"
-            >
-              Developmental Adjustment
+        <SharedElement id="page-title">
+          <h1 className={`${styles.title} ${styles.fromTop}`}>
+            <span className={styles.titleLine}>Dual Credit &</span>
+            <span className={styles.titleLine}>
+              <span
+                className={styles.titleAccent}
+                data-text="Developmental Adjustment"
+              >
+                Developmental Adjustment
+              </span>
             </span>
-          </span>
-        </h1>
+          </h1>
+        </SharedElement>
 
         {/* Subtitle - FROM TOP */}
         <p className={`${styles.subtitle} ${styles.fromTop}`}>

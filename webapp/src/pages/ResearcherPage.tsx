@@ -1,8 +1,8 @@
 import { useTheme } from '../context/ThemeContext';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
-import useParallax from '../hooks/useParallax';
 import SharedElement from '../components/transitions/SharedElement';
+import useParallax from '../hooks/useParallax';
 import styles from './ResearcherPage.module.css';
 
 export default function ResearcherPage() {
@@ -22,7 +22,7 @@ export default function ResearcherPage() {
 
   return (
     <div
-      className={styles.page}
+      className={`${styles.page} page-fade`}
       style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
     >
       <header ref={heroRef} className={styles.hero}>
@@ -53,9 +53,6 @@ export default function ResearcherPage() {
           </figure>
 
           <div className={styles.heroIntro}>
-            <SharedElement id="page-hero">
-              <span className="morph-anchor" aria-hidden="true" />
-            </SharedElement>
             <div className={styles.institutionPanel}>
               <img
                 src={sdsuLogo}
@@ -63,8 +60,12 @@ export default function ResearcherPage() {
                 className={styles.institutionLogo}
               />
             </div>
-            <div className={styles.kicker}>Researcher</div>
-            <h1 className={styles.name}>Jay Johnson</h1>
+            <SharedElement id="page-kicker" className={styles.kicker}>
+              Researcher
+            </SharedElement>
+            <SharedElement id="page-title">
+              <h1 className={styles.name}>Jay Johnson</h1>
+            </SharedElement>
             <div className={styles.metaLine}>
               <span className={styles.credentials}>M.F.A., Ed.D.-(May '26)</span>
               <span className={styles.dot} aria-hidden="true">•</span>

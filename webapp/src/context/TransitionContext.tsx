@@ -179,12 +179,28 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
   );
 }
 
+// Default context for when TransitionProvider is not present
+const defaultContext: TransitionContextValue = {
+  mode: 'none',
+  setMode: () => {},
+  phase: 'idle',
+  setPhase: () => {},
+  sourceRoute: null,
+  targetRoute: null,
+  reducedMotion: false,
+  particleCount: 0,
+  sharedElements: new Map(),
+  registerSharedElement: () => {},
+  unregisterSharedElement: () => {},
+  startTransition: async () => {},
+  completeTransition: () => {},
+  hasMatchingSharedElements: () => false,
+};
+
 export function useTransition() {
   const context = useContext(TransitionContext);
-  if (!context) {
-    throw new Error('useTransition must be used within TransitionProvider');
-  }
-  return context;
+  // Return default context if provider is not present (graceful degradation)
+  return context ?? defaultContext;
 }
 
 export function useReducedMotion() {

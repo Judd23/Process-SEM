@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { TransitionNavLink } from '../transitions';
+import { NavLink } from 'react-router-dom';
 import ThemeToggle from '../ui/ThemeToggle';
 import { navItems } from './navItems';
 import styles from './Header.module.css';
@@ -39,15 +39,15 @@ export default function Header() {
         />
       )}
       <div className={styles.container}>
-        <TransitionNavLink to="/home" className={styles.brandLink} aria-label="Go to home">
+        <NavLink to="/home" className={styles.brandLink} aria-label="Go to home">
           <div className={styles.brand}>
             <h1 className={styles.title}>Dual Credit & Developmental Adjustment</h1>
             <span className={styles.subtitle}>Psychosocial Effects Among California's Equity-Impacted Students</span>
           </div>
-        </TransitionNavLink>
+        </NavLink>
         <nav className={styles.nav} aria-label="Primary navigation">
           {navItems.map((item) => (
-            <TransitionNavLink
+            <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
@@ -56,7 +56,7 @@ export default function Header() {
               end={item.to === '/home'}
             >
               {item.label}
-            </TransitionNavLink>
+            </NavLink>
           ))}
           <ThemeToggle />
         </nav>

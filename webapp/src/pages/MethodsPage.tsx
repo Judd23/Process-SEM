@@ -5,9 +5,9 @@ import GlossaryTerm from '../components/ui/GlossaryTerm';
 import ProgressRing from '../components/ui/ProgressRing';
 import Accordion from '../components/ui/Accordion';
 import AnalysisPipeline from '../components/charts/AnalysisPipeline';
-import useParallax from '../hooks/useParallax';
-import { TransitionLink } from '../components/transitions';
 import SharedElement from '../components/transitions/SharedElement';
+import useParallax from '../hooks/useParallax';
+import { Link } from 'react-router-dom';
 import styles from './MethodsPage.module.css';
 
 const modelSpecs = [
@@ -152,16 +152,17 @@ export default function MethodsPage() {
   }, [fits]);
   return (
     <div
-      className={styles.page}
+      className={`${styles.page} page-fade`}
       style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
     >
       <div className="container">
         <header ref={headerRef} className={styles.header}>
-          <SharedElement id="page-hero">
-            <span className="morph-anchor" aria-hidden="true" />
+          <SharedElement id="page-kicker" className={styles.eyebrow}>
+            Technical Methods
           </SharedElement>
-          <span className={styles.eyebrow}>Technical Methods</span>
-          <h1>About This Study</h1>
+          <SharedElement id="page-title">
+            <h1>About This Study</h1>
+          </SharedElement>
           <p className="lead">
             This page explains how we analyzed the data using{' '}
             <GlossaryTerm
@@ -175,18 +176,20 @@ export default function MethodsPage() {
           </p>
         </header>
 
-        <section ref={pipelineRef} className={`${styles.section} reveal`}>
-          <h2>Analysis Pipeline</h2>
-          <p className={styles.sectionIntro}>
-            Our analysis follows a three-stage process to ensure valid causal inferences
-            from observational data. Each stage builds on the previous one.
-          </p>
-          <p className={styles.plainTalk}>
-            Plain talk: we first make the FASt and non‑FASt groups comparable, then run the model,
-            then check how stable the results are.
-          </p>
-          <AnalysisPipeline />
-        </section>
+        <SharedElement id="page-panel">
+          <section ref={pipelineRef} className={`${styles.section} reveal`}>
+            <h2>Analysis Pipeline</h2>
+            <p className={styles.sectionIntro}>
+              Our analysis follows a three-stage process to ensure valid causal inferences
+              from observational data. Each stage builds on the previous one.
+            </p>
+            <p className={styles.plainTalk}>
+              Plain talk: we first make the FASt and non‑FASt groups comparable, then run the model,
+              then check how stable the results are.
+            </p>
+            <AnalysisPipeline />
+          </section>
+        </SharedElement>
 
         <section ref={fitRef} className={`${styles.section} reveal`}>
           <h2>How Well Does the Model Fit?</h2>
@@ -452,9 +455,9 @@ export default function MethodsPage() {
           <p>
             Explore the pathway diagram to see how stress and engagement connect to success.
           </p>
-          <TransitionLink to="/pathway" className="button button-primary button-lg">
+          <Link to="/pathway" className="button button-primary button-lg">
             Go to Pathway
-          </TransitionLink>
+          </Link>
         </section>
       </div>
     </div>

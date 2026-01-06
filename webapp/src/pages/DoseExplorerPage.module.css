@@ -52,8 +52,8 @@
     rgba(255, 255, 255, 0.01) 50%,
     rgba(255, 255, 255, 0.015) 100%
   );
-  -webkit-backdrop-filter: saturate(110%) blur(4px);
-  backdrop-filter: saturate(110%) blur(4px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: saturate(140%) blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   padding: var(--spacing-2xl);
@@ -89,6 +89,26 @@
   pointer-events: none;
   z-index: 1;
   border-radius: inherit;
+}
+
+/* Inner glass layer for depth */
+.controls::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.015) 0%,
+    rgba(255, 255, 255, 0.008) 50%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  -webkit-backdrop-filter: saturate(130%) blur(8px);
+  backdrop-filter: saturate(130%) blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: calc(var(--radius-lg) - 4px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .controls:focus-within {
@@ -254,8 +274,8 @@
     rgba(255, 255, 255, 0.01) 50%,
     rgba(255, 255, 255, 0.015) 100%
   );
-  -webkit-backdrop-filter: saturate(110%) blur(4px);
-  backdrop-filter: saturate(110%) blur(4px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: saturate(140%) blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
@@ -286,6 +306,26 @@
   pointer-events: none;
   z-index: 1;
   border-radius: inherit;
+}
+
+/* Inner glass layer for depth */
+.chartContainer::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.015) 0%,
+    rgba(255, 255, 255, 0.008) 50%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  -webkit-backdrop-filter: saturate(130%) blur(8px);
+  backdrop-filter: saturate(130%) blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: calc(var(--radius-lg) - 4px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .chartContainer:hover {
@@ -439,8 +479,8 @@
     flex-direction: column;
     align-items: stretch;
     padding: var(--spacing-xl);
-    -webkit-backdrop-filter: saturate(110%) blur(4px);
-    backdrop-filter: saturate(110%) blur(4px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    backdrop-filter: saturate(140%) blur(12px);
   }
 
   .sliderContainer {
@@ -454,8 +494,8 @@
 
   .chartContainer {
     padding: var(--spacing-lg);
-    -webkit-backdrop-filter: saturate(110%) blur(4px);
-    backdrop-filter: saturate(110%) blur(4px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    backdrop-filter: saturate(140%) blur(12px);
   }
 
   .chartContainer:hover {

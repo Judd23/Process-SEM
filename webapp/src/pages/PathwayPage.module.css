@@ -84,8 +84,8 @@
 }
 
 .pathwayButton {
-  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-  border: 2px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-lg);
   font-family: var(--font-body);
@@ -95,7 +95,11 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   min-height: 44px; /* WCAG touch target */
-  box-shadow: var(--shadow-sm);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: saturate(150%) blur(12px);
+  backdrop-filter: saturate(150%) blur(12px);
 }
 
 @media (max-width: 480px) {
@@ -109,9 +113,9 @@
 }
 
 .pathwayButton:hover {
-  border-color: var(--button-color, var(--color-accent));
+  border-color: color-mix(in srgb, var(--button-color, var(--color-accent)) 50%, transparent);
   color: var(--button-color, var(--color-accent));
-  background: color-mix(in srgb, var(--button-color, var(--color-accent)) 8%, transparent);
+  background: color-mix(in srgb, var(--button-color, var(--color-accent)) 12%, transparent);
 }
 
 .pathwayButton:focus-visible {
@@ -120,9 +124,12 @@
 }
 
 .pathwayButton.active {
-  background: linear-gradient(135deg, var(--button-color, var(--color-accent)), color-mix(in srgb, var(--button-color, var(--color-accent)) 70%, var(--color-accent)));
-  border-color: var(--button-color, var(--color-accent));
+  background: color-mix(in srgb, var(--button-color, var(--color-accent)) 75%, transparent);
+  border-color: color-mix(in srgb, var(--button-color, var(--color-accent)) 50%, transparent);
   color: var(--button-text, white);
+  box-shadow: 
+    0 2px 12px color-mix(in srgb, var(--button-color, var(--color-accent)) 30%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .toggleContainer {
@@ -139,8 +146,8 @@
     rgba(255, 255, 255, 0.01) 50%,
     rgba(255, 255, 255, 0.015) 100%
   );
-  -webkit-backdrop-filter: saturate(110%) blur(4px);
-  backdrop-filter: saturate(110%) blur(4px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: saturate(140%) blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
@@ -175,6 +182,26 @@
   pointer-events: none;
   z-index: 1;
   border-radius: inherit;
+}
+
+/* Inner glass layer for depth (desktop only) */
+.diagram::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.015) 0%,
+    rgba(255, 255, 255, 0.008) 50%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  -webkit-backdrop-filter: saturate(130%) blur(8px);
+  backdrop-filter: saturate(130%) blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: calc(var(--radius-lg) - 4px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  z-index: 0;
 }
 
 @media (max-width: 768px) {
@@ -245,8 +272,8 @@
     rgba(255, 255, 255, 0.01) 50%,
     rgba(255, 255, 255, 0.015) 100%
   );
-  -webkit-backdrop-filter: saturate(110%) blur(4px);
-  backdrop-filter: saturate(110%) blur(4px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: saturate(140%) blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
@@ -582,8 +609,8 @@
 
   .diagram,
   .coefficientCard {
-    -webkit-backdrop-filter: saturate(110%) blur(4px);
-    backdrop-filter: saturate(110%) blur(4px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    backdrop-filter: saturate(140%) blur(12px);
   }
 
   .diagram:hover,
@@ -676,6 +703,25 @@
     transform: none;
     box-shadow: none;
   }
+}
+
+/* Light mode button adjustments */
+:global([data-theme="light"]) .pathwayButton {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+:global([data-theme="light"]) .pathwayButton:hover {
+  background: color-mix(in srgb, var(--button-color, var(--color-accent)) 15%, rgba(255, 255, 255, 0.6));
+  border-color: color-mix(in srgb, var(--button-color, var(--color-accent)) 40%, transparent);
+}
+
+:global([data-theme="light"]) .pathwayButton.active {
+  background: color-mix(in srgb, var(--button-color, var(--color-accent)) 85%, transparent);
+  border-color: color-mix(in srgb, var(--button-color, var(--color-accent)) 60%, transparent);
 }
 
 /* Reduced Motion */

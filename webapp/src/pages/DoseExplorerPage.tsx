@@ -9,10 +9,10 @@ import StatCard from '../components/ui/StatCard';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import DataTimestamp from '../components/ui/DataTimestamp';
+import SharedElement from '../components/transitions/SharedElement';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import useParallax from '../hooks/useParallax';
-import { TransitionLink } from '../components/transitions';
-import SharedElement from '../components/transitions/SharedElement';
+import { Link } from 'react-router-dom';
 import styles from './DoseExplorerPage.module.css';
 
 // Dose zone definitions
@@ -52,18 +52,19 @@ export default function DoseExplorerPage() {
   const engagementEffect = doseCoefficients.engagement.main + (doseInUnits * doseCoefficients.engagement.moderation);
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} page-fade`}>
       <div className="container">
         <header
           ref={headerRef}
           className={styles.header}
           style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
         >
-          <SharedElement id="page-hero">
-            <span className="morph-anchor" aria-hidden="true" />
+          <SharedElement id="page-kicker" className={styles.eyebrow}>
+            Dose-Response Analysis
           </SharedElement>
-          <span className={styles.eyebrow}>Dose-Response Analysis</span>
-          <h1>Does the Number of Credits Matter?</h1>
+          <SharedElement id="page-title">
+            <h1>Does the Number of Credits Matter?</h1>
+          </SharedElement>
           <p className="lead">
             Some students earn just a few college credits in high school, while others
             earn many. This is called the <GlossaryTerm term="Credit Dose" definition="The total number of transferable college credits a student earned before starting college. Our model tests whether effects differ based on dose—a 'dose-response' relationship.">credit dose</GlossaryTerm>. Use the slider below to explore
@@ -72,44 +73,46 @@ export default function DoseExplorerPage() {
           </p>
         </header>
 
-        <section ref={controlsRef} className={`${styles.controls} reveal`}>
-          <div className={styles.sliderContainer}>
-            <Slider
-              id="credit-dose"
-              label="College Credits Earned"
-              value={selectedDose}
-              onChange={setSelectedDose}
-              min={0}
-              max={80}
-              step={1}
-              formatValue={(v) => `${v} credits`}
-              showThreshold={12}
-              thresholdLabel="FASt (12+)"
-              tickMarks={[24, 36, 48, 60]}
-            />
-            {/* Dose Zone Indicators */}
-            <div className={styles.doseZones}>
-              {DOSE_ZONES.map((zone) => (
-                <div
-                  key={zone.id}
-                  className={`${styles.doseZone} ${styles[zone.id]} ${currentZone === zone.id ? styles.active : ''}`}
-                >
-                  <span className={styles.zoneDot} />
-                  <span className={styles.zoneLabel}>{zone.label}</span>
-                  <span className={styles.zoneRange}>{zone.range}</span>
-                </div>
-              ))}
+        <SharedElement id="page-panel">
+          <section ref={controlsRef} className={`${styles.controls} reveal`}>
+            <div className={styles.sliderContainer}>
+              <Slider
+                id="credit-dose"
+                label="College Credits Earned"
+                value={selectedDose}
+                onChange={setSelectedDose}
+                min={0}
+                max={80}
+                step={1}
+                formatValue={(v) => `${v} credits`}
+                showThreshold={12}
+                thresholdLabel="FASt (12+)"
+                tickMarks={[24, 36, 48, 60]}
+              />
+              {/* Dose Zone Indicators */}
+              <div className={styles.doseZones}>
+                {DOSE_ZONES.map((zone) => (
+                  <div
+                    key={zone.id}
+                    className={`${styles.doseZone} ${styles[zone.id]} ${currentZone === zone.id ? styles.active : ''}`}
+                  >
+                    <span className={styles.zoneDot} />
+                    <span className={styles.zoneLabel}>{zone.label}</span>
+                    <span className={styles.zoneRange}>{zone.range}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className={styles.toggleContainer}>
-            <Toggle
-              id="show-cis"
-              label="Show Uncertainty Ranges"
-              checked={showCIs}
-              onChange={toggleCIs}
-            />
-          </div>
-        </section>
+            <div className={styles.toggleContainer}>
+              <Toggle
+                id="show-cis"
+                label="Show Uncertainty Ranges"
+                checked={showCIs}
+                onChange={toggleCIs}
+              />
+            </div>
+          </section>
+        </SharedElement>
 
         <section ref={effectsRef} className={`${styles.conditionalEffects} stagger-children`}>
           <h2>What Happens at {selectedDose} Credits?</h2>
@@ -219,9 +222,9 @@ export default function DoseExplorerPage() {
             Translate the dose-response patterns into concrete recommendations for students,
             advisors, and policy leaders.
           </p>
-          <TransitionLink to="/so-what" className="button button-primary button-lg">
+          <Link to="/so-what" className="button button-primary button-lg">
             Go to So, What?
-          </TransitionLink>
+          </Link>
         </section>
       </div>
     </div>
