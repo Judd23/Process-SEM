@@ -20,16 +20,34 @@ export default function EffectDecomposition() {
   const [dimensions, setDimensions] = useState({ width: 520, height: 80 });
 
   const metrics = useMemo(() => {
-    const indirectStress = (paths.a1?.estimate ?? 0) * (paths.b1?.estimate ?? 0);
-    const indirectEngagement = (paths.a2?.estimate ?? 0) * (paths.b2?.estimate ?? 0);
-    const direct = paths.c?.estimate ?? 0;
-    const total = direct + indirectStress + indirectEngagement;
+    const a1 = paths.a1?.estimate ?? null;
+    const b1 = paths.b1?.estimate ?? null;
+    const a2 = paths.a2?.estimate ?? null;
+    const b2 = paths.b2?.estimate ?? null;
+    const c = paths.c?.estimate ?? null;
+
+    const safeMul = (x: number | null, y: number | null) =>
+      x !== null && y !== null && Number.isFinite(x) && Number.isFinite(y) ? x * y : null;
+
+    const indirectStress = safeMul(a1, b1);
+    const indirectEngagement = safeMul(a2, b2);
+    const direct = Number.isFinite(c) ? c! : null;
+    const total =
+      (indirectStress ?? 0) +
+      (indirectEngagement ?? 0) +
+      (direct ?? 0);
+
+    const hasData =
+      Number.isFinite(indirectStress) ||
+      Number.isFinite(indirectEngagement) ||
+      Number.isFinite(direct);
 
     return {
-      indirectStress,
-      indirectEngagement,
-      direct,
+      indirectStress: indirectStress ?? 0,
+      indirectEngagement: indirectEngagement ?? 0,
+      direct: direct ?? 0,
       total,
+      hasData,
     };
   }, [paths]);
 
@@ -108,6 +126,12 @@ export default function EffectDecomposition() {
           Total effect = direct + indirect (stress) + indirect (engagement)
         </p>
       </div>
+      {!metrics.hasData && (
+        <div className={styles.empty} role="status" aria-live="polite">
+          Data not available for effect decomposition.
+        </div>
+      )}
+      {metrics.hasData && (
       <div className={styles.chart}>
         <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Effect decomposition chart">
           <line
@@ -137,17 +161,23 @@ export default function EffectDecomposition() {
           <span>{max.toFixed(2)}</span>
         </div>
       </div>
+      )}
       <div className={styles.legend}>
         {segments.map((segment) => (
           <div key={segment.key} className={styles.legendItem}>
             <span className={styles.legendSwatch} style={{ background: segment.color }} />
             <span className={styles.legendLabel}>{segment.key}</span>
-            <span className={styles.legendValue}>{segment.value.toFixed(2)}</span>
+            <span className={styles.legendValue}>
+              {metrics.hasData ? segment.value.toFixed(2) : '—'}
+            </span>
           </div>
         ))}
       </div>
       <div className={styles.total}>
-        Total effect: <strong>{metrics.total >= 0 ? '+' : ''}{metrics.total.toFixed(2)}</strong>
+        Total effect:{' '}
+        <strong>
+          {metrics.hasData ? `${metrics.total >= 0 ? '+' : ''}${metrics.total.toFixed(2)}` : '—'}
+        </strong>
       </div>
     </div>
   );

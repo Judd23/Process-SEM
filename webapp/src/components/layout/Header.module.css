@@ -179,9 +179,30 @@
   }
 }
 
+/* Touch states */
+.navLink:active {
+  transform: scale(0.95);
+}
+
+@media (hover: none) {
+  .navLink:hover {
+    background: transparent;
+    color: var(--color-text-muted);
+  }
+
+  .navLink.active:hover {
+    background: var(--color-accent-light);
+    color: var(--color-accent);
+  }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .progressBar {
+    transition: none;
+  }
+
+  .navLink {
     transition: none;
   }
 }

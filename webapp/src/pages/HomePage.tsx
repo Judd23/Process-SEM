@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom';
 import StatCard from '../components/ui/StatCard';
 import Icon from '../components/ui/Icon';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import PathwayDiagram from '../components/charts/PathwayDiagram';
 import DataTimestamp from '../components/ui/DataTimestamp';
+import { TransitionLink } from '../components/transitions';
+import SharedElement from '../components/transitions/SharedElement';
 import { useModelData } from '../context/ModelDataContext';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import useParallax from '../hooks/useParallax';
@@ -38,10 +39,13 @@ export default function HomePage() {
       {/* Hero Section - Full viewport */}
       <section
         ref={heroRef}
-        className={`${styles.hero} reveal`}
+        className={styles.hero}
         style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
       >
         <div className="container">
+          <SharedElement id="page-hero">
+            <span className="morph-anchor" aria-hidden="true" />
+          </SharedElement>
           <span className={styles.eyebrow}>Research Findings</span>
           <h1 className={styles.title}>
             How College Credits Earned in High School Affect First-Year Success
@@ -66,6 +70,7 @@ export default function HomePage() {
                 value={keyFindings.totalN.toLocaleString()}
                 subtext="CSU first-year students"
                 size="large"
+                layoutId="stat-sample-size"
               />
             </div>
             <div className="reveal">
@@ -75,6 +80,7 @@ export default function HomePage() {
                 subtext="12+ credits from high school"
                 size="large"
                 color="accent"
+                layoutId="stat-fast-percent"
               />
             </div>
             <div className="reveal">
@@ -181,12 +187,12 @@ export default function HomePage() {
             <PathwayDiagram />
           </div>
           <div className={styles.actions}>
-            <Link to="/pathway" className="button button-primary button-lg">
+            <TransitionLink to="/pathway" className="button button-primary button-lg">
               Explore the Connections
-            </Link>
-            <Link to="/dose" className="button button-secondary button-lg">
+            </TransitionLink>
+            <TransitionLink to="/dose" className="button button-secondary button-lg">
               See How Credit Amount Matters
-            </Link>
+            </TransitionLink>
           </div>
         </div>
       </section>
@@ -194,7 +200,9 @@ export default function HomePage() {
       {/* Key Takeaway */}
       <KeyTakeaway>
         <strong>Bottom Line:</strong> Earning college credits in high school affects first-year students in complex ways—increasing stress while potentially boosting campus engagement.{' '}
-        <Link to="/so-what" style={{ color: 'var(--color-accent)', fontWeight: 600 }}>See what this means for students, advisors, and policy.</Link>
+        <TransitionLink to="/so-what" style={{ color: 'var(--color-accent)', fontWeight: 600 }}>
+          See what this means for students, advisors, and policy.
+        </TransitionLink>
       </KeyTakeaway>
 
       {/* Navigation Cards */}
@@ -202,41 +210,41 @@ export default function HomePage() {
         <div className="container">
           <h2>Explore the Research</h2>
           <div className={styles.exploreCards}>
-            <Link to="/demographics" className={`${styles.exploreCard} reveal`}>
+            <TransitionLink to="/demographics" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="users" size={40} />
               </span>
               <h3>Demographics</h3>
               <p>Compare findings across race, first-generation, Pell, and other subgroups.</p>
-            </Link>
-            <Link to="/methods" className={`${styles.exploreCard} reveal`}>
+            </TransitionLink>
+            <TransitionLink to="/methods" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="microscope" size={40} />
               </span>
               <h3>Methods</h3>
               <p>Technical details on model specification, estimation, and diagnostics.</p>
-            </Link>
-            <Link to="/pathway" className={`${styles.exploreCard} reveal`}>
+            </TransitionLink>
+            <TransitionLink to="/pathway" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="network" size={40} />
               </span>
               <h3>Pathways</h3>
               <p>Interact with the full SEM mediation diagram and explore each pathway.</p>
-            </Link>
-            <Link to="/dose" className={`${styles.exploreCard} reveal`}>
+            </TransitionLink>
+            <TransitionLink to="/dose" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="chart" size={40} />
               </span>
               <h3>Credit Levels</h3>
               <p>See how credit dose moderates treatment effects with interactive visualizations.</p>
-            </Link>
-            <Link to="/so-what" className={`${styles.exploreCard} reveal`}>
+            </TransitionLink>
+            <TransitionLink to="/so-what" className={`${styles.exploreCard} reveal`}>
               <span className={styles.exploreIcon}>
                 <Icon name="lightbulb" size={40} />
               </span>
               <h3>So, What?</h3>
               <p>Practical implications for students, advisors, and policy makers.</p>
-            </Link>
+            </TransitionLink>
           </div>
         </div>
       </section>
@@ -248,9 +256,9 @@ export default function HomePage() {
             Start with the equity frame to see how effects differ across race, first-generation status,
             financial need, and living situations.
           </p>
-          <Link to="/demographics" className="button button-primary button-lg">
+          <TransitionLink to="/demographics" className="button button-primary button-lg">
             Go to Demographics
-          </Link>
+          </TransitionLink>
         </div>
       </section>
     </div>

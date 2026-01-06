@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import { useModelData } from '../context/ModelDataContext';
 import useParallax from '../hooks/useParallax';
+import { TransitionLink } from '../components/transitions';
+import SharedElement from '../components/transitions/SharedElement';
 import styles from './SoWhatPage.module.css';
 
 export default function SoWhatPage() {
@@ -23,10 +24,13 @@ export default function SoWhatPage() {
       {/* Hero */}
       <section
         ref={heroRef}
-        className={`${styles.hero} reveal`}
+        className={styles.hero}
         style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
       >
         <div className="container">
+          <SharedElement id="page-hero">
+            <span className="morph-anchor" aria-hidden="true" />
+          </SharedElement>
           <span className={styles.eyebrow}>Research Implications</span>
           <h1 className={styles.title}>So, What Does This Mean?</h1>
           <p className={styles.lead}>
@@ -232,9 +236,9 @@ export default function SoWhatPage() {
             equity motivation behind this study.
           </p>
           <div className={styles.ctaButtons}>
-            <Link to="/researcher" className="button button-primary button-lg">
+            <TransitionLink to="/researcher" className="button button-primary button-lg">
               Meet the Researcher
-            </Link>
+            </TransitionLink>
           </div>
         </div>
       </section>

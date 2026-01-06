@@ -255,11 +255,22 @@
   margin-bottom: var(--spacing-lg);
   display: inline-block;
   padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-  margin-left: auto;
-  margin-right: auto;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  -webkit-backdrop-filter: saturate(120%) blur(8px);
+  backdrop-filter: saturate(120%) blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  margin-left: 0;
+  margin-right: 0;
   transition: 
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
@@ -267,7 +278,11 @@
 
 .institutionPanel:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
 .institutionLogo {
@@ -555,8 +570,20 @@
 .blockA {
   grid-column: 1 / span 5;
   padding: var(--spacing-2xl);
-  border: 2px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+  -webkit-backdrop-filter: saturate(110%) blur(4px);
+  backdrop-filter: saturate(110%) blur(4px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   transition: 
     transform 0.4s var(--ease-out-back), 
     box-shadow 0.4s var(--ease-out-back),
@@ -625,8 +652,20 @@
 .blockB {
   grid-column: 6 / span 7;
   padding: var(--spacing-2xl);
-  border: 2px solid var(--color-border);
-  background: var(--color-background);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+  -webkit-backdrop-filter: saturate(110%) blur(4px);
+  backdrop-filter: saturate(110%) blur(4px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   transition: 
     transform 0.4s var(--ease-out-back), 
     box-shadow 0.4s var(--ease-out-back),
@@ -790,8 +829,20 @@
 .blockC {
   grid-column: 1 / span 7;
   padding: var(--spacing-2xl);
-  border: 2px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+  -webkit-backdrop-filter: saturate(110%) blur(4px);
+  backdrop-filter: saturate(110%) blur(4px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   transition: 
     transform 0.4s var(--ease-out-back), 
     box-shadow 0.4s var(--ease-out-back),
@@ -907,12 +958,20 @@
 .blockD {
   grid-column: 8 / span 5;
   padding: var(--spacing-2xl);
-  border: 2px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(
     135deg,
-    var(--color-surface) 0%,
-    var(--color-background) 100%
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(255, 255, 255, 0.015) 100%
   );
+  -webkit-backdrop-filter: saturate(110%) blur(4px);
+  backdrop-filter: saturate(110%) blur(4px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
   transition: 
     transform 0.4s var(--ease-out-back), 
     box-shadow 0.4s var(--ease-out-back),
@@ -1148,8 +1207,19 @@
   .blockA,
   .blockB,
   .blockC,
-  .blockD {
+  .blockD,
+  .institutionPanel {
     padding: var(--spacing-xl);
+    -webkit-backdrop-filter: saturate(110%) blur(4px);
+    backdrop-filter: saturate(110%) blur(4px);
+  }
+
+  .blockA:hover,
+  .blockB:hover,
+  .blockC:hover,
+  .blockD:hover,
+  .institutionPanel:hover {
+    transform: none;
   }
 
   .grid p,

@@ -4,7 +4,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  min-height: 400px;
+  min-height: 360px;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
@@ -14,10 +14,10 @@
 
 @media (max-width: 768px) {
   .container {
-    min-height: 360px;
+    min-height: 340px;
     align-items: center;
     padding-bottom: var(--spacing-sm);
-    overflow-x: hidden;
+    overflow-x: auto;
   }
 
   .container::-webkit-scrollbar {

@@ -2,6 +2,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import useParallax from '../hooks/useParallax';
+import SharedElement from '../components/transitions/SharedElement';
 import styles from './ResearcherPage.module.css';
 
 export default function ResearcherPage() {
@@ -24,7 +25,7 @@ export default function ResearcherPage() {
       className={styles.page}
       style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
     >
-      <header ref={heroRef} className={`${styles.hero} reveal-fade`}>
+      <header ref={heroRef} className={styles.hero}>
         <div className={styles.heroGrid}>
           <figure className={styles.heroFigure}>
             <div className={styles.heroMedia}>
@@ -52,6 +53,9 @@ export default function ResearcherPage() {
           </figure>
 
           <div className={styles.heroIntro}>
+            <SharedElement id="page-hero">
+              <span className="morph-anchor" aria-hidden="true" />
+            </SharedElement>
             <div className={styles.institutionPanel}>
               <img
                 src={sdsuLogo}

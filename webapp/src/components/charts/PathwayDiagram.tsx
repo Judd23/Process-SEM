@@ -5,6 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useModelData } from '../../context/ModelDataContext';
 import { colors } from '../../utils/colorScales';
 import { formatNumber } from '../../utils/formatters';
+import SharedElement from '../transitions/SharedElement';
 import DataTimestamp from '../ui/DataTimestamp';
 import styles from './PathwayDiagram.module.css';
 
@@ -95,7 +96,7 @@ export default function PathwayDiagram({
         : Math.max(320, Math.min(initialWidth, usableWidth));
       const aspectRatio = initialHeight / initialWidth;
       const tunedRatio = mobile ? Math.max(aspectRatio, 1.05) : aspectRatio;
-      const responsiveHeight = Math.max(520, responsiveWidth * tunedRatio);
+      const responsiveHeight = Math.max(mobile ? 420 : 520, responsiveWidth * tunedRatio);
       setDimensions({ width: responsiveWidth, height: responsiveHeight });
     }
   }, [initialWidth, initialHeight]);
@@ -178,7 +179,9 @@ export default function PathwayDiagram({
     svg.selectAll('*').remove();
 
     const { width, height } = dimensions;
-    const margin = { top: 40, right: 40, bottom: 40, left: 40 };
+    const margin = isMobile
+      ? { top: 24, right: 24, bottom: 32, left: 24 }
+      : { top: 40, right: 40, bottom: 40, left: 40 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -293,8 +296,8 @@ export default function PathwayDiagram({
       const dx = to.x - from.x;
       const dy = to.y - from.y;
       const len = Math.sqrt(dx * dx + dy * dy);
-      const fromOffset = path.from === 'FASt' ? 52 : 58;
-      const toOffset = path.to === 'Adjustment' ? 62 : 58;
+      const fromOffset = path.from === 'FASt' ? (isMobile ? 46 : 52) : (isMobile ? 50 : 58);
+      const toOffset = path.to === 'Adjustment' ? (isMobile ? 56 : 62) : (isMobile ? 52 : 58);
       const offsetX1 = (dx / len) * fromOffset;
       const offsetY1 = (dy / len) * 32;
       const offsetX2 = (dx / len) * toOffset;
@@ -635,52 +638,54 @@ export default function PathwayDiagram({
   }, [dimensions, highlightedPath, interactive, setHighlightedPath, resolvedTheme, selectedDose, modelData, getAdjustedEstimate, isMobile, showLegend, showPathLabels]);
 
   return (
-    <div ref={containerRef} className={styles.container}>
-      <svg ref={svgRef} width={dimensions.width} height={dimensions.height} className={styles.svg} />
-      {showLegend && isMobile && (
-        <div className={styles.mobileLegend} aria-hidden="true">
-          <div className={styles.legendItem}>
-            <span className={styles.legendLine} style={{ background: colors.distress }} />
-            <span className={styles.legendLabel}>Stress route</span>
+    <SharedElement id="pathway-diagram">
+      <div ref={containerRef} className={styles.container}>
+        <svg ref={svgRef} width={dimensions.width} height={dimensions.height} className={styles.svg} />
+        {showLegend && isMobile && (
+          <div className={styles.mobileLegend} aria-hidden="true">
+            <div className={styles.legendItem}>
+              <span className={styles.legendLine} style={{ background: colors.distress }} />
+              <span className={styles.legendLabel}>Stress route</span>
+            </div>
+            <div className={styles.legendItem}>
+              <span className={styles.legendLine} style={{ background: colors.engagement }} />
+              <span className={styles.legendLabel}>Engagement route</span>
+            </div>
+            <div className={styles.legendItem}>
+              <span className={styles.legendLine} style={{ background: colors.nonfast }} />
+              <span className={styles.legendLabel}>Direct benefit</span>
+            </div>
           </div>
-          <div className={styles.legendItem}>
-            <span className={styles.legendLine} style={{ background: colors.engagement }} />
-            <span className={styles.legendLabel}>Engagement route</span>
+        )}
+        {tooltip?.show && (
+          <div
+            className={`${styles.tooltip} ${tooltip.content.type === 'path' ? styles.pathTooltip : styles.nodeTooltip}`}
+            id={tooltipId}
+            role="tooltip"
+            aria-live="polite"
+            style={{ left: tooltip.x + 15, top: tooltip.y + 15 }}
+          >
+            <div className={styles.tooltipTitle}>{tooltip.content.title}</div>
+            <div className={styles.tooltipDescription}>{tooltip.content.description}</div>
+            {tooltip.content.type === 'path' && (
+              <>
+                <div className={styles.tooltipStats}>
+                  <span className={styles.tooltipFinding}>{tooltip.content.finding}</span>
+                  <span className={styles.tooltipEffect}>
+                    β = {formatNumber(tooltip.content.estimate!)}
+                  </span>
+                  <span className={styles.tooltipPvalue}>
+                    {tooltip.content.pvalue! < 0.001 ? 'p < .001' : 
+                     tooltip.content.pvalue! < 0.05 ? `p = ${tooltip.content.pvalue!.toFixed(3)}` :
+                     'Not significant'}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
-          <div className={styles.legendItem}>
-            <span className={styles.legendLine} style={{ background: colors.nonfast }} />
-            <span className={styles.legendLabel}>Direct benefit</span>
-          </div>
-        </div>
-      )}
-      {tooltip?.show && (
-        <div
-          className={`${styles.tooltip} ${tooltip.content.type === 'path' ? styles.pathTooltip : styles.nodeTooltip}`}
-          id={tooltipId}
-          role="tooltip"
-          aria-live="polite"
-          style={{ left: tooltip.x + 15, top: tooltip.y + 15 }}
-        >
-          <div className={styles.tooltipTitle}>{tooltip.content.title}</div>
-          <div className={styles.tooltipDescription}>{tooltip.content.description}</div>
-          {tooltip.content.type === 'path' && (
-            <>
-              <div className={styles.tooltipStats}>
-                <span className={styles.tooltipFinding}>{tooltip.content.finding}</span>
-                <span className={styles.tooltipEffect}>
-                  β = {formatNumber(tooltip.content.estimate!)}
-                </span>
-                <span className={styles.tooltipPvalue}>
-                  {tooltip.content.pvalue! < 0.001 ? 'p < .001' : 
-                   tooltip.content.pvalue! < 0.05 ? `p = ${tooltip.content.pvalue!.toFixed(3)}` :
-                   'Not significant'}
-                </span>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-      <DataTimestamp />
-    </div>
+        )}
+        <DataTimestamp />
+      </div>
+    </SharedElement>
   );
 }

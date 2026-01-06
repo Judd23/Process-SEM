@@ -41,3 +41,23 @@
     padding: var(--spacing-sm);
   }
 }
+
+/* Touch states */
+.toggle:active {
+  transform: scale(0.95);
+}
+
+@media (hover: none) {
+  .toggle:hover {
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .toggle {
+    transition: none;
+  }
+}

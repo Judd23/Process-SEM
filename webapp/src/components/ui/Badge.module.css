@@ -151,6 +151,13 @@
   }
 }
 
+/* Touch states */
+@media (hover: none) {
+  .badge:hover {
+    filter: none;
+  }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .badge {

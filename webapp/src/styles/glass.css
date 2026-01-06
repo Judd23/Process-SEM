@@ -1,0 +1,289 @@
+/* ============================================
+   GLASS PANEL MIXINS
+   Shared glass styling for panels across all pages
+   Based on Apple Liquid Glass design system
+   ============================================ */
+
+/* Base glass surface effect - applied via inheritance */
+.glass-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+  -webkit-backdrop-filter: saturate(110%) blur(4px);
+  backdrop-filter: saturate(110%) blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.04),
+    0 1px 4px rgba(0, 0, 0, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+  position: relative;
+}
+
+/* Top edge highlight */
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.2) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/* ============================================
+   DOUBLE-LAYERED GLASS
+   Inner glass layer for depth effect
+   ============================================ */
+
+.glass-panel-double {
+  position: relative;
+}
+
+.glass-panel-double::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.015) 0%,
+    rgba(255, 255, 255, 0.008) 50%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  -webkit-backdrop-filter: saturate(105%) blur(2px);
+  backdrop-filter: saturate(105%) blur(2px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: calc(var(--glass-radius, 16px) - 4px);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.02),
+    0 0 8px rgba(0, 0, 0, 0.02);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Interactive glass hover */
+.glass-panel-interactive:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.1),
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================
+   DARK MODE ADJUSTMENTS
+   ============================================ */
+
+[data-theme="dark"] .glass-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.025) 0%,
+    rgba(255, 255, 255, 0.012) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .glass-panel::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 20%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.12) 80%,
+    transparent 100%
+  );
+}
+
+[data-theme="dark"] .glass-panel-double::after {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ============================================
+   LIGHT MODE ADJUSTMENTS
+   ============================================ */
+
+[data-theme="light"] .glass-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.03),
+    0 1px 4px rgba(0, 0, 0, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .glass-panel::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 20%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(255, 255, 255, 0.6) 80%,
+    transparent 100%
+  );
+}
+
+[data-theme="light"] .glass-panel-double::after {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.01),
+    0 0 8px rgba(0, 0, 0, 0.01);
+}
+
+/* ============================================
+   MOBILE OPTIMIZATIONS
+   Reduce complexity for better performance
+   ============================================ */
+
+@media (max-width: 768px) {
+  .glass-panel {
+    /* Reduce blur on mobile for better performance */
+    -webkit-backdrop-filter: saturate(110%) blur(4px);
+    backdrop-filter: saturate(110%) blur(4px);
+    /* Stronger background to compensate for less blur */
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  }
+  
+  /* Mobile double layer - smaller inset, lighter blur */
+  .glass-panel-double::after {
+    inset: 6px;
+    -webkit-backdrop-filter: saturate(105%) blur(2px);
+    backdrop-filter: saturate(105%) blur(2px);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+  }
+  
+  .glass-panel-interactive:hover {
+    /* Disable hover transforms on mobile */
+    transform: none;
+  }
+
+  [data-theme="dark"] .glass-panel {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+  }
+
+  [data-theme="light"] .glass-panel {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0.6) 100%
+    );
+  }
+  
+  [data-theme="light"] .glass-panel-double::after {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.28) 100%
+    );
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+  .glass-panel-interactive:hover {
+    transform: none;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  }
+  
+  .glass-panel-interactive:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .glass-panel,
+  .glass-panel-interactive {
+    transition: none;
+  }
+  
+  .glass-panel-interactive:hover {
+    transform: none;
+  }
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-panel {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.12) 100%
+    );
+  }
+  
+  [data-theme="dark"] .glass-panel {
+    background: linear-gradient(
+      135deg,
+      rgba(30, 40, 55, 0.95) 0%,
+      rgba(25, 35, 50, 0.9) 50%,
+      rgba(30, 40, 55, 0.95) 100%
+    );
+  }
+  
+  [data-theme="light"] .glass-panel {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(248, 250, 252, 0.9) 50%,
+      rgba(255, 255, 255, 0.95) 100%
+    );
+  }
+}

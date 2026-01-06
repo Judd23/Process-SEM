@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useResearch } from '../context/ResearchContext';
 import { useModelData } from '../context/ModelDataContext';
 import Slider from '../components/ui/Slider';
@@ -12,6 +11,8 @@ import GlossaryTerm from '../components/ui/GlossaryTerm';
 import DataTimestamp from '../components/ui/DataTimestamp';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import useParallax from '../hooks/useParallax';
+import { TransitionLink } from '../components/transitions';
+import SharedElement from '../components/transitions/SharedElement';
 import styles from './DoseExplorerPage.module.css';
 
 // Dose zone definitions
@@ -55,9 +56,12 @@ export default function DoseExplorerPage() {
       <div className="container">
         <header
           ref={headerRef}
-          className={`${styles.header} reveal`}
+          className={styles.header}
           style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
         >
+          <SharedElement id="page-hero">
+            <span className="morph-anchor" aria-hidden="true" />
+          </SharedElement>
           <span className={styles.eyebrow}>Dose-Response Analysis</span>
           <h1>Does the Number of Credits Matter?</h1>
           <p className="lead">
@@ -215,9 +219,9 @@ export default function DoseExplorerPage() {
             Translate the dose-response patterns into concrete recommendations for students,
             advisors, and policy leaders.
           </p>
-          <Link to="/so-what" className="button button-primary button-lg">
+          <TransitionLink to="/so-what" className="button button-primary button-lg">
             Go to So, What?
-          </Link>
+          </TransitionLink>
         </section>
       </div>
     </div>

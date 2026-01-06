@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import type { Transition } from 'framer-motion';
+import styles from './PageTransition.module.css';
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -10,16 +11,40 @@ export default function PageTransition({ children }: PageTransitionProps) {
   const reduceMotion = useReducedMotion();
   const transition: Transition = reduceMotion
     ? { duration: 0 }
-    : { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const };
+    : { duration: 0.35, ease: [0.25, 0.9, 0.3, 1] as const };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
-      transition={transition}
-    >
-      {children}
-    </motion.div>
+    <div className={styles.transitionWrap} aria-live="polite">
+      <motion.div
+        initial={{
+          opacity: 0,
+          scale: reduceMotion ? 1 : 0.98,
+          y: reduceMotion ? 0 : 10,
+          x: 0,
+          rotateX: 0,
+          rotateY: 0,
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          x: 0,
+          rotateX: 0,
+          rotateY: 0,
+        }}
+        exit={{
+          opacity: 0,
+          scale: reduceMotion ? 1 : 0.985,
+          y: reduceMotion ? 0 : -12,
+          x: 0,
+          rotateX: 0,
+          rotateY: 0,
+        }}
+        transition={transition}
+        className={styles.content}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 }

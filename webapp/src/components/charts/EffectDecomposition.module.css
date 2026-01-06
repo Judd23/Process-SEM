@@ -50,6 +50,16 @@
   margin-top: var(--spacing-lg);
 }
 
+.empty {
+  padding: var(--spacing-md);
+  background: color-mix(in srgb, var(--color-border-light) 50%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
 .legendItem {
   display: flex;
   align-items: center;
@@ -92,6 +102,19 @@
   }
 }
 
+/* Touch states */
+.container:active {
+  transform: scale(0.99);
+}
+
+@media (hover: none) {
+  .container:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .container {
     transition: none;

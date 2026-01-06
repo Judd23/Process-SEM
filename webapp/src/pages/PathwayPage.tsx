@@ -1,5 +1,4 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { useResearch } from '../context/ResearchContext';
 import { useModelData } from '../context/ModelDataContext';
 import PathwayDiagram from '../components/charts/PathwayDiagram';
@@ -9,6 +8,8 @@ import KeyTakeaway from '../components/ui/KeyTakeaway';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import useParallax from '../hooks/useParallax';
+import { TransitionLink } from '../components/transitions';
+import SharedElement from '../components/transitions/SharedElement';
 import styles from './PathwayPage.module.css';
 
 export default function PathwayPage() {
@@ -137,9 +138,12 @@ export default function PathwayPage() {
       <div className="container">
         <header
           ref={headerRef}
-          className={`${styles.header} reveal`}
+          className={styles.header}
           style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
         >
+          <SharedElement id="page-hero">
+            <span className="morph-anchor" aria-hidden="true" />
+          </SharedElement>
           <span className={styles.eyebrow}>Interactive Model</span>
           <h1>How Dual Enrollment Credits Affect First-Year Success</h1>
           <p className="lead">
@@ -334,9 +338,9 @@ export default function PathwayPage() {
           <p>
             See how different credit doses change the stress and engagement pathways in the model.
           </p>
-          <Link to="/dose" className="button button-primary button-lg">
+          <TransitionLink to="/dose" className="button button-primary button-lg">
             Go to Credit Levels
-          </Link>
+          </TransitionLink>
         </section>
       </div>
     </div>

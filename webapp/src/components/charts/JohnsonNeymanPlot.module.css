@@ -30,6 +30,13 @@
   margin: 0;
 }
 
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  margin: var(--spacing-xs) 0 var(--spacing-md);
+  line-height: 1.5;
+}
+
 .svg {
   display: block;
   max-width: 100%;
@@ -189,9 +196,25 @@
   }
 }
 
+/* Touch states */
+.container:active {
+  transform: scale(0.99);
+}
+
+@media (hover: none) {
+  .container:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .container {
     transition: none;
+  }
+
+  .container:hover {
+    transform: none;
   }
 }

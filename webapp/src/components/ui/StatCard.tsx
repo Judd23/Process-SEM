@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
+import SharedElement from '../transitions/SharedElement';
 import styles from './StatCard.module.css';
 
 interface StatCardProps {
@@ -8,6 +9,7 @@ interface StatCardProps {
   color?: 'default' | 'positive' | 'negative' | 'accent';
   size?: 'small' | 'medium' | 'large';
   animate?: boolean;
+  layoutId?: string;
 }
 
 // Parse a formatted string value to extract numeric part and format info
@@ -82,6 +84,7 @@ export default function StatCard({
   color = 'default',
   size = 'medium',
   animate = true,
+  layoutId,
 }: StatCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
@@ -159,11 +162,17 @@ export default function StatCard({
     return () => observer.disconnect();
   }, [value, animate]);
 
-  return (
+  const card = (
     <div ref={cardRef} className={`${styles.card} ${styles[size]}`}>
       <div className={styles.label}>{label}</div>
       <div className={`${styles.value} ${styles[color]}`}>{displayValue}</div>
       {subtext && <div className={styles.subtext}>{subtext}</div>}
     </div>
   );
+
+  if (layoutId) {
+    return <SharedElement id={layoutId}>{card}</SharedElement>;
+  }
+
+  return card;
 }

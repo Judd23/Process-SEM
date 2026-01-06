@@ -330,9 +330,9 @@ export default function JohnsonNeymanPlot({
   }, [data, width, height, outcome, selectedDose, jnPoint, color, outcomeLabel]);
   const interpretation = useMemo(() => {
     if (outcome === 'engagement' && jnPoint !== null) {
-      return `The effect on ${outcomeLabel.toLowerCase()} becomes statistically significant at ${jnPoint} credits. Below this point, the confidence interval crosses zero.`;
+      return `At about ${jnPoint} credits, we start to see a clear engagement effect: the confidence band stays on one side of zero. Below that, results are too uncertain.`;
     }
-    return `The effect on ${outcomeLabel.toLowerCase()} is statistically significant across all credit levels—the confidence interval never crosses zero.`;
+    return `For ${outcomeLabel.toLowerCase()}, the confidence band never crosses zero—so the effect is consistently present across all credit levels tested.`;
   }, [outcome, jnPoint, outcomeLabel]);
 
   return (
@@ -342,7 +342,12 @@ export default function JohnsonNeymanPlot({
           Johnson-Neyman Analysis: {outcomeLabel}
         </h3>
         <p className={styles.subtitle}>
-          When does the effect become statistically significant?
+          Where does this effect clearly differ from zero?
+        </p>
+        <p className={styles.description}>
+          The shaded region shows where the confidence interval stays above or below zero—
+          that’s where we can be confident the effect is real. The vertical line marks the
+          credit level where that switch happens.
         </p>
       </div>
       <svg ref={svgRef} width={width} height={height} className={styles.svg} />

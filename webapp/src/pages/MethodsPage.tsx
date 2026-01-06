@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useModelData } from '../context/ModelDataContext';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
@@ -7,6 +6,8 @@ import ProgressRing from '../components/ui/ProgressRing';
 import Accordion from '../components/ui/Accordion';
 import AnalysisPipeline from '../components/charts/AnalysisPipeline';
 import useParallax from '../hooks/useParallax';
+import { TransitionLink } from '../components/transitions';
+import SharedElement from '../components/transitions/SharedElement';
 import styles from './MethodsPage.module.css';
 
 const modelSpecs = [
@@ -155,7 +156,10 @@ export default function MethodsPage() {
       style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
     >
       <div className="container">
-        <header ref={headerRef} className={`${styles.header} reveal`}>
+        <header ref={headerRef} className={styles.header}>
+          <SharedElement id="page-hero">
+            <span className="morph-anchor" aria-hidden="true" />
+          </SharedElement>
           <span className={styles.eyebrow}>Technical Methods</span>
           <h1>About This Study</h1>
           <p className="lead">
@@ -448,9 +452,9 @@ export default function MethodsPage() {
           <p>
             Explore the pathway diagram to see how stress and engagement connect to success.
           </p>
-          <Link to="/pathway" className="button button-primary button-lg">
+          <TransitionLink to="/pathway" className="button button-primary button-lg">
             Go to Pathway
-          </Link>
+          </TransitionLink>
         </section>
       </div>
     </div>

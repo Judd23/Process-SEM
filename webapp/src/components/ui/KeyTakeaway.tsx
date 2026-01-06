@@ -1,3 +1,4 @@
+import SharedElement from '../transitions/SharedElement';
 import styles from './KeyTakeaway.module.css';
 
 interface KeyTakeawayProps {
@@ -30,9 +31,11 @@ function InsightIcon() {
 
 export default function KeyTakeaway({ children }: KeyTakeawayProps) {
   return (
-    <aside className={styles.takeaway}>
-      <InsightIcon />
-      <div className={styles.content}>{children}</div>
-    </aside>
+    <SharedElement id="key-takeaway">
+      <aside className={styles.takeaway}>
+        <InsightIcon />
+        <div className={styles.content}>{children}</div>
+      </aside>
+    </SharedElement>
   );
 }

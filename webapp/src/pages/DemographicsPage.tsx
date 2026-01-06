@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useResearch } from '../context/ResearchContext';
 import GroupComparison from '../components/charts/GroupComparison';
 import Toggle from '../components/ui/Toggle';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import useParallax from '../hooks/useParallax';
+import { TransitionLink } from '../components/transitions';
+import SharedElement from '../components/transitions/SharedElement';
 import fastComparison from '../data/fastComparison.json';
 import sampleDescriptives from '../data/sampleDescriptives.json';
 import styles from './DemographicsPage.module.css';
@@ -37,9 +38,12 @@ export default function DemographicsPage() {
       <div className="container">
         <header
           ref={headerRef}
-          className={`${styles.header} reveal`}
+          className={styles.header}
           style={{ ['--parallax-offset' as string]: `${parallaxOffset}px` }}
         >
+          <SharedElement id="page-hero">
+            <span className="morph-anchor" aria-hidden="true" />
+          </SharedElement>
           <span className={styles.eyebrow}>Equity Framework</span>
           <h1>Do Effects Differ for Different Students?</h1>
           <p className="lead">
@@ -296,9 +300,9 @@ export default function DemographicsPage() {
           <p>
             See the step-by-step method we used to make fair comparisons and test the model.
           </p>
-          <Link to="/methods" className="button button-primary button-lg">
+          <TransitionLink to="/methods" className="button button-primary button-lg">
             Go to Methods
-          </Link>
+          </TransitionLink>
         </section>
       </div>
     </div>

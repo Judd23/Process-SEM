@@ -34,7 +34,7 @@ export default function useParallax({ speed = 0.15, max = 40, disabled = false }
       rafRef.current = window.requestAnimationFrame(() => {
         rafRef.current = null;
         const y = window.scrollY || window.pageYOffset || 0;
-        const mobileMax = window.innerWidth < 640 ? max * 0.6 : max;
+        const mobileMax = window.innerWidth < 480 ? max * 0.5 : window.innerWidth < 640 ? max * 0.65 : max;
         const next = Math.max(-mobileMax, Math.min(mobileMax, y * speed));
         setOffset(next);
       });

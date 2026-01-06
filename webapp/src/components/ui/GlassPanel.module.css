@@ -1,0 +1,663 @@
+/* ============================================
+   GLASS PANEL - Apple Liquid Glass Inspired
+   Based on Apple HIG Materials design system
+   ============================================ */
+
+.glassPanel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--glass-radius, 16px);
+  
+  /* Smooth transitions for interactive states */
+  transition: 
+    transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+
+/* ============================================
+   PADDING VARIATIONS
+   ============================================ */
+
+.padding-none { padding: 0; }
+.padding-sm { padding: 0.5rem; }
+.padding-md { padding: 1rem; }
+.padding-lg { padding: 1.5rem; }
+.padding-xl { padding: 2rem; }
+
+/* ============================================
+   GLASS VARIANTS (Apple-style)
+   ============================================ */
+
+/* Regular: Blurs + adjusts luminosity for legibility */
+.variant-regular {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+}
+
+/* Clear: Highly translucent for rich backgrounds */
+.variant-clear {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.01) 0%,
+    rgba(255, 255, 255, 0.005) 50%,
+    rgba(255, 255, 255, 0.008) 100%
+  );
+}
+
+/* ============================================
+   THICKNESS VARIATIONS (Apple HIG terminology)
+   Controls blur intensity and opacity
+   ============================================ */
+
+/* Ultra Thin - Maximum translucency */
+.thickness-ultraThin {
+  -webkit-backdrop-filter: saturate(105%) blur(2px);
+  backdrop-filter: saturate(105%) blur(2px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 
+    0 1px 8px rgba(0, 0, 0, 0.02),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Thin - Light blur, high translucency */
+.thickness-thin {
+  -webkit-backdrop-filter: saturate(108%) blur(4px);
+  backdrop-filter: saturate(108%) blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    0 2px 12px rgba(0, 0, 0, 0.03),
+    0 1px 2px rgba(0, 0, 0, 0.02),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Regular - Balanced (default) */
+.thickness-regular {
+  -webkit-backdrop-filter: saturate(110%) blur(6px);
+  backdrop-filter: saturate(110%) blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.04),
+    0 1px 4px rgba(0, 0, 0, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* Thick - More opacity, stronger blur */
+.thickness-thick {
+  -webkit-backdrop-filter: saturate(115%) blur(10px);
+  backdrop-filter: saturate(115%) blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 6px 30px rgba(0, 0, 0, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   TINT COLORS
+   ============================================ */
+
+/* Neutral - Adapts to theme (no tint override) */
+.tint-neutral {
+  /* Uses base variant background */
+}
+
+/* Navy blue tint */
+.tint-navy.variant-regular {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 58, 95, 0.12) 0%,
+    rgba(21, 34, 56, 0.06) 50%,
+    rgba(30, 58, 95, 0.09) 100%
+  );
+}
+
+.tint-navy.variant-clear {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 58, 95, 0.06) 0%,
+    rgba(21, 34, 56, 0.03) 50%,
+    rgba(30, 58, 95, 0.045) 100%
+  );
+}
+
+/* Accent (theme blue) */
+.tint-accent.variant-regular {
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.1) 0%,
+    rgba(59, 130, 246, 0.05) 50%,
+    rgba(37, 99, 235, 0.075) 100%
+  );
+}
+
+.tint-accent.variant-clear {
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.05) 0%,
+    rgba(59, 130, 246, 0.025) 50%,
+    rgba(37, 99, 235, 0.0375) 100%
+  );
+}
+
+/* Success (green) */
+.tint-success.variant-regular {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.1) 0%,
+    rgba(74, 222, 128, 0.05) 50%,
+    rgba(34, 197, 94, 0.075) 100%
+  );
+}
+
+.tint-success.variant-clear {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.05) 0%,
+    rgba(74, 222, 128, 0.025) 50%,
+    rgba(34, 197, 94, 0.0375) 100%
+  );
+}
+
+/* Warning (amber) */
+.tint-warning.variant-regular {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.1) 0%,
+    rgba(251, 191, 36, 0.05) 50%,
+    rgba(245, 158, 11, 0.075) 100%
+  );
+}
+
+.tint-warning.variant-clear {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.05) 0%,
+    rgba(251, 191, 36, 0.025) 50%,
+    rgba(245, 158, 11, 0.0375) 100%
+  );
+}
+
+/* Error (red) */
+.tint-error.variant-regular {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.1) 0%,
+    rgba(248, 113, 113, 0.05) 50%,
+    rgba(239, 68, 68, 0.075) 100%
+  );
+}
+
+.tint-error.variant-clear {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.05) 0%,
+    rgba(248, 113, 113, 0.025) 50%,
+    rgba(239, 68, 68, 0.0375) 100%
+  );
+}
+
+/* Custom - uses CSS variable */
+.tint-custom.variant-regular {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--glass-custom-color, #ffffff) 10%, transparent) 0%,
+    color-mix(in srgb, var(--glass-custom-color, #ffffff) 5%, transparent) 50%,
+    color-mix(in srgb, var(--glass-custom-color, #ffffff) 7.5%, transparent) 100%
+  );
+}
+
+.tint-custom.variant-clear {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--glass-custom-color, #ffffff) 5%, transparent) 0%,
+    color-mix(in srgb, var(--glass-custom-color, #ffffff) 2.5%, transparent) 50%,
+    color-mix(in srgb, var(--glass-custom-color, #ffffff) 3.75%, transparent) 100%
+  );
+}
+
+/* ============================================
+   HIGHLIGHT & GLOW EFFECTS
+   ============================================ */
+
+/* Top highlight - light hitting glass edge */
+.withHighlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.2) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Inner glow - subtle luminosity */
+.withGlow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================
+   DOUBLE-LAYERED GLASS
+   Creates depth with inner glass panel
+   ============================================ */
+
+.doubleLayer {
+  /* Outer layer is the base panel */
+}
+
+.doubleLayer .innerGlass {
+  position: absolute;
+  inset: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.015) 0%,
+    rgba(255, 255, 255, 0.008) 50%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  -webkit-backdrop-filter: saturate(105%) blur(2px);
+  backdrop-filter: saturate(105%) blur(2px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: calc(var(--glass-radius, 16px) - 4px);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.02),
+    0 0 8px rgba(0, 0, 0, 0.02);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Inner layer top highlight */
+.doubleLayer .innerGlass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 30%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 70%,
+    transparent 100%
+  );
+  border-radius: inherit;
+}
+
+/* ============================================
+   INTERACTIVE STATE
+   ============================================ */
+
+.interactive {
+  cursor: pointer;
+  user-select: none;
+}
+
+.interactive:hover {
+  transform: translateY(-2px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.interactive:active {
+  transform: translateY(0) scale(0.99);
+  transition-duration: 0.1s;
+}
+
+.interactive:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.6);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   DARK MODE ADJUSTMENTS
+   ============================================ */
+
+:global([data-theme="dark"]) .variant-regular {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.025) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+}
+
+:global([data-theme="dark"]) .variant-clear {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+}
+
+:global([data-theme="dark"]) .thickness-ultraThin {
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .thickness-thin {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .thickness-regular {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .thickness-thick {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+:global([data-theme="dark"]) .withHighlight::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 20%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.12) 80%,
+    transparent 100%
+  );
+}
+
+:global([data-theme="dark"]) .withGlow::after {
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 60%
+  );
+}
+
+:global([data-theme="dark"]) .doubleLayer .innerGlass {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.01) 50%,
+    rgba(255, 255, 255, 0.015) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+/* ============================================
+   LIGHT MODE ADJUSTMENTS
+   ============================================ */
+
+:global([data-theme="light"]) .variant-regular {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+}
+
+:global([data-theme="light"]) .variant-clear {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+}
+
+:global([data-theme="light"]) .thickness-ultraThin {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 2px 12px rgba(0, 0, 0, 0.03),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.6);
+}
+
+:global([data-theme="light"]) .thickness-thin {
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.04),
+    0 1px 4px rgba(0, 0, 0, 0.02),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.7);
+}
+
+:global([data-theme="light"]) .thickness-regular {
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.03);
+}
+
+:global([data-theme="light"]) .thickness-thick {
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 12px 48px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+}
+
+:global([data-theme="light"]) .withHighlight::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 20%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(255, 255, 255, 0.6) 80%,
+    transparent 100%
+  );
+}
+
+:global([data-theme="light"]) .withGlow::after {
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.4) 0%,
+    transparent 60%
+  );
+}
+
+:global([data-theme="light"]) .doubleLayer .innerGlass {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.01),
+    0 0 8px rgba(0, 0, 0, 0.01);
+}
+
+:global([data-theme="light"]) .doubleLayer .innerGlass::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 30%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 70%,
+    transparent 100%
+  );
+}
+
+/* Light mode tint overrides */
+:global([data-theme="light"]) .tint-navy.variant-regular {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 58, 95, 0.08) 0%,
+    rgba(21, 34, 56, 0.04) 50%,
+    rgba(30, 58, 95, 0.06) 100%
+  );
+}
+
+/* ============================================
+   MOBILE OPTIMIZATIONS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .glassPanel {
+    /* Reduce blur for mobile performance */
+    -webkit-backdrop-filter: saturate(110%) blur(4px) !important;
+    backdrop-filter: saturate(110%) blur(4px) !important;
+  }
+  
+  .thickness-ultraThin {
+    -webkit-backdrop-filter: saturate(100%) blur(2px);
+    backdrop-filter: saturate(100%) blur(2px);
+  }
+  
+  .thickness-thin {
+    -webkit-backdrop-filter: saturate(105%) blur(4px);
+    backdrop-filter: saturate(105%) blur(4px);
+  }
+  
+  .thickness-regular {
+    -webkit-backdrop-filter: saturate(110%) blur(6px);
+    backdrop-filter: saturate(110%) blur(6px);
+  }
+  
+  .thickness-thick {
+    -webkit-backdrop-filter: saturate(115%) blur(10px);
+    backdrop-filter: saturate(115%) blur(10px);
+  }
+  
+  /* Stronger backgrounds to compensate */
+  .variant-regular {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.04) 50%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  }
+  
+  .variant-clear {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+  }
+  
+  /* Double layer mobile optimization */
+  .doubleLayer .innerGlass {
+    inset: 6px;
+    -webkit-backdrop-filter: saturate(105%) blur(2px);
+    backdrop-filter: saturate(105%) blur(2px);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+  }
+  
+  .interactive:hover {
+    transform: none;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) {
+  .interactive:hover {
+    transform: none;
+    box-shadow: inherit;
+  }
+  
+  .interactive:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .glassPanel {
+    transition: none;
+  }
+  
+  .interactive:hover {
+    transform: none;
+  }
+  
+  .interactive:active {
+    transform: none;
+  }
+}
+
+/* ============================================
+   BACKDROP-FILTER FALLBACK
+   ============================================ */
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glassPanel {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  
+  .variant-regular {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.15) 100%
+    );
+  }
+  
+  .variant-clear {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+  }
+  
+  :global([data-theme="dark"]) .variant-regular {
+    background: linear-gradient(
+      135deg,
+      rgba(20, 30, 45, 0.95) 0%,
+      rgba(15, 25, 40, 0.9) 50%,
+      rgba(20, 30, 45, 0.95) 100%
+    );
+  }
+  
+  :global([data-theme="light"]) .variant-regular {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(248, 250, 252, 0.9) 50%,
+      rgba(255, 255, 255, 0.95) 100%
+    );
+  }
+}

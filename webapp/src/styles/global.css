@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500&family=Source+Sans+Pro:wght@400;600;700&family=Source+Serif+Pro:wght@400;600;700&display=swap');
 @import './variables.css';
+@import './glass.css';
 
 /* Reset */
 *, *::before, *::after {
@@ -131,6 +132,20 @@ tbody tr:nth-child(even) {
 
 .text-right {
   text-align: right;
+}
+
+.morph-anchor {
+  display: inline-block;
+  width: 56px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-accent) 85%, transparent),
+    color-mix(in srgb, var(--color-engagement) 70%, transparent)
+  );
+  box-shadow: 0 0 18px color-mix(in srgb, var(--color-accent) 35%, transparent);
+  margin-bottom: var(--spacing-md);
 }
 
 .sr-only {
@@ -415,6 +430,45 @@ tbody tr:nth-child(even) {
 @media (max-width: 480px) {
   .button-mobile-full {
     width: 100%;
+  }
+}
+
+/* Button touch states */
+.button:active {
+  transform: scale(0.98);
+}
+
+@media (hover: none) {
+  .button-primary:hover,
+  .button-secondary:hover,
+  .button-ghost:hover {
+    transform: none;
+  }
+
+  .button-primary:hover {
+    background: var(--color-accent);
+    box-shadow: none;
+  }
+
+  .button-secondary:hover {
+    background: transparent;
+    color: var(--color-accent);
+  }
+
+  .button-ghost:hover {
+    background: transparent;
+    border-color: var(--color-border);
+  }
+}
+
+/* Button reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .button-primary:hover {
+    transform: none;
   }
 }
 

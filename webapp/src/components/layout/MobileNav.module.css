@@ -47,3 +47,27 @@
     display: flex;
   }
 }
+
+/* Touch states */
+.link:active {
+  transform: scale(0.95);
+}
+
+@media (hover: none) {
+  .link:hover {
+    background: transparent;
+    color: var(--color-text-muted);
+  }
+
+  .active:hover {
+    background: var(--color-accent-light);
+    color: var(--color-accent);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+}

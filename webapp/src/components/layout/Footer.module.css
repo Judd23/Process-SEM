@@ -175,3 +175,33 @@
     display: none;
   }
 }
+
+/* Touch states */
+.badge:active {
+  transform: scale(0.95);
+}
+
+.link:active {
+  transform: scale(0.98);
+}
+
+@media (hover: none) {
+  .badge:hover {
+    background: var(--color-border-light);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+  }
+
+  .link:hover {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .badge,
+  .link {
+    transition: none;
+  }
+}

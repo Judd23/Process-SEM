@@ -1,10 +1,10 @@
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ResearchProvider } from './context/ResearchContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ModelDataProvider } from './context/ModelDataContext';
+import { TransitionProvider } from './context/TransitionContext';
+import { MorphProvider, TransitionOverlay } from './components/transitions';
 import Layout from './components/layout/Layout';
-import PageTransition from './components/layout/PageTransition';
 import ScrollToTop from './components/ui/ScrollToTop';
 import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
@@ -16,44 +16,32 @@ import MethodsPage from './pages/MethodsPage';
 import ResearcherPage from './pages/ResearcherPage';
 import './styles/global.css';
 
-function AnimatedRoutes() {
-  const location = useLocation();
-
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <Routes location={location} key={location.pathname}>
-        <Route
-          index
-          element={
-            <PageTransition>
-              <LandingPage />
-            </PageTransition>
-          }
-        />
-        <Route path="/" element={<Layout />}>
-          <Route path="home" element={<HomePage />} />
-          <Route path="so-what" element={<SoWhatPage />} />
-          <Route path="dose" element={<DoseExplorerPage />} />
-          <Route path="demographics" element={<DemographicsPage />} />
-          <Route path="pathway" element={<PathwayPage />} />
-          <Route path="methods" element={<MethodsPage />} />
-          <Route path="researcher" element={<ResearcherPage />} />
-          <Route path="about" element={<Navigate to="/researcher" replace />} />
-          <Route path="*" element={<Navigate to="/home" replace />} />
-        </Route>
-      </Routes>
-    </AnimatePresence>
-  );
-}
-
 function App() {
   return (
     <ThemeProvider>
       <ModelDataProvider>
         <ResearchProvider>
           <HashRouter>
-            <ScrollToTop />
-            <AnimatedRoutes />
+            <TransitionProvider>
+              <ScrollToTop />
+              <TransitionOverlay />
+              <MorphProvider>
+                <Routes>
+                  <Route index element={<LandingPage />} />
+                  <Route path="/" element={<Layout />}>
+                    <Route path="home" element={<HomePage />} />
+                    <Route path="so-what" element={<SoWhatPage />} />
+                    <Route path="dose" element={<DoseExplorerPage />} />
+                    <Route path="demographics" element={<DemographicsPage />} />
+                    <Route path="pathway" element={<PathwayPage />} />
+                    <Route path="methods" element={<MethodsPage />} />
+                    <Route path="researcher" element={<ResearcherPage />} />
+                    <Route path="about" element={<Navigate to="/researcher" replace />} />
+                    <Route path="*" element={<Navigate to="/home" replace />} />
+                  </Route>
+                </Routes>
+              </MorphProvider>
+            </TransitionProvider>
           </HashRouter>
         </ResearchProvider>
       </ModelDataProvider>
