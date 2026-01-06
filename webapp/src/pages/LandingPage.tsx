@@ -111,6 +111,9 @@ export default function LandingPage() {
 
       {/* Main Content */}
       <main className={styles.content}>
+        <div className={styles.titleGhost} aria-hidden="true">
+          Dual Credit Outcomes &amp; First Year Achievement
+        </div>
         {/* Kicker - FROM TOP */}
         <SharedElement id="page-kicker">
           <p className={`${styles.kicker} ${styles.fromTop}`}>Ed.D. Dissertation Research</p>
@@ -119,13 +122,10 @@ export default function LandingPage() {
         {/* Title - FROM TOP */}
         <SharedElement id="page-title">
           <h1 className={`${styles.title} ${styles.fromTop}`}>
-            <span className={styles.titleLine}>Dual Credit &</span>
+            <span className={styles.titleLine}>Dual Credit Outcomes</span>
             <span className={styles.titleLine}>
-              <span
-                className={styles.titleAccent}
-                data-text="Developmental Adjustment"
-              >
-                Developmental Adjustment
+              <span className={styles.titleAccent}>
+                &amp; First Year Achievement
               </span>
             </span>
           </h1>

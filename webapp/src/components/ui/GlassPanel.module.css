@@ -34,9 +34,9 @@
 .variant-regular {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.015) 0%,
-    rgba(255, 255, 255, 0.008) 50%,
-    rgba(255, 255, 255, 0.01) 100%
+    rgba(255, 255, 255, 0.006) 0%,
+    rgba(255, 255, 255, 0.003) 50%,
+    rgba(255, 255, 255, 0.004) 100%
   );
 }
 
@@ -44,9 +44,9 @@
 .variant-clear {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.003) 50%,
-    rgba(255, 255, 255, 0.004) 100%
+    rgba(255, 255, 255, 0.002) 0%,
+    rgba(255, 255, 255, 0.001) 50%,
+    rgba(255, 255, 255, 0.0015) 100%
   );
 }
 
@@ -57,47 +57,47 @@
 
 /* Ultra Thin - Maximum translucency */
 .thickness-ultraThin {
-  -webkit-backdrop-filter: saturate(130%) blur(8px);
-  backdrop-filter: saturate(130%) blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  backdrop-filter: saturate(140%) blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.02);
   box-shadow: 
-    0 1px 8px rgba(0, 0, 0, 0.02),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.05);
+    0 1px 8px rgba(0, 0, 0, 0.01),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.02);
 }
 
 /* Thin - Light blur, high translucency */
 .thickness-thin {
-  -webkit-backdrop-filter: saturate(135%) blur(12px);
-  backdrop-filter: saturate(135%) blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: saturate(145%) blur(14px);
+  backdrop-filter: saturate(145%) blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   box-shadow: 
-    0 2px 12px rgba(0, 0, 0, 0.03),
-    0 1px 2px rgba(0, 0, 0, 0.02),
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.06);
+    0 2px 12px rgba(0, 0, 0, 0.015),
+    0 1px 2px rgba(0, 0, 0, 0.01),
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.03);
 }
 
 /* Regular - Balanced (default) */
 .thickness-regular {
-  -webkit-backdrop-filter: saturate(140%) blur(16px);
-  backdrop-filter: saturate(140%) blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: saturate(150%) blur(18px);
+  backdrop-filter: saturate(150%) blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.04),
-    0 1px 4px rgba(0, 0, 0, 0.02),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 -0.5px 0 rgba(0, 0, 0, 0.03);
+    0 4px 20px rgba(0, 0, 0, 0.02),
+    0 1px 4px rgba(0, 0, 0, 0.01),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -0.5px 0 rgba(0, 0, 0, 0.015);
 }
 
 /* Thick - More opacity, stronger blur */
 .thickness-thick {
-  -webkit-backdrop-filter: saturate(150%) blur(20px);
-  backdrop-filter: saturate(150%) blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: saturate(160%) blur(22px);
+  backdrop-filter: saturate(160%) blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 
-    0 6px 30px rgba(0, 0, 0, 0.06),
-    0 2px 8px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+    0 6px 30px rgba(0, 0, 0, 0.03),
+    0 2px 8px rgba(0, 0, 0, 0.015),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.02);
 }
 
 /* ============================================
@@ -111,18 +111,18 @@
 .tint-navy.variant-regular {
   background: linear-gradient(
     135deg,
-    rgba(30, 58, 95, 0.12) 0%,
-    rgba(21, 34, 56, 0.06) 50%,
-    rgba(30, 58, 95, 0.09) 100%
+    rgba(30, 58, 95, 0.05) 0%,
+    rgba(21, 34, 56, 0.025) 50%,
+    rgba(30, 58, 95, 0.035) 100%
   );
 }
 
 .tint-navy.variant-clear {
   background: linear-gradient(
     135deg,
-    rgba(30, 58, 95, 0.06) 0%,
-    rgba(21, 34, 56, 0.03) 50%,
-    rgba(30, 58, 95, 0.045) 100%
+    rgba(30, 58, 95, 0.025) 0%,
+    rgba(21, 34, 56, 0.012) 50%,
+    rgba(30, 58, 95, 0.018) 100%
   );
 }
 
@@ -130,18 +130,18 @@
 .tint-accent.variant-regular {
   background: linear-gradient(
     135deg,
-    rgba(37, 99, 235, 0.1) 0%,
-    rgba(59, 130, 246, 0.05) 50%,
-    rgba(37, 99, 235, 0.075) 100%
+    rgba(37, 99, 235, 0.04) 0%,
+    rgba(59, 130, 246, 0.02) 50%,
+    rgba(37, 99, 235, 0.03) 100%
   );
 }
 
 .tint-accent.variant-clear {
   background: linear-gradient(
     135deg,
-    rgba(37, 99, 235, 0.05) 0%,
-    rgba(59, 130, 246, 0.025) 50%,
-    rgba(37, 99, 235, 0.0375) 100%
+    rgba(37, 99, 235, 0.02) 0%,
+    rgba(59, 130, 246, 0.01) 50%,
+    rgba(37, 99, 235, 0.015) 100%
   );
 }
 

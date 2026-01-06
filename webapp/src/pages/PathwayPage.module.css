@@ -3,7 +3,7 @@
 }
 
 .header {
-  text-align: center;
+  text-align: left;
   max-width: 800px;
   margin: 0 auto var(--spacing-2xl);
   padding-top: var(--spacing-2xl);
@@ -74,6 +74,7 @@
   display: flex;
   gap: var(--spacing-sm);
   flex-wrap: wrap;
+  text-align: left;
 }
 
 @media (max-width: 480px) {
@@ -108,7 +109,7 @@
     font-size: var(--font-size-xs);
     flex: 1 1 auto;
     min-width: 0;
-    text-align: center;
+    text-align: left;
   }
 }
 
@@ -247,15 +248,15 @@
 }
 
 .coefficients h2 {
-  text-align: center;
+  text-align: left;
   margin-bottom: var(--spacing-xl);
 }
 
 .coefficientNote {
-  text-align: center;
+  text-align: left;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
-  margin: -var(--spacing-lg) auto var(--spacing-xl);
+  margin: -var(--spacing-lg) 0 var(--spacing-xl);
   max-width: 640px;
 }
 
@@ -380,15 +381,15 @@
 }
 
 .indirectEffects h2 {
-  text-align: center;
+  text-align: left;
   margin-bottom: var(--spacing-md);
 }
 
 .indirectIntro {
-  text-align: center;
+  text-align: left;
   color: var(--color-text-muted);
   max-width: 600px;
-  margin: 0 auto var(--spacing-xl);
+  margin: 0 0 var(--spacing-xl);
   line-height: 1.6;
 }
 
@@ -467,7 +468,7 @@
 
 .formulaMultiply,
 .formulaEquals {
-  text-align: center;
+  text-align: left;
   font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--color-accent);
@@ -505,7 +506,7 @@
 
 /* Summary */
 .summary h2 {
-  text-align: center;
+  text-align: left;
   margin-bottom: var(--spacing-xl);
 }
 
@@ -553,7 +554,7 @@
 
 /* Next step CTA */
 .nextStep {
-  text-align: center;
+  text-align: left;
   padding: var(--spacing-3xl) 0 var(--spacing-4xl);
   border-top: 1px solid var(--color-border-light);
 }

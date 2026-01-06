@@ -6,7 +6,7 @@
 .pipeline {
   display: flex;
   align-items: stretch;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: var(--spacing-lg);
 }
 
@@ -14,11 +14,20 @@
   display: flex;
   align-items: stretch;
   flex: 1;
+  max-width: 320px;
 }
 
 .stepBox {
-  background: var(--color-surface);
-  border: 2px solid var(--step-color);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.015) 0%,
+    rgba(255, 255, 255, 0.008) 50%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  backdrop-filter: saturate(160%) blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-left: 3px solid var(--step-color);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   width: 100%;
@@ -27,6 +36,10 @@
   transition: all var(--transition-fast);
   position: relative;
   overflow: hidden;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  text-align: left;
 }
 
 .stepBox::before {
@@ -35,14 +48,21 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 4px;
-  background: var(--step-color);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--step-color) 0%,
+    rgba(255, 255, 255, 0.06) 30%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
 }
 
 .stepBox:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--step-color);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .stepNumber {
@@ -136,23 +156,37 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    align-items: flex-start;
   }
 
   .stepMobile {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    width: 100%;
   }
 
   .stepBoxMobile {
-    background: var(--color-surface);
-    border: 2px solid var(--step-color);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.015) 0%,
+      rgba(255, 255, 255, 0.008) 50%,
+      rgba(255, 255, 255, 0.01) 100%
+    );
+    -webkit-backdrop-filter: saturate(160%) blur(16px);
+    backdrop-filter: saturate(160%) blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-left: 3px solid var(--step-color);
     border-radius: var(--radius-lg);
     padding: var(--spacing-md);
     width: 100%;
     position: relative;
     overflow: hidden;
     min-height: 0;
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    text-align: left;
   }
 
   .stepDescriptionMobile {
@@ -165,8 +199,13 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
-    background: var(--step-color);
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      var(--step-color) 0%,
+      rgba(255, 255, 255, 0.06) 30%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
   }
 
   .stepNumberMobile {
@@ -224,6 +263,7 @@
     height: 32px;
     color: var(--color-text-muted);
     margin: var(--spacing-sm) 0;
+    margin-left: var(--spacing-lg);
     animation: pulseVertical 2s ease-in-out infinite;
   }
 
@@ -245,7 +285,8 @@
 }
 
 /* Touch states */
-.stepBox:active {
+.stepBox:active,
+.stepBoxMobile:active {
   transform: scale(0.98);
 }
 

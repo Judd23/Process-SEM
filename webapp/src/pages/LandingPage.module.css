@@ -26,7 +26,22 @@
   padding: 2rem;
   position: relative;
   overflow: hidden;
-  background: var(--color-background);
+  background: radial-gradient(
+      circle at 20% 20%,
+      color-mix(in srgb, var(--color-accent-light, rgba(0, 102, 204, 0.12)) 80%, transparent) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 10%,
+      color-mix(in srgb, var(--color-engagement, #2563eb) 14%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 30% 80%,
+      color-mix(in srgb, var(--color-fast, #f97316) 10%, transparent) 0%,
+      transparent 50%
+    ),
+    linear-gradient(135deg, color-mix(in srgb, var(--color-background) 85%, transparent) 0%, color-mix(in srgb, var(--color-background) 65%, transparent) 100%);
 }
 
 /* ============================================
@@ -43,7 +58,7 @@
   height: 800px;
   background: radial-gradient(
     ellipse,
-    color-mix(in srgb, var(--navy-light) 2%, transparent) 0%,
+    color-mix(in srgb, var(--color-accent-light, rgba(0, 102, 204, 0.12)) 60%, transparent) 0%,
     transparent 70%
   );
   border-radius: 50%;
@@ -61,7 +76,7 @@
   height: 700px;
   background: radial-gradient(
     ellipse,
-    color-mix(in srgb, var(--navy-mid) 1.5%, transparent) 0%,
+    color-mix(in srgb, var(--color-fast, #f97316) 18%, transparent) 0%,
     transparent 65%
   );
   border-radius: 50%;
@@ -204,6 +219,23 @@
   margin: auto;
   position: relative;
   z-index: 1;
+}
+
+.titleGhost {
+  position: absolute;
+  inset: 12% auto auto 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 9vw, 6rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.08);
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  white-space: nowrap;
 }
 
 /* ============================================
@@ -418,38 +450,13 @@
 }
 
 .titleAccent {
-  background: linear-gradient(
-    135deg,
-    var(--navy-deep) 0%,
-    var(--navy-accent) 40%,
-    var(--navy-glow) 60%,
-    var(--navy-accent) 100%
-  );
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradientShift 6s ease-in-out infinite;
+  color: var(--color-text);
   position: relative;
 }
 
 /* Glow effect on title accent */
 .titleAccent::after {
-  content: attr(data-text);
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: -1;
-  background: linear-gradient(
-    135deg,
-    var(--navy-accent) 0%,
-    var(--navy-glow) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: blur(25px);
-  opacity: 0.4;
+  content: none;
 }
 
 @keyframes gradientShift {

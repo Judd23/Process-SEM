@@ -879,3 +879,63 @@ Made the ResearcherPage significantly more artistic and dynamic with layered ani
 - Verify chart legends never overlap plots on 320–480px width.
 - Confirm single final CTA per page and correct "next" route.
 - Spot-check simulated data note appears under charts and stats.
+
+---
+
+### January 5, 2026 - Glass UI Refinements & Intro Page Polish
+
+#### Button Consistency
+- Aligned `KeyTakeaway` component styling with global button system:
+  - Reduced background opacity from 6%→4% color-mix values
+  - Reduced border from `rgba(255,255,255,0.12)` → `0.08`
+  - Updated backdrop-filter from `saturate(140%)` → `saturate(150%)`
+  - Simplified box-shadow to match button styling
+  - Reduced top highlight opacity
+- Aligned `pathwayButton` styling with global buttons:
+  - Reduced background from `rgba(255,255,255,0.06)` → `0.02`
+  - Reduced border from `rgba(255,255,255,0.12)` → `0.08`
+  - Reduced box-shadow inset highlight from `0.08` → `0.04`
+
+#### Transition Timing (Slower by 50%)
+- All transition variables doubled for more elegant animations:
+  - `--transition-fast`: 150ms → 300ms
+  - `--transition-normal`: 300ms → 600ms
+  - `--transition-slow`: 500ms → 1000ms
+  - `--reveal-duration`: 800ms → 1600ms
+  - `--reveal-stagger`: 100ms → 200ms
+  - `--transition-page-duration`: 800ms → 1600ms
+  - `--transition-particle-converge`: 400ms → 800ms
+  - `--transition-particle-burst`: 400ms → 800ms
+  - `--transition-morph-duration`: 500ms → 1000ms
+
+#### Intro Page (HomePage) Title Size
+- Reduced title font-size from `clamp(2rem, 5vw, var(--font-size-4xl))` to `clamp(2rem, 5vw, 3.3125rem)` (3 points smaller)
+
+#### Intro Page Centering
+- Added `text-align: center` to global `.container` class
+- Added `justify-items: center` to stats grid
+- Added `justify-content: center` and `text-align: left` to finding content (keeps text readable)
+- Added `justify-items: center` to explore cards grid
+- Added `align-items: center` and `text-align: center` to explore card content
+- **Mobile breakpoints (768px)**:
+  - Stats grid: `justify-items: center`
+  - Finding content: `text-align: center`, `justify-items: center`
+  - Explore cards: `justify-items: center`
+- **Mobile breakpoints (480px)**:
+  - Stats grid: `justify-items: center`
+  - Explore card: `align-items: center`, `text-align: center`
+
+#### Elegant Divider Under Subheader
+- Added centered thin gradient line under `.lead` (subheader) element:
+  - 120px wide, 1px height
+  - Gradient: transparent → white (0.3→0.5→0.3) → transparent
+  - Padding-bottom added to `.lead` for proper spacing
+
+#### Files Modified
+- `webapp/src/components/ui/KeyTakeaway.module.css`
+- `webapp/src/pages/PathwayPage.module.css`
+- `webapp/src/styles/variables.css`
+- `webapp/src/pages/HomePage.module.css`
+- `webapp/src/styles/global.css`
+
+**Deployed:** https://judd23.github.io/Dissertation-Model-Simulation

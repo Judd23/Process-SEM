@@ -45,7 +45,7 @@
 }
 
 .header {
-  text-align: center;
+  text-align: left;
   max-width: 800px;
   margin: 0 auto var(--spacing-2xl);
   padding-top: var(--spacing-xl);
@@ -82,7 +82,7 @@
   border-bottom: 2px solid var(--color-border);
   padding-bottom: var(--spacing-sm);
   margin-bottom: var(--spacing-lg);
-  text-align: center;
+  text-align: left;
   position: relative;
 }
 
@@ -90,8 +90,7 @@
   content: '';
   position: absolute;
   bottom: -2px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   width: 60px;
   height: 2px;
   background: linear-gradient(90deg, var(--color-accent), var(--color-engagement));
@@ -493,7 +492,7 @@
 }
 
 .repoNote {
-  text-align: center;
+  text-align: left;
   font-style: italic;
   color: var(--color-text-muted);
 }
@@ -519,7 +518,7 @@
 
 /* Next step CTA */
 .nextStep {
-  text-align: center;
+  text-align: left;
   padding: var(--spacing-3xl) 0 var(--spacing-4xl);
   border-top: 1px solid var(--color-border-light);
 }

@@ -3,7 +3,7 @@
 }
 
 .header {
-  text-align: center;
+  text-align: left;
   max-width: 800px;
   margin: 0 auto var(--spacing-2xl);
   padding-top: var(--spacing-2xl);
@@ -218,7 +218,7 @@
 }
 
 .conditionalEffects h2 {
-  text-align: center;
+  text-align: left;
   margin-bottom: var(--spacing-lg);
   transition: color var(--transition-fast);
 }
@@ -357,7 +357,7 @@
 }
 
 .jnSection h2 {
-  text-align: center;
+  text-align: left;
   margin-bottom: var(--spacing-md);
   position: relative;
 }
@@ -366,8 +366,7 @@
   content: '';
   position: absolute;
   bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   width: 60px;
   height: 3px;
   background: linear-gradient(90deg, var(--color-accent), var(--color-engagement));
@@ -375,7 +374,7 @@
 }
 
 .jnIntro {
-  text-align: center;
+  text-align: left;
   color: var(--color-text-muted);
   max-width: 700px;
   margin: 0 auto var(--spacing-2xl);
@@ -383,7 +382,7 @@
 }
 
 .jnNote {
-  text-align: center;
+  text-align: left;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   margin: -var(--spacing-xl) auto var(--spacing-2xl);
@@ -408,7 +407,7 @@
 
 /* Interpretation */
 .interpretation h2 {
-  text-align: center;
+  text-align: left;
   margin-bottom: var(--spacing-xl);
 }
 
@@ -446,7 +445,7 @@
 
 /* Next step CTA */
 .nextStep {
-  text-align: center;
+  text-align: left;
   padding: var(--spacing-3xl) 0 var(--spacing-4xl);
   border-top: 1px solid var(--color-border-light);
 }
