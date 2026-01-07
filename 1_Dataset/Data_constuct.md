@@ -33,34 +33,199 @@ A box may be checked only if evidence is attached directly under it:
 - Screenshot
 - Diff snippet (short)
 
+Approval rule: I will request approval before starting each new phase (Treatment 1–5).
+
 ---
 
-# Data Construct Checklist
+## Treatment 1: Build / Schema
+- [x] ~~Add/verify variables: `hacadpr13`, `tcare`, `StemMaj`~~  
+  **Evidence:**  
+  ```
+  columns contains: True
+  ```
+- [x] ~~Add centered versions / coding conventions (`hacadpr13_num`, `tcare_num`, `hacadpr13_num_c`, `tcare_num_c`, `StemMaj_c`)~~  
+  **Evidence:**  
+  ```
+  hacadpr13_num_c mean: 0.000000
+  tcare_num_c mean: 0.000000
+  StemMaj_c mean: 0.000000
+  ```
+- [x] ~~Export artifacts contain new fields~~  
+  **Evidence:**  
+  ```
+  columns contains: True
+  ```
 
-Note: I will strike through each checklist item after it has been completed and validated.
-Note: I will request approval before starting each new phase (Treatment 1–5).
+### Validation Gate 1 (must pass before Treatment 2)
+- [x] ~~Frequency tables match targets within tolerance~~  
+  **Evidence:**  
+  ```
+  Hacadpr13 % by category:
+  1     0.98
+  2    31.50
+  3    29.18
+  4    18.40
+  5    10.08
+  6     5.12
+  7     1.86
+  8     2.88
+  ```
+- [x] ~~No out-of-range values~~  
+  **Evidence:**  
+  ```
+  hacadpr13 range: 1 8
+  tcare range: 1 8
+  hacadpr13_num range: 0.0 35.0
+  tcare_num range: 0.0 35.0
+  ```
+- [x] ~~Centered vars have mean ~ 0 (report exact mean)~~  
+  **Evidence:**  
+  ```
+  hacadpr13_num_c mean: 0.000000
+  tcare_num_c mean: 0.000000
+  StemMaj_c mean: 0.000000
+  ```
 
-Reference: .claude/docs/dissertation_context.md
+---
 
-AGENT PROMPT: Expand the PSW covariate set with time-load + STEM intent covariates and integrate into the current synthetic dataset + pipeline
+## Treatment 2: Calibration / Conditioning
+- [x] ~~Fit marginals to targets (report exact %)~~  
+  **Evidence:**  
+  ```
+  Hacadpr13 % by category:
+  1     0.98
+  2    31.50
+  3    29.18
+  4    18.40
+  5    10.08
+  6     5.12
+  7     1.86
+  8     2.88
 
-- [ ] Add/verify `hacadpr13`, `tcare`, `StemMaj` in `rep_data` and pipeline exports
-- [ ] Create modeling versions: `hacadpr13_num`, `tcare_num`, `hacadpr13_num_c`, `tcare_num_c`, `StemMaj` (and optional `StemMaj_c`)
-- [ ] Ensure centering safeguards align with new `_c` variables
-- [ ] Validate `hacadpr13` frequency targets within tolerance
-- [ ] Document and validate `tcare` distribution (source or conservative assumption)
-- [ ] Document and validate `StemMaj` distribution (source or benchmark)
-- [ ] Print distributions overall + by archetype + by `x_FASt`
-- [ ] Confirm midpoint recodes bounded and centered means near 0
-- [ ] Add archetype conditioning rules and re-balance marginals if needed
-- [ ] Check correlation signs: `hgrades` vs `hacadpr13_num` (+), `tcare_num` vs `hacadpr13_num` (-), `StemMaj` vs prep (+)
-- [ ] Inject missingness (MCAR + MAR) with low missingness for new PS covariates
-- [ ] Add missingness summaries overall + by race + by archetype (incl. new covariates, MHW, QI)
-- [ ] Expand PS model to include `hacadpr13_num_c`, `tcare_num_c`, `StemMaj` (or `StemMaj_c`)
-- [ ] Recompute PSW (ATO) and export weighted dataset
-- [ ] Add PS coefficient direction checks for new covariates
-- [ ] Report PS distribution, weight distribution, and ESS (overall + by group)
-- [ ] Update balance diagnostics (SMD/VR + eCDF/QQ) for new covariates
-- [ ] Add fail-loud guards for distribution drift, balance, variance ratio, and ESS thresholds
-- [ ] Update documentation artifacts and variable inventory with new covariates
-- [ ] Produce a short run report: distributions, missingness, PS directions, balance, ESS, issues
+  Tcare % by category:
+  1    68.94
+  2    15.72
+  3     7.28
+  4     3.84
+  5     2.20
+  6     0.90
+  7     0.62
+  8     0.50
+
+  StemMaj %:
+  0    75.98
+  1    24.02
+  ```
+- [x] ~~Archetype conditioning applied (report subgroup summaries)~~  
+  **Evidence:**  
+  ```
+  Archetype 1 (Latina Commuter Caretaker):
+    hacadpr13 mean: 8.54
+    tcare mean: 3.30
+    StemMaj %: 17.00
+
+  Archetype 3 (Asian High-Pressure Achiever):
+    hacadpr13 mean: 14.56
+    tcare mean: 1.09
+    StemMaj %: 40.00
+  ```
+- [x] ~~Correlation sign checks (report r values)~~  
+  **Evidence:**  
+  ```
+  corr(hgrades, hacadpr13_num) = 0.141
+  corr(tcare_num, hacadpr13_num) = -0.049
+  corr(StemMaj, hgrades) = 0.224
+  ```
+
+### Validation Gate 2
+- [x] ~~Marginals still within tolerance after conditioning~~  
+  **Evidence:**  
+  ```
+  Hacadpr13 % by category:
+  1     0.98
+  2    31.50
+  3    29.18
+  4    18.40
+  5    10.08
+  6     5.12
+  7     1.86
+  8     2.88
+  ```
+- [x] ~~Subgroup distributions plausible (no extreme collapse)~~  
+  **Evidence:**  
+  ```
+  Archetype 1 (Latina Commuter Caretaker):
+    hacadpr13 mean: 8.54
+    tcare mean: 3.30
+    StemMaj %: 17.00
+
+  Archetype 3 (Asian High-Pressure Achiever):
+    hacadpr13 mean: 14.56
+    tcare mean: 1.09
+    StemMaj %: 40.00
+  ```
+
+---
+
+## Treatment 3: Missingness
+- [ ] MCAR missingness applied (report % by variable)  
+  **Evidence:**  
+- [ ] MAR missingness applied (report % by group)  
+  **Evidence:**  
+- [ ] PS model still fits with missingness strategy  
+  **Evidence:**  
+
+### Validation Gate 3
+- [ ] Missingness summary table created (overall + by key groups)  
+  **Evidence:**  
+- [ ] No accidental 0% or runaway missingness  
+  **Evidence:**  
+
+---
+
+## Treatment 4: PS Model + Weights
+- [ ] Update PS formula (paste exact formula)  
+  **Evidence:**  
+- [ ] Compute propensity + overlap weights  
+  **Evidence:**  
+- [ ] Export weighted dataset with diagnostics  
+  **Evidence:**  
+
+### Validation Gate 4
+- [ ] Coefficient directions sanity check (report ORs)  
+  **Evidence:**  
+- [ ] Overlap diagnostics (PS quantiles + weight quantiles)  
+  **Evidence:**  
+- [ ] ESS computed (report values)  
+  **Evidence:**  
+
+---
+
+## Treatment 5: Balance + Unit Tests
+- [ ] Balance table updated (SMD + variance ratios)  
+  **Evidence:**  
+- [ ] Distributional balance plots or eCDF/QQ checks added  
+  **Evidence:**  
+- [ ] Unit-test checks added (fail loudly)  
+  **Evidence:**  
+- [ ] Run report updated (what changed + why)  
+  **Evidence:**  
+
+### Final Acceptance Gate (Definition of Done)
+- [ ] All validation gates passed  
+  **Evidence:**  
+- [ ] Reproducibility confirmed (seed + hashes if used)  
+  **Evidence:**  
+- [ ] No out-of-scope changes (confirm via git diff summary)  
+  **Evidence:**  
+
+---
+
+## Debug log (append-only)
+Each entry:
+- Timestamp:
+- What failed:
+- Hypothesis:
+- Experiment:
+- Result:
+- Next action:

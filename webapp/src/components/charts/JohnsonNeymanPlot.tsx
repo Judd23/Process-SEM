@@ -6,19 +6,16 @@ import styles from './JohnsonNeymanPlot.module.css';
 interface JohnsonNeymanPlotProps {
   outcome: 'distress' | 'engagement';
   selectedDose?: number;
-  width?: number;
-  height?: number;
 }
 
 export default function JohnsonNeymanPlot({
   outcome,
   selectedDose = 24,
-  width = 600,
-  height = 350,
 }: JohnsonNeymanPlotProps) {
   const tooltipId = `jn-tooltip-${outcome}`;
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 600, height: 350 });
   const [tooltip, setTooltip] = useState<{
     x: number;
     y: number;
@@ -47,6 +44,24 @@ export default function JohnsonNeymanPlot({
       ciUpper: outcome === 'distress' ? d.distressCI[1] : d.engagementCI[1],
     }));
   }, [outcome]);
+
+  // Responsive sizing
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const width = Math.max(320, Math.min(containerWidth, 600));
+        const height = Math.max(250, width * 0.58);
+        setDimensions({ width, height });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
+
+  const { width, height } = dimensions;
 
   // Colors
   const colors = useMemo(

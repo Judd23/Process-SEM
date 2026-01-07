@@ -17,11 +17,22 @@ interface RaceComparisonData {
   nonfast: { n: number; pct: number };
 }
 
+// Type for transfer credits stats
+interface TransferCreditsStats {
+  fast: { mean: number; sd: number; min: number; max: number; median: number };
+  nonfast: { mean: number; sd: number; min: number; max: number; median: number };
+}
+
 // Type for the fastComparison data
 interface FastComparisonType {
   overall: { n: number; fast_n: number; nonfast_n: number };
   demographics: {
     race: Record<string, RaceComparisonData>;
+    firstgen: Record<string, RaceComparisonData>;
+    pell: Record<string, RaceComparisonData>;
+    sex: Record<string, RaceComparisonData>;
+    living: Record<string, RaceComparisonData>;
+    transferCredits: TransferCreditsStats;
   };
 }
 

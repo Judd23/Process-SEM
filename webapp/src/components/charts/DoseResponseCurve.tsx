@@ -93,9 +93,8 @@ export default function DoseResponseCurve({
       .domain([Math.min(yExtent[0] - yPadding, -0.1), Math.max(yExtent[1] + yPadding, 0.3)])
       .range([innerHeight, 0]);
 
-    // Color for this outcome
-    const color = outcome === 'distress' ? colors.distress :
-                 outcome === 'engagement' ? colors.engagement : colors.belonging;
+    // Color for this outcome - reuse outcomeColor from component scope
+    const color = outcomeColor;
 
     // Get CSS variable values for theming
     const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--color-chart-grid').trim() || '#e0e0e0';
@@ -346,7 +345,7 @@ export default function DoseResponseCurve({
         }
       });
 
-  }, [outcome, selectedDose, dimensions, showCIs, resolvedTheme, doseCoefficients, data, tooltipId]);
+  }, [outcome, selectedDose, dimensions, showCIs, resolvedTheme, doseCoefficients, data, tooltipId, outcomeColor]);
 
   return (
     <div ref={containerRef} className={styles.container}>
