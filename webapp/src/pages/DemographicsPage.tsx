@@ -7,7 +7,7 @@ import SharedElement from '../components/transitions/SharedElement';
 import { useScrollReveal, useStaggeredReveal } from '../hooks/useScrollReveal';
 import useParallax from '../hooks/useParallax';
 import { Link } from 'react-router-dom';
-import fastComparison from '../data/fastComparison.json';
+import fastComparisonData from '../data/fastComparison.json';
 import sampleDescriptives from '../data/sampleDescriptives.json';
 import styles from './DemographicsPage.module.css';
 
@@ -16,6 +16,17 @@ interface RaceComparisonData {
   fast: { n: number; pct: number };
   nonfast: { n: number; pct: number };
 }
+
+// Type for the fastComparison data
+interface FastComparisonType {
+  overall: { n: number; fast_n: number; nonfast_n: number };
+  demographics: {
+    race: Record<string, RaceComparisonData>;
+  };
+}
+
+// Cast imported JSON to proper type
+const fastComparison = fastComparisonData as FastComparisonType;
 
 const groupingOptions = [
   { value: 'race', label: 'Race/Ethnicity', description: 'Compare across Hispanic/Latino, White, Asian, Black/African American, and Other groups' },
@@ -99,21 +110,21 @@ export default function DemographicsPage() {
                             <span className={styles.comparisonLabel}>FASt</span>
                             <div className={styles.demoBar}>
                               <div className={styles.demoBarFill} style={{
-                                width: `${(fastComparison.demographics.race as Record<string, RaceComparisonData>)[group]?.fast.pct || 0}%`,
+                                width: `${fastComparison.demographics.race[group]?.fast.pct || 0}%`,
                                 backgroundColor: 'var(--color-fast)'
                               }} />
                             </div>
-                            <span>{(fastComparison.demographics.race as Record<string, RaceComparisonData>)[group]?.fast.pct || 0}%</span>
+                            <span>{fastComparison.demographics.race[group]?.fast.pct || 0}%</span>
                           </div>
                           <div className={styles.comparisonRow}>
                             <span className={styles.comparisonLabel}>Non-FASt</span>
                             <div className={styles.demoBar}>
                               <div className={styles.demoBarFill} style={{
-                                width: `${(fastComparison.demographics.race as Record<string, RaceComparisonData>)[group]?.nonfast.pct || 0}%`,
+                                width: `${fastComparison.demographics.race[group]?.nonfast.pct || 0}%`,
                                 backgroundColor: 'var(--color-text-muted)'
                               }} />
                             </div>
-                            <span>{(fastComparison.demographics.race as Record<string, RaceComparisonData>)[group]?.nonfast.pct || 0}%</span>
+                            <span>{fastComparison.demographics.race[group]?.nonfast.pct || 0}%</span>
                           </div>
                         </div>
                       )}

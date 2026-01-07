@@ -2,7 +2,7 @@
 
 > **Last Updated:** January 6, 2026  
 > **Maintainer:** Jay Johnson  
-> **Status:** 17 issues | 15 completed ✅
+> **Status:** 17 issues | 18 completed ✅
 
 ---
 
@@ -352,7 +352,7 @@ const getColor = (name: string) =>
 
 **Fix:** Also exclude `/home` or check for content height.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Added `/home` to progress bar exclusion
 
 ---
 
@@ -374,7 +374,7 @@ const getColor = (name: string) =>
 
 **Fix:** Check `parsed.numericValue !== null` before animating.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Already implemented - Shows actual value when non-numeric
 
 ---
 
@@ -418,7 +418,7 @@ const getColor = (name: string) =>
 
 **Fix:** Properly type `fastComparison.json` or create interface.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Added FastComparisonType interface
 
 ---
 

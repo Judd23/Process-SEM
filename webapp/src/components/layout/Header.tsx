@@ -9,8 +9,8 @@ export default function Header() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
 
-  // Don't show progress bar on landing page
-  const showProgress = location.pathname !== '/';
+  // Don't show progress bar on landing page (HashRouter initially shows '/')
+  const showProgress = location.pathname !== '/' && location.pathname !== '/home';
 
   useEffect(() => {
     const handleScroll = () => {
