@@ -13,6 +13,7 @@ export function useD3<T extends SVGSVGElement>(
       const svg = d3.select(ref.current);
       renderFn(svg);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies);
 
   return ref;

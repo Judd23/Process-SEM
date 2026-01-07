@@ -151,6 +151,7 @@ export class ParticleSystem {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private updateConverging(_dt: number) {
     const t = this.easeOutExpo(Math.min(this.progress / 0.4, 1));
 
@@ -180,6 +181,7 @@ export class ParticleSystem {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private updateExploding(_dt: number) {
     const t = this.easeOutBack(Math.min(this.progress / 0.4, 1));
 

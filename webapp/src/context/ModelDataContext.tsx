@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, type ReactNode } from 'react';
 import modelResultsData from '../data/modelResults.json';
 import doseEffectsData from '../data/doseEffects.json';

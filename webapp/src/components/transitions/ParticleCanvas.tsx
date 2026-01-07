@@ -13,6 +13,7 @@ export default function ParticleCanvas({ active, onComplete }: ParticleCanvasPro
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const systemRef = useRef<ParticleSystem | null>(null);
   const animationRef = useRef<number>(0);
+  const animateFnRef = useRef<((lastTime: number) => void) | null>(null);
   const { particleCount, reducedMotion } = useTransition();
 
   const render = useCallback(() => {
@@ -38,8 +39,9 @@ export default function ParticleCanvas({ active, onComplete }: ParticleCanvasPro
     ctx.globalAlpha = 1;
   }, []);
 
-  const animate = useCallback(
-    (lastTime: number) => {
+  // Store animate function in ref to avoid hoisting issues with self-reference
+  useEffect(() => {
+    animateFnRef.current = (lastTime: number) => {
       const system = systemRef.current;
       if (!system || !active) return;
 
@@ -50,13 +52,12 @@ export default function ParticleCanvas({ active, onComplete }: ParticleCanvasPro
       render();
 
       if (!system.isComplete()) {
-        animationRef.current = requestAnimationFrame(() => animate(currentTime));
+        animationRef.current = requestAnimationFrame(() => animateFnRef.current?.(currentTime));
       } else {
         onComplete?.();
       }
-    },
-    [active, render, onComplete]
-  );
+    };
+  }, [active, render, onComplete]);
 
   useEffect(() => {
     if (!active || reducedMotion) {
@@ -79,13 +80,13 @@ export default function ParticleCanvas({ active, onComplete }: ParticleCanvasPro
     systemRef.current = system;
 
     // Start animation
-    animationRef.current = requestAnimationFrame(() => animate(performance.now()));
+    animationRef.current = requestAnimationFrame(() => animateFnRef.current?.(performance.now()));
 
     return () => {
       cancelAnimationFrame(animationRef.current);
       systemRef.current?.reset();
     };
-  }, [active, particleCount, reducedMotion, animate, onComplete]);
+  }, [active, particleCount, reducedMotion, onComplete, render]);
 
   // Handle window resize
   useEffect(() => {

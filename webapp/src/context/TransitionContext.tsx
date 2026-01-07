@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useContext,
@@ -57,7 +58,8 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
   // Detect reduced motion preference
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReducedMotion(mediaQuery.matches);
+    // Defer initial state update to avoid synchronous setState in effect
+    queueMicrotask(() => setReducedMotion(mediaQuery.matches));
 
     const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
     if (mediaQuery.addEventListener) {
@@ -90,13 +92,16 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
   // Detect device capability for particle count
   useEffect(() => {
     const cores = navigator.hardwareConcurrency || 4;
-    if (cores >= 8) {
-      setParticleCount(200);
-    } else if (cores >= 4) {
-      setParticleCount(100);
-    } else {
-      setParticleCount(50);
-    }
+    // Defer state update to avoid synchronous setState in effect
+    queueMicrotask(() => {
+      if (cores >= 8) {
+        setParticleCount(200);
+      } else if (cores >= 4) {
+        setParticleCount(100);
+      } else {
+        setParticleCount(50);
+      }
+    });
   }, []);
 
   const registerSharedElement = useCallback(

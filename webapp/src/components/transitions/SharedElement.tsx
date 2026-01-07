@@ -12,7 +12,7 @@ interface SharedElementProps extends HTMLMotionProps<'div'> {
 export default function SharedElement({
   id,
   children,
-  fallback = 'fade',
+  // fallback prop available for future animation fallback modes
   ...motionProps
 }: SharedElementProps) {
   const ref = useRef<HTMLDivElement>(null);

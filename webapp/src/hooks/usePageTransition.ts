@@ -15,7 +15,6 @@ export function usePageTransition() {
   const {
     mode,
     startTransition,
-    hasMatchingSharedElements,
     reducedMotion,
   } = useTransition();
 
@@ -52,7 +51,6 @@ export function usePageTransition() {
       location.pathname,
       navigate,
       mode,
-      hasMatchingSharedElements,
       reducedMotion,
       startTransition,
     ]

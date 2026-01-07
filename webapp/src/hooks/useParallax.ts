@@ -25,7 +25,8 @@ export default function useParallax({ speed = 0.15, max = 40, disabled = false }
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (disabled || reducedRef.current) {
-      setOffset(0);
+      // Defer state update to avoid synchronous setState in effect
+      queueMicrotask(() => setOffset(0));
       return;
     }
 

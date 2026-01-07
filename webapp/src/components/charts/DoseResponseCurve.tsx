@@ -346,7 +346,7 @@ export default function DoseResponseCurve({
         }
       });
 
-  }, [outcome, selectedDose, dimensions, showCIs, resolvedTheme, doseCoefficients, data]);
+  }, [outcome, selectedDose, dimensions, showCIs, resolvedTheme, doseCoefficients, data, tooltipId]);
 
   return (
     <div ref={containerRef} className={styles.container}>

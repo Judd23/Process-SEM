@@ -56,6 +56,10 @@ hchallenge,HS Courses Challenged You [hchallenge],PS Covariate,ML (continuous),E
 hchallenge_c,HS Challenge (Centered),PS Covariate,ML (continuous),Exogenous,59,Interval,,,hchallenge_c = hchallenge - mean(hchallenge),Continuous (mean-centered),Computed,Mean-centered version,Yes
 cSFcareer,Expected: Talk career plans with faculty [cSFcareer],PS Covariate,ML (continuous),Exogenous,59,Ordinal,4,,,1=Never | 2=Sometimes | 3=Often | 4=Very often,BCSSE,How often do you expect to talk about career plans with a faculty member?,Yes
 cSFcareer_c,Baseline Career Goals (Centered),PS Covariate,ML (continuous),Exogenous,59,Interval,,,cSFcareer_c = cSFcareer - mean(cSFcareer),Continuous (mean-centered),Computed,Mean-centered version,Yes
+hacadpr13,HS Study Hours [hacadpr13],PS Covariate,ML (continuous),Exogenous,59,Ordinal,8,,,1=0 | 2=1-5 | 3=6-10 | 4=11-15 | 5=16-20 | 6=21-25 | 7=26-30 | 8=More than 30,BCSSE,hacadpr13: During your last year of high school how many hours per week spent preparing for class (studying/reading/homework)?,Yes
+hwork,HS Work Hours [hwork],PS Covariate,ML (continuous),Exogenous,59,Ordinal,8,,,1=0 | 2=1-5 | 3=6-10 | 4=11-15 | 5=16-20 | 6=21-25 | 7=26-30 | 8=More than 30,BCSSE,hwork: During your last year of high school how many hours per week working for pay?,Yes
+tcare,Expected Caregiving Hours [tcare],PS Covariate,ML (continuous),Exogenous,59,Ordinal,8,,,1=0 | 2=1-5 | 3=6-10 | 4=11-15 | 5=16-20 | 6=21-25 | 7=26-30 | 8=More than 30,BCSSE,tcare: During the coming school year expected hours per week providing care for dependents (children/parents/etc.)?,Yes
+StemMaj,STEM Major [StemMaj],PS Covariate,ML (continuous),Exogenous,59,Nominal,2,,,0=Non-STEM | 1=STEM,Institutional,Declared major classification,Yes
 MULTI-GROUP MODERATORS (W),,,,,,,,,,,,,
 re_all,Race/Ethnicity [re_all],MG Grouping (W1),ML (continuous),Exogenous,MG,Nominal,5,,,1=Hispanic/Latino | 2=White | 3=Asian | 4=Black/African-Am | 5=Other/Multi,Institutional,Self-reported; collapsed for MG stability,Yes
 firstgen,First-Generation Status [bfirstgen],MG Grouping (W2),ML (continuous),Exogenous,MG,Nominal,2,,,0=Continuing-gen | 1=First-gen,BCSSE,bfirstgen: Neither parent/guardian holds bachelor's degree,Yes
@@ -69,4 +73,3 @@ WEIGHT,,,,,,,,,,,,,
 psw,Propensity Score Overlap Weight [psw],Weight,,,--,Ratio,,,psw = X·(1−ps) + (1−X)·ps; normalized,"0-1 (normalized, mean=1)",Computed,Overlap weights for ATO estimand,Computed
 AUXILIARY VARIABLES,,,,,,,,,,,,,
 Cgrades,College GPA [Cgrades],Auxiliary,,,--,Interval,,,,0.0–4.0 (GPA scale),Institutional,First-year cumulative GPA,Yes
-StemMaj,STEM Major [StemMaj],Auxiliary,,,--,Nominal,2,,,0=Non-STEM | 1=STEM,Institutional,Declared major classification,Yes

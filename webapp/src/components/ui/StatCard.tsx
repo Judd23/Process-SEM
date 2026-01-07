@@ -104,16 +104,17 @@ export default function StatCard({
     // Reset animation state if value changes
     const newParsed = parseFormattedValue(value);
 
-    // If not animatable, just show the value
+    // If not animatable, just show the value (use callback to avoid cascading renders)
     if (!animate || newParsed.numericValue === null) {
-      setDisplayValue(String(value));
+      // Defer state update to avoid synchronous setState in effect
+      queueMicrotask(() => setDisplayValue(String(value)));
       return;
     }
 
     // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
-      setDisplayValue(String(value));
+      queueMicrotask(() => setDisplayValue(String(value)));
       hasAnimated.current = true;
       return;
     }

@@ -212,7 +212,11 @@ export function useRevealCallback<T extends HTMLElement>(
 
   const ref = useRef<T>(null);
   const callbackRef = useRef(callback);
-  callbackRef.current = callback;
+  
+  // Update callback ref in effect to avoid ref access during render
+  useEffect(() => {
+    callbackRef.current = callback;
+  });
 
   useEffect(() => {
     const element = ref.current;

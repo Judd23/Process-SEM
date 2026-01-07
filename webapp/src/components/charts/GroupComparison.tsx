@@ -351,7 +351,7 @@ export default function GroupComparison({
       .attr('font-size', 12)
       .text('Effect Size (β)');
 
-  }, [grouping, pathway, dimensions, resolvedTheme]);
+  }, [grouping, pathway, dimensions, resolvedTheme, tooltipId]);
 
   return (
     <div ref={containerRef} className={styles.container}>

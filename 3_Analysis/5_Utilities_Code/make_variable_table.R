@@ -473,6 +473,29 @@ add_row("cSFcareer_c", "Baseline Career Goals (Centered)", "PS Covariate", "ML (
         source = "Computed", notes = "Mean-centered version",
         model_num = "59")
 
+add_row("hacadpr13", "HS Study Hours [hacadpr13]", "PS Covariate", "ML (continuous)", "Exogenous",
+        scale = "Ordinal", scale_points = 8,
+        levels = "1=0 | 2=1-5 | 3=6-10 | 4=11-15 | 5=16-20 | 6=21-25 | 7=26-30 | 8=More than 30",
+        source = "BCSSE", notes = "hacadpr13: During your last year of high school how many hours per week spent preparing for class (studying/reading/homework)?",
+        model_num = "59")
+
+add_row("hwork", "HS Work Hours [hwork]", "PS Covariate", "ML (continuous)", "Exogenous",
+        scale = "Ordinal", scale_points = 8,
+        levels = "1=0 | 2=1-5 | 3=6-10 | 4=11-15 | 5=16-20 | 6=21-25 | 7=26-30 | 8=More than 30",
+        source = "BCSSE", notes = "hwork: During your last year of high school how many hours per week working for pay?",
+        model_num = "59")
+
+add_row("tcare", "Expected Caregiving Hours [tcare]", "PS Covariate", "ML (continuous)", "Exogenous",
+        scale = "Ordinal", scale_points = 8,
+        levels = "1=0 | 2=1-5 | 3=6-10 | 4=11-15 | 5=16-20 | 6=21-25 | 7=26-30 | 8=More than 30",
+        source = "BCSSE", notes = "tcare: During the coming school year expected hours per week providing care for dependents (children/parents/etc.)?",
+        model_num = "59")
+
+add_row("StemMaj", "STEM Major [StemMaj]", "PS Covariate", "ML (continuous)", "Exogenous",
+        scale = "Nominal", scale_points = 2, levels = "0=Non-STEM | 1=STEM",
+        source = "Institutional", notes = "Declared major classification",
+        model_num = "59")
+
 # ============================================================================
 # SECTION 6: GROUPING/MODERATOR VARIABLES (for RQ4 multi-group analyses)
 # ============================================================================
@@ -538,10 +561,6 @@ add_row("Cgrades", "College GPA [Cgrades]", "Auxiliary", "N/A", "N/A",
         scale = "Interval", scale_points = NA,
         levels = "0.0–4.0 (GPA scale)",
         source = "Institutional", notes = "First-year cumulative GPA")
-
-add_row("StemMaj", "STEM Major [StemMaj]", "Auxiliary", "N/A", "N/A",
-        scale = "Nominal", scale_points = 2, levels = "0=Non-STEM | 1=STEM",
-        source = "Institutional", notes = "Declared major classification")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Combine and write output
@@ -707,4 +726,3 @@ if (!requireNamespace("openxlsx", quietly = TRUE)) {
   saveWorkbook(wb, xlsx_path, overwrite = TRUE)
   cat("Wrote Excel file:", normalizePath(xlsx_path), "\n")
 }
-

@@ -327,7 +327,7 @@ export default function JohnsonNeymanPlot({
           setTooltip(null);
         }
       });
-  }, [data, width, height, outcome, selectedDose, jnPoint, color, outcomeLabel]);
+  }, [data, width, height, outcome, selectedDose, jnPoint, color, outcomeLabel, tooltipId]);
   const interpretation = useMemo(() => {
     if (outcome === 'engagement' && jnPoint !== null) {
       return `At about ${jnPoint} credits, we start to see a clear engagement effect: the confidence band stays on one side of zero. Below that, results are too uncertain.`;
