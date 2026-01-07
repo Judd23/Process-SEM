@@ -355,7 +355,14 @@ export default function GroupComparison({
 
   return (
     <div ref={containerRef} className={styles.container}>
-      <svg ref={svgRef} width={dimensions.width} height={dimensions.height} className={styles.svg} />
+      <svg
+        ref={svgRef}
+        width={dimensions.width}
+        height={dimensions.height}
+        className={styles.svg}
+        role="img"
+        aria-label="Forest plot comparing treatment effects across demographic groups"
+      />
       {tooltip && (
         <div
           className={styles.tooltip}

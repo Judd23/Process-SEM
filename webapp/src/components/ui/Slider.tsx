@@ -49,6 +49,11 @@ export default function Slider({
           onChange={(e) => onChange(Number(e.target.value))}
           className={styles.slider}
           style={{ '--percentage': `${percentage}%` } as React.CSSProperties}
+          aria-label={label}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={value}
+          aria-valuetext={formatValue(value)}
         />
         {thresholdPercentage !== null && (
           <div

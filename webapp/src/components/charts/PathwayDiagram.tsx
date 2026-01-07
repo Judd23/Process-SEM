@@ -640,7 +640,14 @@ export default function PathwayDiagram({
   return (
     <SharedElement id="pathway-diagram">
       <div ref={containerRef} className={styles.container}>
-        <svg ref={svgRef} width={dimensions.width} height={dimensions.height} className={styles.svg} />
+        <svg
+          ref={svgRef}
+          width={dimensions.width}
+          height={dimensions.height}
+          className={styles.svg}
+          role="img"
+          aria-label="Pathway diagram showing FASt treatment effects through emotional distress and engagement mediators to developmental adjustment"
+        />
         {showLegend && isMobile && (
           <div className={styles.mobileLegend} aria-hidden="true">
             <div className={styles.legendItem}>

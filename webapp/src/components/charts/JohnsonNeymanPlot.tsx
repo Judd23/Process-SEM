@@ -350,7 +350,14 @@ export default function JohnsonNeymanPlot({
           credit level where that switch happens.
         </p>
       </div>
-      <svg ref={svgRef} width={width} height={height} className={styles.svg} />
+      <svg
+        ref={svgRef}
+        width={width}
+        height={height}
+        className={styles.svg}
+        role="img"
+        aria-label="Johnson-Neyman plot showing regions of statistical significance across credit dose levels"
+      />
       {tooltip && (
         <div
           className={styles.tooltip}

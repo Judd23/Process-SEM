@@ -350,7 +350,14 @@ export default function DoseResponseCurve({
 
   return (
     <div ref={containerRef} className={styles.container}>
-      <svg ref={svgRef} width={dimensions.width} height={dimensions.height} className={styles.svg} />
+      <svg
+        ref={svgRef}
+        width={dimensions.width}
+        height={dimensions.height}
+        className={styles.svg}
+        role="img"
+        aria-label="Dose-response curve showing how treatment effects change with credit dose"
+      />
       {tooltip && (
         <div
           className={styles.tooltip}

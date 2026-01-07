@@ -2,7 +2,7 @@
 
 > **Last Updated:** January 6, 2026  
 > **Maintainer:** Jay Johnson  
-> **Status:** 26 issues identified | 0 completed
+> **Status:** 17 issues | 9 completed ✅
 
 ---
 
@@ -174,7 +174,7 @@ git bisect reset
 
 **Fix:** Move `animate` function declaration above its first usage, or convert to `function animate()` syntax.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Used ref pattern for self-referencing callback
 
 ---
 
@@ -185,7 +185,7 @@ git bisect reset
 
 **Fix:** Remove unused prop or implement fallback rendering logic.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Removed from destructuring
 
 ---
 
@@ -196,7 +196,7 @@ git bisect reset
 
 **Fix:** Use `useLayoutEffect` for synchronous state updates or restructure to avoid setState in effect body.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Used queueMicrotask()
 
 ---
 
@@ -207,7 +207,7 @@ git bisect reset
 
 **Fix:** Batch state updates or use reducer pattern to consolidate updates.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Used queueMicrotask()
 
 ---
 
@@ -218,7 +218,7 @@ git bisect reset
 
 **Fix:** Initialize state properly outside effect or use useLayoutEffect.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Used queueMicrotask()
 
 ---
 
@@ -229,7 +229,7 @@ git bisect reset
 
 **Fix:** Move ref access into useEffect or use callback ref pattern.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Moved to useEffect
 
 ---
 
@@ -240,7 +240,7 @@ git bisect reset
 
 **Fix:** Remove parameter or prefix with underscore if intentionally unused (already prefixed, may need eslint-disable).
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Added eslint-disable comments
 
 ---
 
@@ -254,7 +254,7 @@ git bisect reset
 
 **Fix:** Add `tooltipId` to useEffect dependency arrays or memoize tooltip setup.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Added tooltipId to dependency arrays
 
 ---
 
@@ -268,7 +268,7 @@ git bisect reset
 
 **Fix:** Separate hook exports into their own files or add `// @refresh reset` directive.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Added eslint-disable directive
 
 ---
 
