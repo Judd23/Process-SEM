@@ -2,7 +2,7 @@
 
 > **Last Updated:** January 6, 2026  
 > **Maintainer:** Jay Johnson  
-> **Status:** 17 issues | 9 completed ✅
+> **Status:** 17 issues | 15 completed ✅
 
 ---
 
@@ -163,7 +163,7 @@ git bisect reset
 </svg>
 ```
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Added role and aria-label to all chart SVGs
 
 ---
 
@@ -281,7 +281,7 @@ git bisect reset
 
 **Fix:** Add responsive sizing with `containerRef` and `ResizeObserver` pattern.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Added ResizeObserver responsive sizing
 
 ---
 
@@ -292,7 +292,7 @@ git bisect reset
 
 **Fix:** Use `Math.min(containerWidth, 700)` pattern and ensure mobile breakpoint adjusts dimensions.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Already implemented - Uses containerRef + ResizeObserver with mobile-adaptive layout
 
 ---
 
@@ -328,7 +328,7 @@ const getColor = (name: string) =>
 />
 ```
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Added aria-label, aria-valuetext, aria-valuenow, etc.
 
 ---
 
@@ -363,7 +363,7 @@ const getColor = (name: string) =>
 
 **Fix:** Remove the duplicate.
 
-**Status:** [ ] Not started
+**Status:** [x] ✅ Fixed Jan 6 - Removed duplicate color variable
 
 ---
 
