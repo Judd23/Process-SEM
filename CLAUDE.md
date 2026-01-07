@@ -938,4 +938,21 @@ Made the ResearcherPage significantly more artistic and dynamic with layered ani
 - `webapp/src/pages/HomePage.module.css`
 - `webapp/src/styles/global.css`
 
+#### Glass Morphism System (Global Classes)
+Added global utility classes for consistent glass UI throughout the app:
+
+- **`.glass-panel`**: Use on cards, modals, dropdowns. Includes backdrop-filter blur, subtle gradient background, and hover lift effect.
+- **`.glass-button`**: Use on all interactive buttons. Includes hover scale, border glow, and press feedback.
+- **`.glass-header`**: Use on section headers and page titles. Includes top-down gradient and bottom border.
+- **`.glass-shine`**: Add-on class that adds a subtle top highlight shine to any glass element.
+- **`.morph-element`**: Add to any element that should participate in page-to-page morph transitions.
+- **`.vibrant-bg`**: Higher contrast vibrant gradient background for hero sections.
+
+#### Morph Transition Rules
+- **Buttons**: Wrap in `<SharedElement id="unique-button-id">` for cross-page morphing
+- **Panels**: Add `id="page-panel"` via SharedElement for primary panel morph
+- **Headers**: Use shared `page-kicker` and `page-title` ids across all pages
+- **Timing**: All morph transitions use `--transition-morph-duration` (1000ms) regardless of scroll position
+- **Spring physics**: stiffness=120, damping=22, mass=1.4 for elegant movement
+
 **Deployed:** https://judd23.github.io/Dissertation-Model-Simulation

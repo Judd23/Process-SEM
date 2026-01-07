@@ -61,6 +61,27 @@ p {
   font-size: var(--font-size-lg);
   color: var(--color-text-muted);
   line-height: 1.8;
+  padding-bottom: var(--spacing-lg);
+  position: relative;
+}
+
+/* Elegant gradient divider under subheader */
+.lead::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 20%,
+    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.3) 80%,
+    transparent 100%
+  );
 }
 
 /* Links */
@@ -183,6 +204,118 @@ tbody tr:nth-child(even) {
 
 .stat-neutral {
   color: var(--color-text-muted);
+}
+
+/* ============================================
+   GLASS MORPHISM SYSTEM
+   Consistent glass look across all elements
+   ============================================ */
+
+/* Base glass panel - use on cards, modals, dropdowns */
+.glass-panel {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-accent) 4%, rgba(255, 255, 255, 0.02)) 0%,
+    color-mix(in srgb, var(--color-engagement) 3%, rgba(255, 255, 255, 0.015)) 100%);
+  -webkit-backdrop-filter: saturate(150%) blur(16px);
+  backdrop-filter: saturate(150%) blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: 
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal),
+    background var(--transition-normal);
+}
+
+.glass-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Glass button - use on all interactive buttons */
+.glass-button {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.02) 100%);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  backdrop-filter: saturate(140%) blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: 
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.glass-button:hover {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.glass-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Glass header - use on section headers, page titles */
+.glass-header {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.02) 100%);
+  -webkit-backdrop-filter: saturate(130%) blur(20px);
+  backdrop-filter: saturate(130%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* Morph-ready elements - consistent timing for page transitions */
+.morph-element {
+  transition: 
+    transform var(--transition-morph-duration) var(--ease-out-expo),
+    opacity var(--transition-morph-duration) var(--ease-out-expo);
+  will-change: transform, opacity;
+}
+
+/* Higher contrast vibrant backgrounds */
+.vibrant-bg {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-accent) 12%, var(--color-background)) 0%,
+    color-mix(in srgb, var(--color-engagement) 8%, var(--color-background)) 50%,
+    color-mix(in srgb, var(--color-fast) 6%, var(--color-background)) 100%);
+}
+
+/* Top highlight shine effect - add to glass elements */
+.glass-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Container */
