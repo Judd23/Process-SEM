@@ -9,7 +9,7 @@
     "lint": "eslint src --cache --cache-location .eslintcache",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist -b gh-pages --dotfiles"
   },
   "homepage": "https://judd23.github.io/Dissertation-Model-Simulation",
   "dependencies": {
