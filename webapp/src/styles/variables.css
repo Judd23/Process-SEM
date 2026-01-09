@@ -20,7 +20,7 @@
   --color-negative: #dc2626;
 
   /* UI colors - Light Mode (default) - 30% bolder background, 50% MORE transparent surfaces */
-  --color-background: #a8c8ff;
+  --color-background: #f8f9fb;
   --color-surface: rgba(232, 242, 255, 0.30);
   --color-surface-elevated: rgba(223, 234, 255, 0.30);
   --color-text: #1a1f26;
@@ -30,7 +30,7 @@
   --color-border-light: #c5d8f5;
   --color-accent: #0055bb;
   --color-accent-hover: #003d8a;
-  --color-accent-light: rgba(0, 85, 187, 0.15);
+  --color-accent-light: rgba(0, 85, 187, 0.35);
 
   /* Chart-specific colors */
   --color-chart-grid: #b4cbe6;
@@ -128,7 +128,7 @@
   --color-border-light: #122549;
   --color-accent: #70b5fa;
   --color-accent-hover: #a3d5fd;
-  --color-accent-light: rgba(112, 181, 250, 0.2);
+  --color-accent-light: rgba(112, 181, 250, 0.4);
 
   /* Adjust construct colors for dark mode visibility */
   --color-distress: #ff7b74;

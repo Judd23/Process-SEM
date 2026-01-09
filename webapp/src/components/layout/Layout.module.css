@@ -41,9 +41,9 @@
   position: absolute;
   inset: 0;
   background: 
-    radial-gradient(ellipse 80% 60% at 15% 25%, rgba(0, 102, 204, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 50% at 85% 75%, rgba(44, 160, 44, 0.14) 0%, transparent 55%),
-    radial-gradient(ellipse 90% 40% at 50% 95%, rgba(214, 39, 40, 0.10) 0%, transparent 60%);
+    radial-gradient(ellipse 80% 60% at 15% 25%, rgba(0, 102, 204, 0.45) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 85% 75%, rgba(44, 160, 44, 0.40) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 40% at 50% 95%, rgba(214, 39, 40, 0.35) 0%, transparent 60%);
   animation: gradientShift 15s ease-in-out infinite alternate;
 }
 

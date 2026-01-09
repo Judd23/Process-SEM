@@ -28,17 +28,17 @@
   overflow: hidden;
   background: radial-gradient(
       circle at 20% 20%,
-      color-mix(in srgb, var(--color-accent-light, rgba(0, 102, 204, 0.12)) 80%, transparent) 0%,
+      color-mix(in srgb, var(--color-accent-light, rgba(0, 102, 204, 0.25)) 90%, transparent) 0%,
       transparent 40%
     ),
     radial-gradient(
       circle at 80% 10%,
-      color-mix(in srgb, var(--color-engagement, #2563eb) 14%, transparent) 0%,
+      color-mix(in srgb, var(--color-engagement, #2563eb) 28%, transparent) 0%,
       transparent 45%
     ),
     radial-gradient(
       circle at 30% 80%,
-      color-mix(in srgb, var(--color-fast, #f97316) 10%, transparent) 0%,
+      color-mix(in srgb, var(--color-fast, #f97316) 22%, transparent) 0%,
       transparent 50%
     ),
     linear-gradient(135deg, color-mix(in srgb, var(--color-background) 85%, transparent) 0%, color-mix(in srgb, var(--color-background) 65%, transparent) 100%);
@@ -58,7 +58,7 @@
   height: 800px;
   background: radial-gradient(
     ellipse,
-    color-mix(in srgb, var(--color-accent-light, rgba(0, 102, 204, 0.12)) 60%, transparent) 0%,
+    color-mix(in srgb, var(--color-accent-light, rgba(0, 102, 204, 0.25)) 80%, transparent) 0%,
     transparent 70%
   );
   border-radius: 50%;
@@ -76,7 +76,7 @@
   height: 700px;
   background: radial-gradient(
     ellipse,
-    color-mix(in srgb, var(--color-fast, #f97316) 18%, transparent) 0%,
+    color-mix(in srgb, var(--color-fast, #f97316) 32%, transparent) 0%,
     transparent 65%
   );
   border-radius: 50%;
