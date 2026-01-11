@@ -22,6 +22,7 @@ interface InteractiveSurfaceProps {
   'aria-pressed'?: boolean;
   'aria-expanded'?: boolean;
   'aria-controls'?: string;
+  role?: string;
   type?: 'button' | 'submit' | 'reset';
   id?: string;
   title?: string;
@@ -48,6 +49,7 @@ export function InteractiveSurface({
   'aria-pressed': ariaPressed,
   'aria-expanded': ariaExpanded,
   'aria-controls': ariaControls,
+  role,
   type,
   id,
   title,
@@ -72,6 +74,7 @@ export function InteractiveSurface({
     transition: DANCE_SPRING_HEAVY,
     onClick,
     'aria-label': ariaLabel,
+    role,
     id,
     title,
     role,

@@ -15,6 +15,13 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Dark base for parallax gradients to show against */
+  background: hsl(220, 70%, 3%);
+}
+
+html[data-theme="light"] {
+  /* Light base for parallax gradients */
+  background: hsl(220, 25%, 94%);
 }
 
 body {
@@ -22,7 +29,7 @@ body {
   font-size: var(--font-size-base);
   line-height: 1.6;
   color: var(--color-text);
-  /* No opaque background - orbs visible through ParallaxBackground */
+  /* Transparent to let parallax background show through */
   background-color: transparent;
 }
 
