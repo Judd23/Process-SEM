@@ -3,6 +3,17 @@
    Shared glass styling for panels across all pages
    ============================================ */
 
+/* 
+   USAGE:
+   - .glass-panel          → Standard glass (6% accent tint)
+   - .glass-panel-light    → 50% more transparent (3% accent tint)
+   - .glass-panel-subtle   → Minimal glass (header/footer bars)
+   
+   Modules should NOT duplicate backdrop-filter. Instead:
+   1. Apply global glass class: className={`${styles.card} glass-panel-light`}
+   2. Keep only layout/positioning in module CSS
+*/
+
 /* Base glass panel - use on cards, modals, dropdowns */
 .glass-panel {
   background: linear-gradient(135deg,
@@ -85,6 +96,67 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.06),
     inset 0 -1px 0 rgba(0, 0, 0, 0.10),
     inset 0 -12px 28px rgba(0, 0, 0, 0.10);
+}
+
+/* Light variant - 50% more transparent for stat cards, accordions */
+.glass-panel-light {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent) 3%, rgba(255, 255, 255, 0.02)) 0%,
+    rgba(255, 255, 255, 0.015) 50%,
+    color-mix(in srgb, var(--color-engagement) 2%, rgba(255, 255, 255, 0.015)) 100%
+  );
+  -webkit-backdrop-filter: saturate(180%) blur(6px);
+  backdrop-filter: saturate(180%) blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: var(--radius-lg);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.03),
+    0 2px 8px rgba(0, 0, 0, 0.015),
+    inset 0 1px 0 rgba(255, 255, 255, 0.075),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
+  position: relative;
+  transition: 
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.glass-panel-light::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 20%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.glass-panel-light:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.025),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.02);
+}
+
+/* Subtle variant - minimal glass for toolbars, headers */
+.glass-panel-subtle {
+  background: rgba(255, 255, 255, 0.02);
+  -webkit-backdrop-filter: saturate(160%) blur(6px);
+  backdrop-filter: saturate(160%) blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
 }
 
 /* Glass button - use on all interactive buttons */
