@@ -32,44 +32,23 @@ export function usePointerParallax({
   const targetRef = useRef({ x: 0, y: 0, clientX: 0, clientY: 0 });
   const rafRef = useRef<number | null>(null);
 
-  // Use ref for animate to avoid circular dependency
-  const animateRef = useRef<(() => void) | null>(null);
-
-  animateRef.current = () => {
-    if (!enabled) {
-      setPosition({ x: 0, y: 0, clientX: 0, clientY: 0 });
-      return;
-    }
-
-    setPosition((prev) => {
-      const dx = targetRef.current.x - prev.x;
-      const dy = targetRef.current.y - prev.y;
-
-      // If close enough, snap to target
-      if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
-        return {
-          x: targetRef.current.x,
-          y: targetRef.current.y,
-          clientX: targetRef.current.clientX,
-          clientY: targetRef.current.clientY,
-        };
-      }
-
-      return {
-        x: prev.x + dx * smoothing,
-        y: prev.y + dy * smoothing,
-        clientX: targetRef.current.clientX,
-        clientY: targetRef.current.clientY,
-      };
-    });
-
-    rafRef.current = requestAnimationFrame(() => animateRef.current?.());
-  };
+  // Keep latest options in refs so the animation loop doesn't depend on render-time values
+  const enabledRef = useRef(enabled);
+  const smoothingRef = useRef(smoothing);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !enabled) return;
+    enabledRef.current = enabled;
+  }, [enabled]);
+
+  useEffect(() => {
+    smoothingRef.current = smoothing;
+  }, [smoothing]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
 
     const handleMove = (e: PointerEvent) => {
+      if (!enabledRef.current) return;
       const { clientX, clientY } = e;
       const { innerWidth, innerHeight } = window;
 
@@ -91,18 +70,54 @@ export function usePointerParallax({
     window.addEventListener('blur', handleLeave);
     window.addEventListener('mouseleave', handleLeave);
 
+    const animate = () => {
+      if (!enabledRef.current) {
+        // If disabled, reset and stop looping
+        targetRef.current = { x: 0, y: 0, clientX: 0, clientY: 0 };
+        setPosition({ x: 0, y: 0, clientX: 0, clientY: 0 });
+        rafRef.current = null;
+        return;
+      }
+
+      setPosition((prev) => {
+        const dx = targetRef.current.x - prev.x;
+        const dy = targetRef.current.y - prev.y;
+
+        // If close enough, snap to target
+        if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
+          return {
+            x: targetRef.current.x,
+            y: targetRef.current.y,
+            clientX: targetRef.current.clientX,
+            clientY: targetRef.current.clientY,
+          };
+        }
+
+        const s = smoothingRef.current;
+        return {
+          x: prev.x + dx * s,
+          y: prev.y + dy * s,
+          clientX: targetRef.current.clientX,
+          clientY: targetRef.current.clientY,
+        };
+      });
+
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
     // Start animation loop
-    rafRef.current = requestAnimationFrame(() => animateRef.current?.());
+    rafRef.current = requestAnimationFrame(animate);
 
     return () => {
       window.removeEventListener('pointermove', handleMove);
       window.removeEventListener('blur', handleLeave);
       window.removeEventListener('mouseleave', handleLeave);
-      if (rafRef.current) {
+      if (rafRef.current != null) {
         cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
       }
     };
-  }, [enabled]);
+  }, []);
 
   return position;
 }
