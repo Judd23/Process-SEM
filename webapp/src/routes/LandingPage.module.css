@@ -10,14 +10,14 @@
   --navy-light: #1e3a5f;
   --navy-accent: #f0f4f8;
   --navy-glow: #ffffff;
-  
-  /* Refined easing curves - softer, no bounce */
+
+  /* Motion system (LOCKED): springy editorial entrance + light settle */
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-back-soft: cubic-bezier(0.25, 1.25, 0.35, 1);
   --ease-elegant: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-settle: cubic-bezier(0.2, 0.9, 0.2, 1);
-  --ease-soft: cubic-bezier(0.25, 0.9, 0.25, 1);
-  --ease-soft-out: cubic-bezier(0.16, 1, 0.3, 1);
-  
+
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -115,8 +115,8 @@
 }
 
 /* ============================================
-   ELEGANT ENTRANCE SYSTEM
-   Refined, professional with subtle settle
+   ENTRANCE SYSTEM (LOCKED)
+   Spring-forward reveal with a controlled settle
    ============================================ */
 
 .fromTop,
@@ -141,95 +141,115 @@
 .scrollIndicator.fromBottom { transform: translateY(18px); }
 
 /* ============================================
-   STAGGERED ELEGANT ANIMATIONS
-   Softer, restrained reveals
+   STAGGERED ENTRANCE ANIMATIONS (LOCKED)
+   Spring motion + slight overshoot
    ============================================ */
 
 .loaded .kicker.fromTop {
-  animation: softRevealDown 0.9s var(--ease-soft-out) 0.1s forwards;
+  animation: springRevealDown 1.0s var(--ease-out-back) 0.1s forwards;
 }
 
 .loaded .title.fromTop {
-  animation: softRevealDownTitle 1.05s var(--ease-soft-out) 0.25s forwards;
+  animation: springRevealDownTitle 1.15s var(--ease-out-back) 0.25s forwards;
 }
 
 .loaded .subtitle.fromTop {
-  animation: softRevealDown 0.9s var(--ease-soft-out) 0.45s forwards;
+  animation: springRevealDown 1.0s var(--ease-out-back-soft) 0.45s forwards;
 }
 
 .loaded .divider {
-  animation: softExpand 0.8s var(--ease-soft-out) 0.55s forwards;
+  animation: springExpand 0.95s var(--ease-out-back) 0.55s forwards;
 }
 
 .loaded .description.fromBottom {
-  animation: softRevealUp 0.95s var(--ease-soft-out) 0.65s forwards;
+  animation: springRevealUp 1.05s var(--ease-out-back) 0.65s forwards;
 }
 
 .loaded .nameplate.fromBottom {
-  animation: softRevealUp 1.0s var(--ease-soft-out) 0.8s forwards;
+  animation: springRevealUp 1.15s var(--ease-out-back) 0.8s forwards;
 }
 
 .loaded .cta.fromBottom {
-  animation: softRevealCTA 0.95s var(--ease-soft-out) 0.95s forwards;
+  animation: springRevealCTA 1.05s var(--ease-out-back) 0.95s forwards;
 }
 
 .loaded .scrollIndicator.fromBottom {
-  animation: softFadeIn 0.8s var(--ease-soft) 1.2s forwards;
+  animation: springFadeIn 0.9s var(--ease-out-back-soft) 1.2s forwards;
 }
 
 /* ============================================
-   SOFT REVEAL KEYFRAMES
-   Smooth, restrained, no bounce
+   SPRING REVEAL KEYFRAMES (LOCKED)
+   Controlled overshoot, no excessive travel
    ============================================ */
 
-@keyframes softRevealDown {
+@keyframes springRevealDown {
   0% {
     opacity: 0;
     transform: translateY(-24px);
   }
+  75% {
+    opacity: 1;
+    transform: translateY(2px);
+  }
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes softRevealDownTitle {
+@keyframes springRevealDownTitle {
   0% {
     opacity: 0;
     transform: translateY(-32px);
   }
+  72% {
+    opacity: 1;
+    transform: translateY(3px);
+  }
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes softRevealUp {
+@keyframes springRevealUp {
   0% {
     opacity: 0;
     transform: translateY(24px);
   }
+  75% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
   100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes softRevealCTA {
+@keyframes springRevealCTA {
   0% {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(24px) scale(0.98);
+  }
+  78% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.01);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-@keyframes softExpand {
+@keyframes springExpand {
   0% {
     opacity: 0;
     transform: scaleX(0.6);
+  }
+  80% {
+    opacity: 1;
+    transform: scaleX(1.03);
   }
   100% {
     opacity: 1;
@@ -237,10 +257,14 @@
   }
 }
 
-@keyframes softFadeIn {
+@keyframes springFadeIn {
   0% {
     opacity: 0;
     transform: translateY(18px);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(-1px);
   }
   100% {
     opacity: 1;
@@ -621,5 +645,5 @@
 /* ============================================
    DARK MODE ADJUSTMENTS
    Keep glass styling centralized in glass.css.
-   (No LandingPage-specific glass overrides to avoid tint/thin drift.)
+   Entrance motion is intentionally springy and consistent.
    ============================================ */
