@@ -1,4 +1,3 @@
-import { useTheme } from '../app/contexts';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -8,12 +7,10 @@ import styles from './LandingPage.module.css';
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const { resolvedTheme } = useTheme();
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const logoSrc = resolvedTheme === 'light'
-    ? `${import.meta.env.BASE_URL}researcher/SDSUPrmary Bar.png`
-    : `${import.meta.env.BASE_URL}researcher/sdsu_primary-logo_rgb_horizontal_reverse.png`;
+  // Dark mode only - always use reverse logo
+  const logoSrc = `${import.meta.env.BASE_URL}researcher/sdsu_primary-logo_rgb_horizontal_reverse.png`;
 
   useEffect(() => {
     // Trigger animations after mount
