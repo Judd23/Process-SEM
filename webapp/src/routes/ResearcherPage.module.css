@@ -91,7 +91,7 @@
   position: relative;
   margin: 0;
   border: 2px solid var(--color-border);
-  background: var(--color-surface);
+  background: transparent;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: 
@@ -160,7 +160,7 @@
 
 .heroMedia {
   padding: var(--spacing-lg);
-  background: var(--color-surface);
+  background: transparent;
 }
 
 .heroMedia picture,
@@ -336,7 +336,7 @@
 }
 
 .fact {
-  background: var(--color-surface);
+  background: transparent;
   padding: var(--spacing-lg);
   transition: 
     background var(--transition-fast), 
@@ -936,7 +936,7 @@
   font-weight: 700;
   font-size: var(--font-size-xl);
   position: relative;
-  background: var(--color-surface);
+  background: transparent;
   border: 2px solid var(--color-border);
   border-radius: 8px;
   transition: 

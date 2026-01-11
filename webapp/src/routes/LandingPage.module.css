@@ -11,12 +11,12 @@
   --navy-accent: #f0f4f8;
   --navy-glow: #ffffff;
   
-  /* Refined easing curves - bounce with soft settle */
-  --ease-bounce-settle: cubic-bezier(0.34, 1.56, 0.64, 1);   /* Overshoot with settle */
-  --ease-bounce-soft: cubic-bezier(0.34, 1.4, 0.64, 1);      /* Gentler overshoot */
-  --ease-elegant: cubic-bezier(0.22, 1, 0.36, 1);             /* Smooth decel */
-  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);           /* Fast start, soft end */
-  --ease-settle: cubic-bezier(0.33, 1, 0.68, 1);              /* Gentle settle */
+  /* Refined easing curves - softer, no bounce */
+  --ease-elegant: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-settle: cubic-bezier(0.2, 0.9, 0.2, 1);
+  --ease-soft: cubic-bezier(0.25, 0.9, 0.25, 1);
+  --ease-soft-out: cubic-bezier(0.16, 1, 0.3, 1);
   
   min-height: 100dvh;
   display: flex;
@@ -131,68 +131,61 @@
   will-change: transform, opacity;
 }
 
-/* Initial positions - generous offset for dramatic entrance */
-.kicker.fromTop { transform: translateY(-80px); }
-.title.fromTop { transform: translateY(-100px); }
-.subtitle.fromTop { transform: translateY(-60px); }
-.description.fromBottom { transform: translateY(80px); }
-.nameplate.fromBottom { transform: translateY(100px); }
-.cta.fromBottom { transform: translateY(70px); }
-.scrollIndicator.fromBottom { transform: translateY(50px); }
+/* Initial positions - restrained offset for softer entrance */
+.kicker.fromTop { transform: translateY(-24px); }
+.title.fromTop { transform: translateY(-32px); }
+.subtitle.fromTop { transform: translateY(-20px); }
+.description.fromBottom { transform: translateY(24px); }
+.nameplate.fromBottom { transform: translateY(28px); }
+.cta.fromBottom { transform: translateY(24px); }
+.scrollIndicator.fromBottom { transform: translateY(18px); }
 
 /* ============================================
    STAGGERED ELEGANT ANIMATIONS
-   Long, smooth reveals with soft landings
+   Softer, restrained reveals
    ============================================ */
 
 .loaded .kicker.fromTop {
-  animation: bounceRevealDown 1.6s var(--ease-bounce-soft) 0.2s forwards;
+  animation: softRevealDown 0.9s var(--ease-soft-out) 0.1s forwards;
 }
 
 .loaded .title.fromTop {
-  animation: bounceRevealDownTitle 2s var(--ease-bounce-settle) 0.5s forwards;
+  animation: softRevealDownTitle 1.05s var(--ease-soft-out) 0.25s forwards;
 }
 
 .loaded .subtitle.fromTop {
-  animation: bounceRevealDown 1.5s var(--ease-bounce-soft) 1.0s forwards;
+  animation: softRevealDown 0.9s var(--ease-soft-out) 0.45s forwards;
 }
 
 .loaded .divider {
-  animation: bounceExpand 1.6s var(--ease-bounce-soft) 1.4s forwards;
+  animation: softExpand 0.8s var(--ease-soft-out) 0.55s forwards;
 }
 
 .loaded .description.fromBottom {
-  animation: bounceRevealUp 1.5s var(--ease-bounce-soft) 1.7s forwards;
+  animation: softRevealUp 0.95s var(--ease-soft-out) 0.65s forwards;
 }
 
 .loaded .nameplate.fromBottom {
-  animation: bounceRevealUp 1.8s var(--ease-bounce-settle) 2.0s forwards;
+  animation: softRevealUp 1.0s var(--ease-soft-out) 0.8s forwards;
 }
 
 .loaded .cta.fromBottom {
-  animation: bounceRevealCTA 1.8s var(--ease-bounce-settle) 2.4s forwards;
+  animation: softRevealCTA 0.95s var(--ease-soft-out) 0.95s forwards;
 }
 
 .loaded .scrollIndicator.fromBottom {
-  animation: softFadeIn 1.5s var(--ease-elegant) 3s forwards;
+  animation: softFadeIn 0.8s var(--ease-soft) 1.2s forwards;
 }
 
 /* ============================================
-   BOUNCE REVEAL KEYFRAMES
-   Bump effect with gradual opacity for soft settle
+   SOFT REVEAL KEYFRAMES
+   Smooth, restrained, no bounce
    ============================================ */
 
-/* Elements from top - bounce down */
-@keyframes bounceRevealDown {
+@keyframes softRevealDown {
   0% {
     opacity: 0;
-    transform: translateY(-80px);
-  }
-  40% {
-    opacity: 0.6;
-  }
-  70% {
-    opacity: 0.9;
+    transform: translateY(-24px);
   }
   100% {
     opacity: 1;
@@ -200,20 +193,10 @@
   }
 }
 
-/* Title - larger travel, bounce with soft fade */
-@keyframes bounceRevealDownTitle {
+@keyframes softRevealDownTitle {
   0% {
     opacity: 0;
-    transform: translateY(-100px);
-  }
-  35% {
-    opacity: 0.5;
-  }
-  60% {
-    opacity: 0.8;
-  }
-  85% {
-    opacity: 0.95;
+    transform: translateY(-32px);
   }
   100% {
     opacity: 1;
@@ -221,17 +204,10 @@
   }
 }
 
-/* Elements from bottom - bounce up */
-@keyframes bounceRevealUp {
+@keyframes softRevealUp {
   0% {
     opacity: 0;
-    transform: translateY(80px);
-  }
-  40% {
-    opacity: 0.6;
-  }
-  70% {
-    opacity: 0.9;
+    transform: translateY(24px);
   }
   100% {
     opacity: 1;
@@ -239,32 +215,21 @@
   }
 }
 
-/* CTA button - bounce with scale */
-@keyframes bounceRevealCTA {
+@keyframes softRevealCTA {
   0% {
     opacity: 0;
-    transform: translateY(70px) scale(0.96);
-  }
-  40% {
-    opacity: 0.5;
-  }
-  70% {
-    opacity: 0.85;
+    transform: translateY(24px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-/* Divider expand - bounce with soft settle */
-@keyframes bounceExpand {
+@keyframes softExpand {
   0% {
     opacity: 0;
-    transform: scaleX(0);
-  }
-  50% {
-    opacity: 0.7;
+    transform: scaleX(0.6);
   }
   100% {
     opacity: 1;
@@ -272,17 +237,10 @@
   }
 }
 
-/* Scroll indicator - gentle fade in */
 @keyframes softFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(50px);
-  }
-  40% {
-    opacity: 0.3;
-  }
-  70% {
-    opacity: 0.7;
+    transform: translateY(18px);
   }
   100% {
     opacity: 1;
