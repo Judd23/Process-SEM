@@ -25,6 +25,7 @@ interface InteractiveSurfaceProps {
   type?: 'button' | 'submit' | 'reset';
   id?: string;
   title?: string;
+  role?: string;
   ref?: Ref<HTMLElement> | RefObject<HTMLElement | null>;
 }
 
@@ -50,6 +51,7 @@ export function InteractiveSurface({
   type,
   id,
   title,
+  role,
   ref,
 }: InteractiveSurfaceProps) {
   const hoverProps = {
@@ -72,6 +74,7 @@ export function InteractiveSurface({
     'aria-label': ariaLabel,
     id,
     title,
+    role,
     ref: ref as any,
   };
 
