@@ -299,11 +299,11 @@
   font-weight: 500;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--navy-accent);
+  color: var(--color-text-muted);
   margin-bottom: var(--spacing-lg);
   padding: var(--spacing-xs) var(--spacing-md);
   background: color-mix(in srgb, var(--navy-mid) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--navy-accent) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-text-muted) 25%, transparent);
   border-radius: 4px;
 }
 
@@ -507,7 +507,7 @@
   font-family: var(--font-body);
   font-size: var(--font-size-lg);
   font-weight: 500;
-  color: var(--navy-accent);
+  color: var(--color-text-muted);
   margin: var(--spacing-2xs) 0 0;
   letter-spacing: 0.02em;
 }
@@ -628,7 +628,7 @@
 }
 
 .scrollIndicator:hover .scrollText {
-  color: var(--navy-accent);
+  color: var(--color-text);
 }
 
 .scrollText {
