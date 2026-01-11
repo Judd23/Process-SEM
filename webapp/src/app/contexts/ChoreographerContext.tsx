@@ -88,6 +88,7 @@ export function ChoreographerProvider({ children }: ChoreographerProviderProps) 
   const [phase, setPhase] = useState<ChoreographerPhase>('idle');
   const [visibleElements] = useState(() => new Map<string, RegisteredElement>());
   const [viewportCenter, setViewportCenter] = useState<ViewportCenter>({ x: 0, y: 0 });
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   // Track viewport center
   useEffect(() => {

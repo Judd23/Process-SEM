@@ -26,6 +26,7 @@ interface InteractiveSurfaceProps {
   id?: string;
   title?: string;
   ref?: Ref<HTMLElement> | RefObject<HTMLElement | null>;
+  role?: string;
 }
 
 /**
@@ -51,6 +52,7 @@ export function InteractiveSurface({
   id,
   title,
   ref,
+  role,
 }: InteractiveSurfaceProps) {
   const hoverProps = {
     y: -hoverLift,
@@ -73,6 +75,7 @@ export function InteractiveSurface({
     id,
     title,
     ref: ref as any,
+    role,
   };
 
   // Handle Link special case
