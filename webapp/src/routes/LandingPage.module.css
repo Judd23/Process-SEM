@@ -131,14 +131,14 @@
   will-change: transform, opacity;
 }
 
-/* Initial positions - restrained offset for softer entrance */
-.kicker.fromTop { transform: translateY(-24px); }
-.title.fromTop { transform: translateY(-32px); }
-.subtitle.fromTop { transform: translateY(-20px); }
-.description.fromBottom { transform: translateY(24px); }
-.nameplate.fromBottom { transform: translateY(28px); }
-.cta.fromBottom { transform: translateY(24px); }
-.scrollIndicator.fromBottom { transform: translateY(18px); }
+/* Initial positions - longer travel for deeper spring */
+.kicker.fromTop { transform: translateY(-56px); }
+.title.fromTop { transform: translateY(-72px); }
+.subtitle.fromTop { transform: translateY(-52px); }
+.description.fromBottom { transform: translateY(56px); }
+.nameplate.fromBottom { transform: translateY(64px); }
+.cta.fromBottom { transform: translateY(56px); }
+.scrollIndicator.fromBottom { transform: translateY(44px); }
 
 /* ============================================
    STAGGERED ENTRANCE ANIMATIONS (LOCKED)
@@ -185,10 +185,16 @@
 @keyframes springRevealDown {
   0% {
     opacity: 0;
-    transform: translateY(-24px);
+    transform: translateY(-56px);
   }
-  75% {
+  60% {
     opacity: 1;
+    transform: translateY(10px);
+  }
+  78% {
+    transform: translateY(-6px);
+  }
+  90% {
     transform: translateY(2px);
   }
   100% {
@@ -200,11 +206,17 @@
 @keyframes springRevealDownTitle {
   0% {
     opacity: 0;
-    transform: translateY(-32px);
+    transform: translateY(-72px);
   }
-  72% {
+  58% {
     opacity: 1;
-    transform: translateY(3px);
+    transform: translateY(12px);
+  }
+  76% {
+    transform: translateY(-7px);
+  }
+  90% {
+    transform: translateY(2px);
   }
   100% {
     opacity: 1;
@@ -215,10 +227,16 @@
 @keyframes springRevealUp {
   0% {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(56px);
   }
-  75% {
+  60% {
     opacity: 1;
+    transform: translateY(-10px);
+  }
+  78% {
+    transform: translateY(6px);
+  }
+  90% {
     transform: translateY(-2px);
   }
   100% {
@@ -230,11 +248,17 @@
 @keyframes springRevealCTA {
   0% {
     opacity: 0;
-    transform: translateY(24px) scale(0.98);
+    transform: translateY(56px) scale(0.98);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.03);
   }
   78% {
-    opacity: 1;
-    transform: translateY(-2px) scale(1.01);
+    transform: translateY(6px) scale(0.995);
+  }
+  90% {
+    transform: translateY(-2px) scale(1.005);
   }
   100% {
     opacity: 1;
@@ -260,10 +284,16 @@
 @keyframes springFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(44px);
   }
-  85% {
+  65% {
     opacity: 1;
+    transform: translateY(-6px);
+  }
+  82% {
+    transform: translateY(3px);
+  }
+  92% {
     transform: translateY(-1px);
   }
   100% {
