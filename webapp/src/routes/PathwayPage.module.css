@@ -36,8 +36,6 @@
   position: sticky;
   top: calc(var(--header-height) + var(--spacing-sm));
   background: color-mix(in srgb, var(--color-background) 92%, transparent);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   padding: var(--spacing-md) 0;
   z-index: 100;
   border-bottom: 1px solid transparent;
@@ -65,7 +63,6 @@
 }
 
 .pathwayButton {
-  /* 50% MORE TRANSPARENT */
   background: rgba(255, 255, 255, 0.006);
   border: 1px solid rgba(255, 255, 255, 0.024);
   border-radius: var(--radius-md);
@@ -77,34 +74,10 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   min-height: 44px; /* WCAG touch target */
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.012),
-    inset 0 1px 0 rgba(255, 255, 255, 0.012);
-  -webkit-backdrop-filter: saturate(150%) blur(6px);
-  backdrop-filter: saturate(150%) blur(6px);
   position: relative;
 }
 
-/* Edge reflection - 50% MORE TRANSPARENT */
-.pathwayButton::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 20%,
-    rgba(255, 255, 255, 0.105) 50%,
-    rgba(255, 255, 255, 0.12) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* Edge reflection handled by glass-button class */
 
 @media (max-width: 480px) {
   .pathwayButton {
@@ -152,17 +125,8 @@
   gap: var(--spacing-md);
 }
 
-/* Diagram - 50% MORE TRANSPARENT */
+/* Diagram - glass handled by glass.css */
 .diagram {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--color-accent) 3%, rgba(255, 255, 255, 0.012)) 0%,
-    rgba(255, 255, 255, 0.0075) 50%,
-    color-mix(in srgb, var(--color-engagement) 2%, rgba(255, 255, 255, 0.009)) 100%
-  );
-  -webkit-backdrop-filter: saturate(180%) blur(6px);
-  backdrop-filter: saturate(180%) blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.036);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   margin-bottom: var(--spacing-xl);
@@ -172,11 +136,6 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   position: relative;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.018),
-    0 2px 8px rgba(0, 0, 0, 0.009),
-    inset 0 1px 0 rgba(255, 255, 255, 0.036),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.006);
   transition: 
     transform var(--transition-fast), 
     box-shadow var(--transition-fast), 
@@ -218,54 +177,12 @@
 }
 
 .diagram:hover {
-  border-color: rgba(255, 255, 255, 0.06);
-  box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.03),
-    0 6px 16px rgba(0, 0, 0, 0.015),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.006);
+  /* Hover handled by glass.css */
 }
 
-.diagram::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  /* Edge reflection - 50% MORE TRANSPARENT */
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 20%,
-    rgba(255, 255, 255, 0.12) 50%,
-    rgba(255, 255, 255, 0.06) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* Edge reflection handled by glass.css */
 
-/* Inner glass layer for depth (desktop only) - 50% MORE TRANSPARENT */
-.diagram::after {
-  content: '';
-  position: absolute;
-  inset: 8px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.0045) 0%,
-    rgba(255, 255, 255, 0.0024) 50%,
-    rgba(255, 255, 255, 0.003) 100%
-  );
-  -webkit-backdrop-filter: saturate(130%) blur(8px);
-  backdrop-filter: saturate(130%) blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.018);
-  border-radius: calc(var(--radius-lg) - 4px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.024);
-  pointer-events: none;
-  z-index: -1;
-}
+/* Inner glass layer handled by glass.css */
 
 @media (max-width: 768px) {
   .diagram {
@@ -367,55 +284,17 @@
 }
 
 .coefficientCard {
-  /* 40% MORE TRANSPARENT */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.012) 0%,
-    rgba(255, 255, 255, 0.006) 50%,
-    rgba(255, 255, 255, 0.009) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.048);
+  /* Glass handled by glass.css .coefficientCard auto-selector */
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.048),
-    0 2px 8px rgba(0, 0, 0, 0.024),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
   position: relative;
   transition: opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
-.coefficientCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  /* Edge reflection - 40% MORE TRANSPARENT */
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.12) 20%,
-    rgba(255, 255, 255, 0.21) 50%,
-    rgba(255, 255, 255, 0.12) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* Edge reflection handled by glass.css */
 
 .coefficientCard:not(.dimmed):hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+  /* Hover handled by glass.css */
 }
 
 .coefficientCard.dimmed {
@@ -514,26 +393,7 @@
   position: relative;
 }
 
-/* Edge reflection - 40% MORE TRANSPARENT */
-.indirectCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.12) 20%,
-    rgba(255, 255, 255, 0.21) 50%,
-    rgba(255, 255, 255, 0.12) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* Edge reflection handled by glass.css .indirectCard auto-selector */
 
 .indirectCard:hover {
   box-shadow: var(--shadow-lg);
@@ -653,26 +513,7 @@
   position: relative;
 }
 
-/* Edge reflection - 40% MORE TRANSPARENT */
-.summaryCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.12) 20%,
-    rgba(255, 255, 255, 0.21) 50%,
-    rgba(255, 255, 255, 0.12) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* Edge reflection handled by glass.css */
 
 .summaryCard:hover {
   box-shadow: var(--shadow-lg);
@@ -753,8 +594,7 @@
 
   .diagram,
   .coefficientCard {
-    -webkit-backdrop-filter: saturate(140%) blur(6px);
-    backdrop-filter: saturate(140%) blur(6px);
+    /* Glass handled by glass.css */
   }
 
   .diagram:hover,

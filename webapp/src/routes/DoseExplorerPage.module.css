@@ -25,17 +25,8 @@
   margin-bottom: var(--spacing-md);
 }
 
-/* Controls - 50% MORE TRANSPARENT */
+/* Controls - glass handled by glass.css */
 .controls {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.003) 50%,
-    rgba(255, 255, 255, 0.0045) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.024);
   border-radius: var(--radius-lg);
   padding: var(--spacing-2xl);
   margin-bottom: var(--spacing-2xl);
@@ -43,63 +34,16 @@
   gap: var(--spacing-xl);
   align-items: flex-end;
   flex-wrap: wrap;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.024),
-    0 2px 8px rgba(0, 0, 0, 0.012),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
   position: relative;
   transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
-.controls::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  /* Edge reflection - 50% MORE TRANSPARENT */
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 20%,
-    rgba(255, 255, 255, 0.105) 50%,
-    rgba(255, 255, 255, 0.06) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* Edge reflection handled by glass.css */
 
-/* Inner glass layer for depth - 50% MORE TRANSPARENT */
-.controls::after {
-  content: '';
-  position: absolute;
-  inset: 8px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.0045) 0%,
-    rgba(255, 255, 255, 0.0024) 50%,
-    rgba(255, 255, 255, 0.003) 100%
-  );
-  -webkit-backdrop-filter: saturate(130%) blur(8px);
-  backdrop-filter: saturate(130%) blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.018);
-  border-radius: calc(var(--radius-lg) - 4px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.024);
-  pointer-events: none;
-  z-index: -1;
-}
+/* Inner glass layer handled by glass.css */
 
 .controls:focus-within {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.06),
-    0 4px 12px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+  /* Focus handled by glass.css */
 }
 
 /* Dose Zones */
@@ -268,76 +212,19 @@
 }
 
 .chartContainer {
-  /* 40% MORE TRANSPARENT */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.012) 0%,
-    rgba(255, 255, 255, 0.006) 50%,
-    rgba(255, 255, 255, 0.009) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.048);
+  /* Glass handled by glass.css .chartContainer auto-selector */
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.048),
-    0 2px 8px rgba(0, 0, 0, 0.024),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
   position: relative;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
-.chartContainer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  /* Edge reflection - 40% MORE TRANSPARENT */
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.12) 20%,
-    rgba(255, 255, 255, 0.21) 50%,
-    rgba(255, 255, 255, 0.12) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* Edge reflection handled by glass.css */
 
-/* Inner glass layer for depth - 40% MORE TRANSPARENT */
-.chartContainer::after {
-  content: '';
-  position: absolute;
-  inset: 8px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.009) 0%,
-    rgba(255, 255, 255, 0.0048) 50%,
-    rgba(255, 255, 255, 0.006) 100%
-  );
-  -webkit-backdrop-filter: saturate(130%) blur(8px);
-  backdrop-filter: saturate(130%) blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.036);
-  border-radius: calc(var(--radius-lg) - 4px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.048);
-  pointer-events: none;
-  z-index: -1;
-}
+/* Inner glass layer handled by glass.css */
 
 .chartContainer:hover {
   transform: translateY(-4px) scale(1.01);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.06),
-    0 4px 16px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
 }
 
 .chartContainer h3 {
@@ -517,8 +404,7 @@
 
   .chartContainer {
     padding: var(--spacing-lg);
-    -webkit-backdrop-filter: saturate(140%) blur(6px);
-    backdrop-filter: saturate(140%) blur(6px);
+    /* Glass handled by glass.css */
   }
 
   .chartContainer:hover {

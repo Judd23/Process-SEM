@@ -102,22 +102,10 @@
   font-size: var(--font-size-sm);
 }
 
-/* Table - 50% MORE TRANSPARENT */
+/* Table - glass handled by glass.css */
 .tableWrapper {
   overflow-x: auto;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.018) 0%,
-    rgba(255, 255, 255, 0.009) 50%,
-    rgba(255, 255, 255, 0.015) 100%
-  );
-  -webkit-backdrop-filter: saturate(180%) blur(6px);
-  backdrop-filter: saturate(180%) blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-lg);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.018),
-    inset 0 1px 0 rgba(255, 255, 255, 0.024);
 }
 
 .table {
@@ -186,23 +174,9 @@
 }
 
 .specCard {
-  /* 50% MORE TRANSPARENT */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.003) 50%,
-    rgba(255, 255, 255, 0.0045) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.024);
+  /* Glass handled by glass.css */
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.024),
-    0 2px 8px rgba(0, 0, 0, 0.012),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
   transition:
     transform var(--transition-fast),
     box-shadow var(--transition-fast),
@@ -224,34 +198,10 @@
   transform-origin: bottom;
 }
 
-/* Edge reflection - 50% MORE TRANSPARENT */
-.specCard::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 20%,
-    rgba(255, 255, 255, 0.105) 50%,
-    rgba(255, 255, 255, 0.06) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
+/* Edge reflection handled by glass.css */
 
 .specCard:hover {
   transform: translateY(-4px) scale(1.01);
-  border-color: rgba(255, 255, 255, 0.06);
-  box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.03),
-    0 4px 16px rgba(0, 0, 0, 0.015),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
 }
 
 .specCard[data-morph-id] {
@@ -296,25 +246,11 @@
   color: var(--color-text-muted);
 }
 
-/* Code Block - 50% MORE TRANSPARENT */
+/* Code Block - glass handled by glass.css */
 .codeBlock {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.003) 50%,
-    rgba(255, 255, 255, 0.0045) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.024);
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   margin-top: var(--spacing-lg);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.024),
-    0 2px 8px rgba(0, 0, 0, 0.012),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
   position: relative;
   transition:
     transform var(--transition-fast),
@@ -322,35 +258,10 @@
     border-color var(--transition-fast);
 }
 
-.codeBlock::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  /* Edge reflection - 50% MORE TRANSPARENT */
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 20%,
-    rgba(255, 255, 255, 0.105) 50%,
-    rgba(255, 255, 255, 0.06) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* Edge reflection handled by glass.css */
 
 .codeBlock:hover {
   transform: translateY(-4px) scale(1.01);
-  border-color: rgba(255, 255, 255, 0.06);
-  box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.03),
-    0 4px 16px rgba(0, 0, 0, 0.015),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
 }
 
 .codeBlock h4 {
