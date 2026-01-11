@@ -418,52 +418,6 @@
 }
 
 /* ============================================
-   LIGHT MODE ADJUSTMENTS - 100% MORE TRANSPARENT (2x reduction)
-   ============================================ */
-
-[data-theme="light"] .glass-panel {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.003) 50%,
-    rgba(255, 255, 255, 0.0045) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.015);
-  box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.005),
-    0 1px 4px rgba(0, 0, 0, 0.0025),
-    inset 0 1px 0 rgba(255, 255, 255, 0.02),
-    inset 0 -0.5px 0 rgba(0, 0, 0, 0.0025);
-}
-
-[data-theme="light"] .glass-panel::before {
-  /* Edge reflection - 100% MORE TRANSPARENT */
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.15) 20%,
-    rgba(255, 255, 255, 0.225) 50%,
-    rgba(255, 255, 255, 0.15) 80%,
-    transparent 100%
-  );
-}
-
-[data-theme="light"] .glass-panel-double::after {
-  /* 100% MORE TRANSPARENT */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.009) 0%,
-    rgba(255, 255, 255, 0.0045) 50%,
-    rgba(255, 255, 255, 0.006) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.03);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.0375),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.0025),
-    0 0 8px rgba(0, 0, 0, 0.0025);
-}
-
-/* ============================================
    MOBILE OPTIMIZATIONS
    Reduce complexity for better performance
    ============================================ */
@@ -509,26 +463,6 @@
       rgba(255, 255, 255, 0.024) 100%
     );
   }
-
-  [data-theme="light"] .glass-panel {
-    /* 50% MORE TRANSPARENT */
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.045) 0%,
-      rgba(255, 255, 255, 0.024) 50%,
-      rgba(255, 255, 255, 0.03) 100%
-    );
-  }
-  
-  [data-theme="light"] .glass-panel-double::after {
-    /* 50% MORE TRANSPARENT */
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.04) 0%,
-      rgba(255, 255, 255, 0.02) 50%,
-      rgba(255, 255, 255, 0.03) 100%
-    );
-  }
 }
 
 /* Touch device optimizations */
@@ -565,16 +499,6 @@
       rgba(30, 40, 55, 0.95) 0%,
       rgba(25, 35, 50, 0.9) 50%,
       rgba(30, 40, 55, 0.95) 100%
-    );
-  }
-  
-  [data-theme="light"] .glass-panel {
-    /* 50% MORE TRANSPARENT - fallback */
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.475) 0%,
-      rgba(248, 250, 252, 0.45) 50%,
-      rgba(255, 255, 255, 0.475) 100%
     );
   }
 }
