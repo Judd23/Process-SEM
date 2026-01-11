@@ -260,6 +260,20 @@ tbody tr:nth-child(even) {
   text-align: center;
 }
 
+/* Large screens - allow wider content */
+@media (min-width: 1400px) {
+  .container {
+    max-width: var(--max-width-wide);
+    padding: 0 var(--spacing-2xl);
+  }
+}
+
+@media (min-width: 1800px) {
+  .container {
+    max-width: 90vw;
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .container {

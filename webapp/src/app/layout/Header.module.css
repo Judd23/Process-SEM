@@ -31,6 +31,19 @@
   gap: var(--spacing-xl);
 }
 
+@media (min-width: 1400px) {
+  .container {
+    max-width: var(--max-width-wide);
+    padding: var(--spacing-md) var(--spacing-2xl);
+  }
+}
+
+@media (min-width: 1800px) {
+  .container {
+    max-width: 90vw;
+  }
+}
+
 .brand {
   display: flex;
   flex-direction: column;
@@ -70,6 +83,13 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+}
+
+/* Hide desktop nav on tablets - MobileNav takes over */
+@media (max-width: 900px) {
+  .nav {
+    display: none;
+  }
 }
 
 .nav > :last-child {
@@ -118,28 +138,9 @@
   background: linear-gradient(90deg, var(--color-accent), var(--color-engagement));
 }
 
-/* Tablet breakpoint - reduce nav spacing */
-@media (max-width: 1024px) {
-  .nav {
-    gap: 2px;
-  }
-
-  .navLink {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-xs);
-  }
-
-  .nav > :last-child {
-    margin-left: var(--spacing-xs);
-    padding-left: var(--spacing-sm);
-  }
-}
-
-@media (max-width: 768px) {
+/* Desktop nav hidden below 900px (MobileNav takes over) - no tablet cramping needed */
+@media (max-width: 900px) {
   .container {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
   }
 
@@ -158,25 +159,6 @@
 
   .subtitle {
     display: none;
-  }
-
-  .nav {
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    gap: 2px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .nav > :last-child {
-    margin-left: var(--spacing-xs);
-    padding-left: var(--spacing-sm);
-  }
-
-  .navLink {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    white-space: nowrap;
   }
 }
 

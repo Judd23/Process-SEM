@@ -54,7 +54,8 @@
   line-height: 1.2;
 }
 
-@media (max-width: 768px) {
+/* Show mobile nav on tablets (matches Header hiding at 900px) */
+@media (max-width: 900px) {
   .nav {
     display: flex;
   }

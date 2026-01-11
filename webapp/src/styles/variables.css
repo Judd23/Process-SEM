@@ -84,6 +84,7 @@
 
   /* Layout */
   --max-width: 1200px;
+  --max-width-wide: 1600px;
   --sidebar-width: 280px;
   --header-height: 64px;
 
