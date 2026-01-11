@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'framer-motion';
 import { usePointerParallax } from '../../lib/hooks/usePointerParallax';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './ParallaxBackground.module.css';
@@ -22,26 +22,36 @@ export function ParallaxBackground() {
   // Pointer position for subtle world parallax
   const pointer = usePointerParallax({ smoothing: 0.05, enabled: true });
 
+  // Make pointer values motion-native so we can compose them with scroll MotionValues
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  pointerX.set(pointer.x);
+  pointerY.set(pointer.y);
+
   // Scroll-based transforms for each layer
   // Far layer moves slowest (creates depth)
   const farY = useTransform(scrollY, [0, 3000], [0, -150]);
-  const farYSpring = useSpring(farY, { stiffness: 50, damping: 30 });
-
-  // Mid layer moves medium speed
   const midY = useTransform(scrollY, [0, 3000], [0, -300]);
-  const midYSpring = useSpring(midY, { stiffness: 60, damping: 25 });
-
-  // Near layer moves fastest
   const nearY = useTransform(scrollY, [0, 3000], [0, -500]);
-  const nearYSpring = useSpring(nearY, { stiffness: 70, damping: 20 });
 
-  // Pointer-based subtle translations (world reacts to mouse)
-  const pointerXFar = pointer.x * 8;
-  const pointerYFar = pointer.y * 6;
-  const pointerXMid = pointer.x * 15;
-  const pointerYMid = pointer.y * 12;
-  const pointerXNear = pointer.x * 25;
-  const pointerYNear = pointer.y * 20;
+  // Combine scroll + pointer into ONE x/y per layer (prevents y vs translateY conflicts)
+  const farX = useTransform(pointerX, (v) => v * 8);
+  const farYCombined = useTransform([farY, pointerY], ([sy, py]) => sy + py * 6);
+
+  const midX = useTransform(pointerX, (v) => v * 15);
+  const midYCombined = useTransform([midY, pointerY], ([sy, py]) => sy + py * 12);
+
+  const nearX = useTransform(pointerX, (v) => v * 25);
+  const nearYCombined = useTransform([nearY, pointerY], ([sy, py]) => sy + py * 20);
+
+  // Heavy spring feel (use the shared preset as the spring config)
+  const farYSpring = useSpring(farYCombined, DANCE_SPRING_HEAVY);
+  const midYSpring = useSpring(midYCombined, DANCE_SPRING_HEAVY);
+  const nearYSpring = useSpring(nearYCombined, DANCE_SPRING_HEAVY);
+
+  const farXSpring = useSpring(farX, DANCE_SPRING_HEAVY);
+  const midXSpring = useSpring(midX, DANCE_SPRING_HEAVY);
+  const nearXSpring = useSpring(nearX, DANCE_SPRING_HEAVY);
 
   return (
     <div className={styles.container} aria-hidden="true">
@@ -50,10 +60,8 @@ export function ParallaxBackground() {
         className={styles.layerFar}
         style={{
           y: farYSpring,
-          x: pointerXFar,
-          translateY: pointerYFar,
+          x: farXSpring,
         }}
-        transition={DANCE_SPRING_HEAVY}
       />
 
       {/* MID LAYER - Glow orbs (medium speed) */}
@@ -61,10 +69,8 @@ export function ParallaxBackground() {
         className={styles.layerMid}
         style={{
           y: midYSpring,
-          x: pointerXMid,
-          translateY: pointerYMid,
+          x: midXSpring,
         }}
-        transition={DANCE_SPRING_HEAVY}
       />
 
       {/* NEAR LAYER - Subtle highlights (fastest) */}
@@ -72,10 +78,8 @@ export function ParallaxBackground() {
         className={styles.layerNear}
         style={{
           y: nearYSpring,
-          x: pointerXNear,
-          translateY: pointerYNear,
+          x: nearXSpring,
         }}
-        transition={DANCE_SPRING_HEAVY}
       />
 
       {/* GRAIN/NOISE overlay (static, no parallax) */}
