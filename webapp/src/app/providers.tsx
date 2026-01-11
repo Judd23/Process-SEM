@@ -11,7 +11,8 @@ interface AppProvidersProps {
 /**
  * Global spring physics configuration.
  * All Framer Motion components inherit this transition by default.
- * reducedMotion="never" ensures animations run (user can still use CSS prefers-reduced-motion).
+ * reducedMotion="never" intentionally ignores user motion-reduction preferences
+ * so all depth, parallax, and spring effects always run.
  */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
