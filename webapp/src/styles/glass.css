@@ -1,29 +1,27 @@
 /* ============================================
-   GLASS PANEL MIXINS
+   GLASS SYSTEM (single source of truth)
    Shared glass styling for panels across all pages
-   Based on Apple Liquid Glass design system
    ============================================ */
 
-/* Base glass surface effect - applied via inheritance - 50% MORE TRANSPARENT */
+/* Base glass panel - use on cards, modals, dropdowns */
 .glass-panel {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.0035) 0%,
-    rgba(255, 255, 255, 0.002) 50%,
-    rgba(255, 255, 255, 0.0025) 100%
-  );
-  -webkit-backdrop-filter: saturate(150%) blur(16px);
-  backdrop-filter: saturate(150%) blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.02);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-accent) 6%, rgba(255, 255, 255, 0.03)) 0%,
+    color-mix(in srgb, var(--color-engagement) 5%, rgba(255, 255, 255, 0.02)) 100%);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  backdrop-filter: saturate(180%) blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
   box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.01),
-    0 1px 4px rgba(0, 0, 0, 0.005),
-    inset 0 1px 0 rgba(255, 255, 255, 0.015),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.005);
+    0 4px 20px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: 
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
   position: relative;
 }
 
-/* Top edge highlight - 50% MORE TRANSPARENT */
 .glass-panel::before {
   content: '';
   position: absolute;
@@ -34,14 +32,143 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.04) 20%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.04) 80%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 80%,
     transparent 100%
   );
   pointer-events: none;
   z-index: 1;
   border-radius: inherit;
+}
+
+.glass-panel:hover {
+  transform: translateY(-3px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Glass button - use on all interactive buttons */
+.glass-button {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.03) 100%);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  backdrop-filter: saturate(160%) blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  box-shadow: 
+    0 2px 12px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: 
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+  cursor: pointer;
+  position: relative;
+}
+
+.glass-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 20%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.12) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.glass-button:hover {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.06) 100%);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.glass-button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Glass header - use on section headers, page titles */
+.glass-header {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.03) 100%);
+  -webkit-backdrop-filter: saturate(150%) blur(24px);
+  backdrop-filter: saturate(150%) blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* Top highlight shine effect - add to glass elements */
+.glass-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ============================================
+   GLASSIFY COMMON PANELS (no markup changes)
+   ============================================ */
+
+.glass-auto,
+.diagramContainer,
+.exploreCard,
+.stakeholderCard,
+.actionCard,
+.demoCard,
+.sampleCard,
+.chartContainer,
+.jnCharts > div,
+.coefficientCard,
+.indirectCard,
+.factsStrip .fact,
+.sampleCard,
+.demoStat,
+.demoComparison {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-surface) 45%, transparent) 0%,
+    color-mix(in srgb, var(--color-surface) 30%, transparent) 50%,
+    color-mix(in srgb, var(--color-surface) 45%, transparent) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--color-border) 40%, transparent);
+  -webkit-backdrop-filter: saturate(160%) blur(18px);
+  backdrop-filter: saturate(160%) blur(18px);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.04),
+    0 2px 12px rgba(0, 0, 0, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.02);
 }
 
 /* ============================================

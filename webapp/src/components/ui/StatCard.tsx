@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { DANCE_SPRING_HEAVY } from '../../config/transitionConfig';
+import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './StatCard.module.css';
 
 interface StatCardProps {

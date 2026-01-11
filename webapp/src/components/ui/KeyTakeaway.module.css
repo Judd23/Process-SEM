@@ -53,11 +53,27 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
+.takeaway[data-morph-id] {
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.takeaway[data-morph-id]:hover {
+  transform: none;
+}
+
 .icon {
   width: 2rem;
   height: 2rem;
   flex-shrink: 0;
   color: var(--color-accent);
+}
+
+.emojiIcon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .content {
@@ -87,6 +103,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .takeaway {
+    transition: none;
+  }
+
+  .takeaway[data-morph-id] {
     transition: none;
   }
 

@@ -56,6 +56,17 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.015);
 }
 
+.card[data-morph-id] {
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.card[data-morph-id]:hover,
+.card[data-morph-id]:active {
+  transform: none;
+}
+
 .label {
   font-family: var(--font-body);
   font-size: var(--font-size-sm);
@@ -152,11 +163,21 @@
     transition: none;
   }
 
+  .card[data-morph-id],
+  .card[data-morph-id]::before {
+    transition: none;
+  }
+
   .value {
     transition: none;
   }
 
   .card:hover {
+    transform: none;
+  }
+
+  .card[data-morph-id]:hover,
+  .card[data-morph-id]:active {
     transform: none;
   }
 

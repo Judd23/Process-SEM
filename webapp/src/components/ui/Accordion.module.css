@@ -23,10 +23,10 @@
     0 2px 8px rgba(0, 0, 0, 0.015),
     inset 0 1px 0 rgba(255, 255, 255, 0.075),
     inset 0 -1px 0 rgba(0, 0, 0, 0.015);
+  /* Transform handled by Framer Motion DANCE_SPRING_HEAVY */
   transition: 
     border-color var(--transition-fast), 
-    box-shadow var(--transition-fast), 
-    transform var(--transition-fast);
+    box-shadow var(--transition-fast);
 }
 
 .item::before {
@@ -101,16 +101,9 @@
   font-weight: 700;
 }
 
+/* Height/opacity handled by Framer Motion AnimatePresence */
 .panel {
-  max-height: 0;
   overflow: hidden;
-  transition: max-height var(--transition-fast), opacity var(--transition-fast);
-  opacity: 0;
-}
-
-.item.open .panel {
-  max-height: 1200px;
-  opacity: 1;
 }
 
 .panelInner {
@@ -119,12 +112,6 @@
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   line-height: 1.6;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .panel {
-    transition: none;
-  }
 }
 
 /* ============================================

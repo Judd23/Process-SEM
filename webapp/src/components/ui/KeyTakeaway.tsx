@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
-import { DANCE_SPRING_HEAVY } from '../../config/transitionConfig';
+import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './KeyTakeaway.module.css';
 
 interface KeyTakeawayProps {
   children: React.ReactNode;
   /** Unique ID for shared-element morphing across routes */
   layoutId?: string;
+  /** Optional emoji or text icon to display instead of default SVG */
+  icon?: string;
 }
 
 // Clean SVG icon that matches the academic style
@@ -32,7 +34,7 @@ function InsightIcon() {
   );
 }
 
-export default function KeyTakeaway({ children, layoutId }: KeyTakeawayProps) {
+export default function KeyTakeaway({ children, layoutId, icon }: KeyTakeawayProps) {
   return (
     <motion.aside
       className={styles.takeaway}
@@ -40,7 +42,7 @@ export default function KeyTakeaway({ children, layoutId }: KeyTakeawayProps) {
       layout={!!layoutId}
       transition={DANCE_SPRING_HEAVY}
     >
-      <InsightIcon />
+      {icon ? <span className={styles.emojiIcon} aria-hidden="true">{icon}</span> : <InsightIcon />}
       <div className={styles.content}>{children}</div>
     </motion.aside>
   );

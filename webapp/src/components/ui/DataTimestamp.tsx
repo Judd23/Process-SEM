@@ -1,4 +1,4 @@
-import dataMetadata from '../../data/dataMetadata.json';
+import { dataMetadata } from '../../data/adapters/dataMetadata';
 import styles from './DataTimestamp.module.css';
 
 interface DataTimestampProps {

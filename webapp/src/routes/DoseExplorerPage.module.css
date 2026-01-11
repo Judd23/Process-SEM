@@ -1,0 +1,730 @@
+.page {
+  padding-bottom: var(--spacing-4xl);
+}
+
+.header {
+  text-align: left;
+  max-width: 800px;
+  margin: 0 auto var(--spacing-2xl);
+  padding-top: var(--spacing-2xl);
+  position: relative;
+}
+
+.eyebrow {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-accent);
+  margin-bottom: var(--spacing-md);
+}
+
+.header h1 {
+  font-size: clamp(1.75rem, 4vw, var(--font-size-3xl));
+  margin-bottom: var(--spacing-md);
+}
+
+/* Controls - 50% MORE TRANSPARENT */
+.controls {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.006) 0%,
+    rgba(255, 255, 255, 0.003) 50%,
+    rgba(255, 255, 255, 0.0045) 100%
+  );
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: saturate(140%) blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.024);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  gap: var(--spacing-xl);
+  align-items: flex-end;
+  flex-wrap: wrap;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.024),
+    0 2px 8px rgba(0, 0, 0, 0.012),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
+  position: relative;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.controls::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  /* Edge reflection - 50% MORE TRANSPARENT */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 20%,
+    rgba(255, 255, 255, 0.105) 50%,
+    rgba(255, 255, 255, 0.06) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/* Inner glass layer for depth - 50% MORE TRANSPARENT */
+.controls::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.0045) 0%,
+    rgba(255, 255, 255, 0.0024) 50%,
+    rgba(255, 255, 255, 0.003) 100%
+  );
+  -webkit-backdrop-filter: saturate(130%) blur(8px);
+  backdrop-filter: saturate(130%) blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.018);
+  border-radius: calc(var(--radius-lg) - 4px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.024);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.controls:focus-within {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* Dose Zones */
+.doseZones {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.doseZone {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  background: var(--color-surface-alt);
+  border: 2px solid transparent;
+  opacity: 0.6;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.doseZone:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+
+.doseZone:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.doseZone.active {
+  opacity: 1;
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.doseZone.low {
+  border-color: var(--color-engagement);
+  color: var(--color-engagement);
+}
+
+.doseZone.low.active {
+  background: color-mix(in srgb, var(--color-engagement) 15%, var(--color-surface));
+}
+
+.doseZone.moderate {
+  border-color: var(--color-fast);
+  color: var(--color-fast);
+}
+
+.doseZone.moderate.active {
+  background: color-mix(in srgb, var(--color-fast) 15%, var(--color-surface));
+}
+
+.doseZone.high {
+  border-color: var(--color-distress);
+  color: var(--color-distress);
+}
+
+.doseZone.high.active {
+  background: color-mix(in srgb, var(--color-distress) 15%, var(--color-surface));
+}
+
+.zoneDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.zoneLabel {
+  font-weight: 600;
+}
+
+.zoneRange {
+  opacity: 0.8;
+  font-size: var(--font-size-xs);
+}
+
+.sliderContainer {
+  flex: 1;
+  min-width: min(100%, 300px);
+}
+
+@media (max-width: 640px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .sliderContainer {
+    min-width: 100%;
+  }
+}
+
+.toggleContainer {
+  flex-shrink: 0;
+}
+
+.toggleHint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-xs);
+  max-width: 220px;
+}
+
+/* Conditional Effects */
+.conditionalEffects {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.conditionalEffects h2 {
+  text-align: left;
+  margin-bottom: var(--spacing-lg);
+  transition: color var(--transition-fast);
+}
+
+.effectCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Make the StatCard values animate smoothly when they change */
+.effectCards :global(.value) {
+  transition: color var(--transition-normal), transform 0.15s ease-out;
+}
+
+/* Subtle pulse when value changes - applied via CSS will-change */
+.effectCards > div {
+  position: relative;
+}
+
+.effectCards > div::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-accent);
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  pointer-events: none;
+}
+
+/* Charts */
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-3xl);
+}
+
+@media (max-width: 640px) {
+  .charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chartContainer {
+  /* 40% MORE TRANSPARENT */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.012) 0%,
+    rgba(255, 255, 255, 0.006) 50%,
+    rgba(255, 255, 255, 0.009) 100%
+  );
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+  backdrop-filter: saturate(140%) blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.048);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.048),
+    0 2px 8px rgba(0, 0, 0, 0.024),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+  position: relative;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.chartContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  /* Edge reflection - 40% MORE TRANSPARENT */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 20%,
+    rgba(255, 255, 255, 0.21) 50%,
+    rgba(255, 255, 255, 0.12) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/* Inner glass layer for depth - 40% MORE TRANSPARENT */
+.chartContainer::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.009) 0%,
+    rgba(255, 255, 255, 0.0048) 50%,
+    rgba(255, 255, 255, 0.006) 100%
+  );
+  -webkit-backdrop-filter: saturate(130%) blur(8px);
+  backdrop-filter: saturate(130%) blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.036);
+  border-radius: calc(var(--radius-lg) - 4px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.048);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.chartContainer:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+}
+
+.chartContainer h3 {
+  margin-bottom: var(--spacing-sm);
+}
+
+.chartDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.6;
+}
+
+/* Johnson-Neyman Section */
+.jnSection {
+  margin-bottom: var(--spacing-3xl);
+  border-top: 1px solid var(--color-border-light);
+  padding-top: var(--spacing-3xl);
+}
+
+.jnSection h2 {
+  text-align: left;
+  margin-bottom: var(--spacing-md);
+  position: relative;
+}
+
+.jnSection h2::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-engagement));
+  border-radius: 2px;
+}
+
+.jnIntro {
+  text-align: left;
+  color: var(--color-text-muted);
+  max-width: 700px;
+  margin: 0 auto var(--spacing-2xl);
+  line-height: 1.7;
+}
+
+.jnNote {
+  text-align: left;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin: -var(--spacing-xl) auto var(--spacing-2xl);
+}
+
+.jnCharts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
+  gap: var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+  .jnCharts {
+    grid-template-columns: 1fr;
+  }
+
+  .jnSection {
+    padding-top: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+  }
+}
+
+/* Interpretation */
+.interpretation h2 {
+  text-align: left;
+  margin-bottom: var(--spacing-xl);
+}
+
+.interpretationContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.interpretationCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+}
+
+/* Edge reflection - 40% MORE TRANSPARENT */
+.interpretationCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 20%,
+    rgba(255, 255, 255, 0.21) 50%,
+    rgba(255, 255, 255, 0.12) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+.interpretationCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
+}
+
+.interpretationCard h3 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.interpretationCard p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Next step CTA */
+.nextStep {
+  text-align: left;
+  padding: var(--spacing-3xl) 0 var(--spacing-4xl);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.nextStep h2 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-md);
+}
+
+.nextStep p {
+  max-width: 640px;
+  margin: 0 auto var(--spacing-xl);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-lg);
+  line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+  .header::before {
+    width: 300px;
+    height: 300px;
+    top: -50px;
+  }
+
+  .header h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--spacing-xl);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    backdrop-filter: saturate(140%) blur(12px);
+  }
+
+  .sliderContainer {
+    min-width: unset;
+  }
+
+  .charts {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .chartContainer {
+    padding: var(--spacing-lg);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    backdrop-filter: saturate(140%) blur(12px);
+  }
+
+  .chartContainer:hover {
+    transform: none;
+  }
+
+  .chartContainer h3 {
+    font-size: var(--font-size-base);
+  }
+
+  .interpretationContent {
+    grid-template-columns: 1fr;
+  }
+
+  .interpretationCard {
+    padding: var(--spacing-lg);
+  }
+
+  .interpretationCard:hover {
+    transform: none;
+  }
+
+  .effectCards {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .nextStep {
+    padding: var(--spacing-2xl) 0 var(--spacing-3xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding-top: var(--spacing-lg);
+  }
+
+  .header::before {
+    width: 200px;
+    height: 200px;
+    opacity: 0.3;
+  }
+
+  .header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .controls {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+
+  .chartContainer {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .chartDescription {
+    font-size: var(--font-size-xs);
+  }
+
+  .interpretation h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .interpretationCard {
+    padding: var(--spacing-md);
+  }
+
+  .interpretationCard h3 {
+    font-size: var(--font-size-base);
+  }
+
+  .jnSection {
+    padding-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .nextStep h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .nextStep p {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Touch states */
+.chartContainer:active,
+.interpretationCard:active {
+  transform: scale(0.99);
+}
+
+@media (hover: none) {
+  .chartContainer:hover,
+  .interpretationCard:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .chartContainer,
+  .interpretationCard {
+    transition: none;
+  }
+
+  .chartContainer:hover,
+  .interpretationCard:hover {
+    transform: none;
+  }
+}
+
+/* ============================================
+   LIGHT MODE - 100% MORE TRANSPARENT
+   ============================================ */
+
+:global([data-theme="light"]) .controls {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.003) 0%,
+    rgba(255, 255, 255, 0.0015) 50%,
+    rgba(255, 255, 255, 0.00225) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.012);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.012),
+    0 2px 8px rgba(0, 0, 0, 0.006),
+    inset 0 1px 0 rgba(255, 255, 255, 0.015),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.0075);
+}
+
+:global([data-theme="light"]) .controls::before {
+  /* Edge reflection - 100% lighter */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.0525) 50%,
+    rgba(255, 255, 255, 0.03) 80%,
+    transparent 100%
+  );
+}
+
+:global([data-theme="light"]) .controls::after {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.00225) 0%,
+    rgba(255, 255, 255, 0.0012) 50%,
+    rgba(255, 255, 255, 0.0015) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.009);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.012);
+}
+
+:global([data-theme="light"]) .chartContainer {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.006) 0%,
+    rgba(255, 255, 255, 0.00375) 50%,
+    rgba(255, 255, 255, 0.0045) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.018);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.009),
+    0 2px 8px rgba(0, 0, 0, 0.0045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.018),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.003);
+}
+
+/* Edge reflection for chartContainer */
+:global([data-theme="light"]) .chartContainer::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.06) 80%,
+    transparent 100%
+  );
+}
+
+:global([data-theme="light"]) .interpretationCard {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.006) 0%,
+    rgba(255, 255, 255, 0.00375) 50%,
+    rgba(255, 255, 255, 0.0045) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.018);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.009),
+    0 2px 8px rgba(0, 0, 0, 0.0045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.018),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.003);
+}
+
+/* Edge reflection for interpretationCard */
+:global([data-theme="light"]) .interpretationCard::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.03) 80%,
+    transparent 100%
+  );
+}

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './BackToTop.module.css';
 
 export default function BackToTop() {
@@ -21,14 +23,24 @@ export default function BackToTop() {
   };
 
   return (
-    <button
-      type="button"
-      className={`${styles.button} ${isVisible ? styles.visible : ''}`}
-      onClick={handleClick}
-      aria-label="Back to top"
-    >
-      <span className={styles.arrow} aria-hidden="true">↑</span>
-      <span className={styles.label}>Top</span>
-    </button>
+    <AnimatePresence>
+      {isVisible && (
+        <motion.button
+          type="button"
+          className={`${styles.button} ${styles.visible}`}
+          onClick={handleClick}
+          aria-label="Back to top"
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          whileHover={{ scale: 1.1, y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          transition={DANCE_SPRING_HEAVY}
+        >
+          <span className={styles.arrow} aria-hidden="true">↑</span>
+          <span className={styles.label}>Top</span>
+        </motion.button>
+      )}
+    </AnimatePresence>
   );
 }

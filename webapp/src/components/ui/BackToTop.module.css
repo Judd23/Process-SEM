@@ -15,10 +15,7 @@
   font-size: var(--font-size-sm);
   box-shadow: var(--shadow-md);
   cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(8px);
-  transition: opacity var(--transition-fast), transform var(--transition-fast), background var(--transition-fast);
+  /* Transform/opacity handled by Framer Motion AnimatePresence */
   z-index: 120;
 }
 
@@ -52,10 +49,9 @@
   outline-offset: 2px;
 }
 
+/* Visibility handled by AnimatePresence - this class just keeps pointer-events */
 .visible {
-  opacity: 1;
   pointer-events: auto;
-  transform: translateY(0);
 }
 
 .arrow {

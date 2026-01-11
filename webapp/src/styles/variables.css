@@ -83,8 +83,9 @@
   /* Animation timing */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --reveal-duration: 1600ms;
-  --reveal-stagger: 200ms;
+  --reveal-duration: 800ms;
+  --reveal-stagger: 100ms;
+  --reveal-delay: 500ms;
 
   /* Page transition timing - consistent regardless of scroll position */
   --transition-page-duration: 800ms;

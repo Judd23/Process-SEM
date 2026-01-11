@@ -1,109 +1,124 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { useTheme } from '../../context/ThemeContext';
-import { getRaceColor, getSignificanceColor } from '../../utils/colorScales';
+import { useTheme } from '../../app/contexts/ThemeContext';
+import { getRaceColor, getSignificanceColor } from '../../lib/colorScales';
 import DataTimestamp from '../ui/DataTimestamp';
-import groupComparisons from '../../data/groupComparisons.json';
+import groupComparisonsRaw from '../../data/groupComparisons.json';
 import sampleDescriptives from '../../data/sampleDescriptives.json';
 import styles from './GroupComparison.module.css';
 
-// Build group data from pipeline output + sample descriptives for sample sizes
-const buildGroupData = () => {
-  const demographics = sampleDescriptives.demographics;
-  const raceData = groupComparisons.byRace;
-  
-  // Sample sizes from descriptives
-  const raceSizes: Record<string, number> = {
-    'Hispanic/Latino': demographics.race['Hispanic/Latino'].n,
-    'White': demographics.race['White'].n,
-    'Asian': demographics.race['Asian'].n,
-    'Black/African American': demographics.race['Black/African American'].n,
-    'Other/Multiracial': demographics.race['Other/Multiracial/Unknown'].n,
+// Type for the JSON structure
+interface GroupEffectJson {
+  estimate: number;
+  se: number;
+  pvalue: number;
+}
+
+interface GroupJson {
+  label: string;
+  effects: {
+    a1: GroupEffectJson;
+    a2: GroupEffectJson;
   };
+}
+
+interface GroupingJson {
+  groupVariable: string;
+  groups: GroupJson[];
+}
+
+interface GroupComparisonsJson {
+  byRace: GroupingJson;
+  byFirstgen: GroupingJson;
+  byPell: GroupingJson;
+  bySex: GroupingJson;
+  byLiving: GroupingJson;
+}
+
+// Cast the imported JSON to proper type
+const groupComparisons = groupComparisonsRaw as GroupComparisonsJson;
+
+// Type for group data structure
+interface GroupEffect {
+  label: string;
+  estimate: number;
+  se: number;
+  pvalue: number;
+  n: number;
+}
+
+interface PathwayGroups {
+  groups: GroupEffect[];
+}
+
+interface GroupingData {
+  a1: PathwayGroups;
+  a2: PathwayGroups;
+}
+
+// Build group data from pipeline JSON + sample descriptives for sample sizes
+const buildGroupData = (): Record<string, GroupingData> => {
+  const demographics = sampleDescriptives.demographics;
   
-  // Build race group data from pipeline
-  const raceGroups = {
+  // Sample size lookups
+  const sampleSizes: Record<string, Record<string, number>> = {
+    race: {
+      'Hispanic/Latino': demographics.race['Hispanic/Latino'].n,
+      'White': demographics.race['White'].n,
+      'Asian': demographics.race['Asian'].n,
+      'Black/African American': demographics.race['Black/African American'].n,
+      'Other/Multiracial': demographics.race['Other/Multiracial/Unknown'].n,
+    },
+    firstgen: {
+      'First-Gen': demographics.firstgen.yes.n,
+      'Continuing-Gen': demographics.firstgen.no.n,
+    },
+    pell: {
+      'Pell Eligible': demographics.pell.yes.n,
+      'Not Pell Eligible': demographics.pell.no.n,
+    },
+    sex: {
+      'Women': demographics.sex.women.n,
+      'Men': demographics.sex.men.n,
+    },
+    living: {
+      'With Family': 2360,
+      'Off-Campus': 1315,
+      'On-Campus': 1325,
+    },
+  };
+
+  // Helper to build pathway groups from JSON
+  const buildPathwayGroups = (
+    jsonData: GroupingJson,
+    sizeKey: string
+  ): GroupingData => ({
     a1: {
-      groups: raceData.groups.map(g => ({
+      groups: jsonData.groups.map(g => ({
         label: g.label,
         estimate: g.effects.a1.estimate,
         se: g.effects.a1.se,
         pvalue: g.effects.a1.pvalue,
-        n: raceSizes[g.label] || 0
+        n: sampleSizes[sizeKey]?.[g.label] || 0
       }))
     },
     a2: {
-      groups: raceData.groups.map(g => ({
+      groups: jsonData.groups.map(g => ({
         label: g.label,
         estimate: g.effects.a2.estimate,
         se: g.effects.a2.se,
         pvalue: g.effects.a2.pvalue,
-        n: raceSizes[g.label] || 0
+        n: sampleSizes[sizeKey]?.[g.label] || 0
       }))
     }
-  };
+  });
 
-  // Other groupings use sample data (until MG models are run for these)
   return {
-    race: raceGroups,
-    firstgen: {
-      a1: {
-        groups: [
-          { label: 'First-Gen', estimate: 0.138, se: 0.048, pvalue: 0.004, n: demographics.firstgen.yes.n },
-          { label: 'Continuing-Gen', estimate: 0.114, se: 0.052, pvalue: 0.028, n: demographics.firstgen.no.n },
-        ],
-      },
-      a2: {
-        groups: [
-          { label: 'First-Gen', estimate: -0.022, se: 0.047, pvalue: 0.640, n: demographics.firstgen.yes.n },
-          { label: 'Continuing-Gen', estimate: 0.005, se: 0.051, pvalue: 0.922, n: demographics.firstgen.no.n },
-        ],
-      },
-    },
-    pell: {
-      a1: {
-        groups: [
-          { label: 'Pell Eligible', estimate: 0.142, se: 0.047, pvalue: 0.003, n: demographics.pell.yes.n },
-          { label: 'Not Pell Eligible', estimate: 0.109, se: 0.053, pvalue: 0.039, n: demographics.pell.no.n },
-        ],
-      },
-      a2: {
-        groups: [
-          { label: 'Pell Eligible', estimate: -0.018, se: 0.046, pvalue: 0.696, n: demographics.pell.yes.n },
-          { label: 'Not Pell Eligible', estimate: 0.002, se: 0.052, pvalue: 0.969, n: demographics.pell.no.n },
-        ],
-      },
-    },
-    sex: {
-      a1: {
-        groups: [
-          { label: 'Women', estimate: 0.135, se: 0.046, pvalue: 0.003, n: demographics.sex.women.n },
-          { label: 'Men', estimate: 0.115, se: 0.058, pvalue: 0.047, n: demographics.sex.men.n },
-        ],
-      },
-      a2: {
-        groups: [
-          { label: 'Women', estimate: -0.008, se: 0.045, pvalue: 0.859, n: demographics.sex.women.n },
-          { label: 'Men', estimate: -0.014, se: 0.057, pvalue: 0.806, n: demographics.sex.men.n },
-        ],
-      },
-    },
-    living: {
-      a1: {
-        groups: [
-          { label: 'With Family', estimate: 0.128, se: 0.049, pvalue: 0.009, n: 2360 },
-          { label: 'Off-Campus', estimate: 0.132, se: 0.068, pvalue: 0.052, n: 1315 },
-          { label: 'On-Campus', estimate: 0.118, se: 0.072, pvalue: 0.101, n: 1325 },
-        ],
-      },
-      a2: {
-        groups: [
-          { label: 'With Family', estimate: -0.012, se: 0.048, pvalue: 0.802, n: 2360 },
-          { label: 'Off-Campus', estimate: 0.008, se: 0.067, pvalue: 0.905, n: 1315 },
-          { label: 'On-Campus', estimate: -0.015, se: 0.071, pvalue: 0.833, n: 1325 },
-        ],
-      },
-    },
+    race: buildPathwayGroups(groupComparisons.byRace, 'race'),
+    firstgen: buildPathwayGroups(groupComparisons.byFirstgen, 'firstgen'),
+    pell: buildPathwayGroups(groupComparisons.byPell, 'pell'),
+    sex: buildPathwayGroups(groupComparisons.bySex, 'sex'),
+    living: buildPathwayGroups(groupComparisons.byLiving, 'living'),
   };
 };
 

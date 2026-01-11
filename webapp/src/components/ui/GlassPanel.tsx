@@ -1,5 +1,7 @@
 import { forwardRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
+import { motion } from 'framer-motion';
+import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './GlassPanel.module.css';
 
 /**
@@ -138,8 +140,15 @@ const GlassPanel = forwardRef<HTMLDivElement, GlassPanelProps>(
       .filter(Boolean)
       .join(' ');
 
+    // Motion variants for interactive panels
+    const hoverVariants = onClick ? {
+      rest: { scale: 1, y: 0 },
+      hover: { scale: 1.01, y: -2 },
+      tap: { scale: 0.99, y: 0 }
+    } : undefined;
+
     return (
-      <div
+      <motion.div
         ref={ref}
         className={classNames}
         style={cssVars}
@@ -147,6 +156,11 @@ const GlassPanel = forwardRef<HTMLDivElement, GlassPanelProps>(
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
         aria-label={ariaLabel}
+        variants={hoverVariants}
+        initial="rest"
+        whileHover={onClick ? "hover" : undefined}
+        whileTap={onClick ? "tap" : undefined}
+        transition={DANCE_SPRING_HEAVY}
         onKeyDown={
           onClick
             ? (e) => {
@@ -160,7 +174,7 @@ const GlassPanel = forwardRef<HTMLDivElement, GlassPanelProps>(
       >
         {doubleLayer && <div className={styles.innerGlass} aria-hidden="true" />}
         {children}
-      </div>
+      </motion.div>
     );
   }
 );

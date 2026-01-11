@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect, useId } from 'react';
+import { useState, useRef, useLayoutEffect, useId, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './GlossaryTerm.module.css';
 
@@ -12,9 +12,47 @@ export default function GlossaryTerm({ term, definition, children }: GlossaryTer
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState<'top' | 'bottom'>('bottom');
   const [coords, setCoords] = useState<{ left: number; top: number }>({ left: 0, top: 0 });
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const termRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const tooltipId = useId();
+
+  // Detect touch device
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
+  // Close tooltip when tapping outside (touch devices)
+  const handleClickOutside = useCallback((event: MouseEvent | TouchEvent) => {
+    if (
+      isOpen &&
+      termRef.current &&
+      !termRef.current.contains(event.target as Node) &&
+      tooltipRef.current &&
+      !tooltipRef.current.contains(event.target as Node)
+    ) {
+      setIsOpen(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isTouchDevice && isOpen) {
+      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('click', handleClickOutside);
+      return () => {
+        document.removeEventListener('touchstart', handleClickOutside);
+        document.removeEventListener('click', handleClickOutside);
+      };
+    }
+  }, [isTouchDevice, isOpen, handleClickOutside]);
+
+  // Handle touch tap to toggle
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (isTouchDevice) {
+      e.preventDefault();
+      setIsOpen(prev => !prev);
+    }
+  };
 
   useLayoutEffect(() => {
     if (!isOpen || !termRef.current || !tooltipRef.current) return;
@@ -59,8 +97,9 @@ export default function GlossaryTerm({ term, definition, children }: GlossaryTer
       <span
         ref={termRef}
         className={styles.term}
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
+        onMouseEnter={() => !isTouchDevice && setIsOpen(true)}
+        onMouseLeave={() => !isTouchDevice && setIsOpen(false)}
+        onTouchStart={handleTouchStart}
         onFocus={() => setIsOpen(true)}
         onBlur={() => setIsOpen(false)}
         onKeyDown={(event) => {

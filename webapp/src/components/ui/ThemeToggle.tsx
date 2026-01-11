@@ -1,4 +1,6 @@
-import { useTheme } from '../../context/ThemeContext';
+import { motion } from 'framer-motion';
+import { useTheme } from '../../app/contexts/ThemeContext';
+import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './ThemeToggle.module.css';
 
 export default function ThemeToggle() {
@@ -47,20 +49,29 @@ export default function ThemeToggle() {
   };
 
   const getLabel = () => {
-    if (theme === 'system') return 'System';
+    if (theme === 'system') return 'Auto';
     if (theme === 'dark') return 'Dark';
     return 'Light';
   };
 
+  const getFullLabel = () => {
+    if (theme === 'system') return `Auto (${resolvedTheme === 'dark' ? '☾' : '☀'})`;
+    if (theme === 'dark') return 'Dark ☾';
+    return 'Light ☀';
+  };
+
   return (
-    <button
+    <motion.button
       onClick={cycleTheme}
       className={styles.toggle}
-      aria-label={`Current theme: ${getLabel()}. Click to change.`}
-      title={`Theme: ${getLabel()}`}
+      aria-label={`Current theme: ${getLabel()}. Click to cycle through light, dark, and auto modes.`}
+      title={`Theme: ${getFullLabel()}`}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={DANCE_SPRING_HEAVY}
     >
       {getIcon()}
-      <span className={styles.label}>{getLabel()}</span>
-    </button>
+      <span className={styles.label}>{getFullLabel()}</span>
+    </motion.button>
   );
 }

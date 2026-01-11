@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './Accordion.module.css';
 
 interface AccordionItem {
@@ -40,29 +42,51 @@ export default function Accordion({
         const panelId = `${item.id}-panel`;
 
         return (
-          <div key={item.id} className={`${styles.item} ${isOpen ? styles.open : ''}`}>
-            <button
+          <motion.div 
+            key={item.id} 
+            className={`${styles.item} ${isOpen ? styles.open : ''}`}
+            initial={false}
+            animate={{ backgroundColor: isOpen ? 'rgba(255, 255, 255, 0.02)' : 'transparent' }}
+            transition={DANCE_SPRING_HEAVY}
+          >
+            <motion.button
               type="button"
               id={buttonId}
               className={styles.button}
               aria-expanded={isOpen}
               aria-controls={panelId}
               onClick={() => toggleItem(item.id)}
+              whileHover={{ scale: 1.01, x: 4 }}
+              whileTap={{ scale: 0.99 }}
+              transition={DANCE_SPRING_HEAVY}
             >
               <span className={styles.title}>{item.title}</span>
-              <span className={styles.icon} aria-hidden="true">
-                {isOpen ? '−' : '+'}
-              </span>
-            </button>
-            <div
-              id={panelId}
-              className={styles.panel}
-              role="region"
-              aria-labelledby={buttonId}
-            >
-              <div className={styles.panelInner}>{item.content}</div>
-            </div>
-          </div>
+              <motion.span 
+                className={styles.icon} 
+                aria-hidden="true"
+                animate={{ rotate: isOpen ? 45 : 0 }}
+                transition={DANCE_SPRING_HEAVY}
+              >
+                +
+              </motion.span>
+            </motion.button>
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  id={panelId}
+                  className={styles.panel}
+                  role="region"
+                  aria-labelledby={buttonId}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={DANCE_SPRING_HEAVY}
+                >
+                  <div className={styles.panelInner}>{item.content}</div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         );
       })}
     </div>
