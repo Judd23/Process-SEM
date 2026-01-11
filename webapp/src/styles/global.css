@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500&family=Source+Sans+Pro:wght@400;600;700&family=Source+Serif+Pro:wght@400;600;700&display=swap');
 @import './variables.css';
 @import './glass.css';
+@import './interactiveSurfaces.css';
 
 /* Reset */
 *, *::before, *::after {
@@ -392,24 +393,6 @@ tbody tr:nth-child(even) {
 .stagger-children > .reveal:nth-child(11) { transition-delay: 1000ms; }
 .stagger-children > .reveal:nth-child(12) { transition-delay: 1100ms; }
 
-/* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  .reveal,
-  .reveal-fade,
-  .reveal-up,
-  .reveal-scale,
-  .reveal-left,
-  .reveal-right {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .page-fade {
-    animation: none;
-  }
-}
-
 /* ============================================
    UNIFIED BUTTON SYSTEM
    ============================================ */
@@ -430,7 +413,6 @@ tbody tr:nth-child(even) {
   transition:
     background-color var(--transition-fast),
     color var(--transition-fast),
-    transform var(--transition-fast),
     box-shadow var(--transition-fast);
   min-height: 44px; /* Touch-friendly */
   -webkit-backdrop-filter: saturate(160%) blur(16px);
@@ -464,14 +446,14 @@ tbody tr:nth-child(even) {
 .button-primary:hover {
   background: rgba(37, 99, 235, 0.85);
   color: white;
-  transform: translateY(-2px);
   box-shadow: 
     0 4px 16px rgba(37, 99, 235, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .button-primary:active {
-  transform: translateY(0);
+  /* Motion owns transform - keep empty */
+  outline: none;
 }
 
 .button-secondary {
@@ -534,15 +516,11 @@ tbody tr:nth-child(even) {
 
 /* Button touch states */
 .button:active {
-  transform: scale(0.98);
+  /* Motion owns transform - keep empty */
+  outline: none;
 }
 
 @media (hover: none) {
-  .button-primary:hover,
-  .button-secondary:hover,
-  .button-ghost:hover {
-    transform: none;
-  }
 
   .button-primary:hover {
     background: rgba(37, 99, 235, 0.75);
@@ -598,17 +576,6 @@ tbody tr:nth-child(even) {
 [data-theme="light"] .button-ghost:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(0, 0, 0, 0.0375);
-}
-
-/* Button reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .button {
-    transition: none;
-  }
-
-  .button-primary:hover {
-    transform: none;
-  }
 }
 
 /* ============================================

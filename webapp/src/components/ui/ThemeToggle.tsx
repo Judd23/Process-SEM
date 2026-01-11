@@ -1,6 +1,5 @@
-import { motion } from 'framer-motion';
-import { useTheme } from '../../app/contexts/ThemeContext';
-import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
+import { useTheme } from '../../app/contexts';
+import { InteractiveSurface } from './InteractiveSurface';
 import styles from './ThemeToggle.module.css';
 
 export default function ThemeToggle() {
@@ -61,17 +60,15 @@ export default function ThemeToggle() {
   };
 
   return (
-    <motion.button
+    <InteractiveSurface
+      as="button"
       onClick={cycleTheme}
-      className={styles.toggle}
+      className={`${styles.toggle} interactiveSurface`}
       aria-label={`Current theme: ${getLabel()}. Click to cycle through light, dark, and auto modes.`}
       title={`Theme: ${getFullLabel()}`}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      transition={DANCE_SPRING_HEAVY}
     >
       {getIcon()}
       <span className={styles.label}>{getFullLabel()}</span>
-    </motion.button>
+    </InteractiveSurface>
   );
 }

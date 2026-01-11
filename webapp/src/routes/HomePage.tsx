@@ -1,14 +1,13 @@
-import { motion } from 'framer-motion';
 import StatCard from '../components/ui/StatCard';
 import Icon from '../components/ui/Icon';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import PathwayDiagram from '../features/charts/PathwayDiagram';
 import DataTimestamp from '../components/ui/DataTimestamp';
+import { InteractiveSurface } from '../components/ui/InteractiveSurface';
 import { Link } from 'react-router-dom';
-import { useModelData } from '../app/contexts/ModelDataContext';
-import useParallax from '../lib/hooks/useParallax';
-import { DANCE_SPRING_HEAVY } from '../lib/transitionConfig';
+import { useModelData } from '../app/contexts';
+import { useParallax } from '../lib/hooks';
 import styles from './HomePage.module.css';
 
 export default function HomePage() {
@@ -169,12 +168,12 @@ export default function HomePage() {
             <PathwayDiagram />
           </div>
           <div className={styles.actions}>
-            <Link to="/pathway" className="button button-primary button-lg">
+            <InteractiveSurface as="link" to="/pathway" className="button button-primary button-lg interactiveSurface">
               Explore the Connections
-            </Link>
-            <Link to="/dose" className="button button-secondary button-lg">
+            </InteractiveSurface>
+            <InteractiveSurface as="link" to="/dose" className="button button-secondary button-lg interactiveSurface">
               See How Credit Amount Matters
-            </Link>
+            </InteractiveSurface>
           </div>
         </div>
       </section>
@@ -192,51 +191,41 @@ export default function HomePage() {
         <div className="container">
           <h2>Explore the Research</h2>
           <div className={styles.exploreCards}>
-            <motion.div whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }} transition={DANCE_SPRING_HEAVY}>
-              <Link to="/demographics" className={styles.exploreCard}>
-                <span className={styles.exploreIcon}>
-                  <Icon name="users" size={40} />
-                </span>
-                <h3>Demographics</h3>
-                <p>Compare findings across race, first-generation, Pell, and other subgroups.</p>
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }} transition={DANCE_SPRING_HEAVY}>
-              <Link to="/methods" className={styles.exploreCard}>
-                <span className={styles.exploreIcon}>
-                  <Icon name="microscope" size={40} />
-                </span>
-                <h3>Methods</h3>
-                <p>Technical details on model specification, estimation, and diagnostics.</p>
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }} transition={DANCE_SPRING_HEAVY}>
-              <Link to="/pathway" className={styles.exploreCard}>
-                <span className={styles.exploreIcon}>
-                  <Icon name="network" size={40} />
-                </span>
-                <h3>Pathways</h3>
-                <p>Interact with the full SEM mediation diagram and explore each pathway.</p>
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }} transition={DANCE_SPRING_HEAVY}>
-              <Link to="/dose" className={styles.exploreCard}>
-                <span className={styles.exploreIcon}>
-                  <Icon name="chart" size={40} />
-                </span>
-                <h3>Credit Levels</h3>
-                <p>See how credit dose moderates treatment effects with interactive visualizations.</p>
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.02, y: -4 }} whileTap={{ scale: 0.98 }} transition={DANCE_SPRING_HEAVY}>
-              <Link to="/so-what" className={styles.exploreCard}>
-                <span className={styles.exploreIcon}>
-                  <Icon name="lightbulb" size={40} />
-                </span>
-                <h3>So, What?</h3>
-                <p>Practical implications for students, advisors, and policy makers.</p>
-              </Link>
-            </motion.div>
+            <InteractiveSurface as="link" to="/demographics" className={`${styles.exploreCard} interactiveSurface`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="users" size={40} />
+              </span>
+              <h3>Demographics</h3>
+              <p>Compare findings across race, first-generation, Pell, and other subgroups.</p>
+            </InteractiveSurface>
+            <InteractiveSurface as="link" to="/methods" className={`${styles.exploreCard} interactiveSurface`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="microscope" size={40} />
+              </span>
+              <h3>Methods</h3>
+              <p>Technical details on model specification, estimation, and diagnostics.</p>
+            </InteractiveSurface>
+            <InteractiveSurface as="link" to="/pathway" className={`${styles.exploreCard} interactiveSurface`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="network" size={40} />
+              </span>
+              <h3>Pathways</h3>
+              <p>Interact with the full SEM mediation diagram and explore each pathway.</p>
+            </InteractiveSurface>
+            <InteractiveSurface as="link" to="/dose" className={`${styles.exploreCard} interactiveSurface`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="chart" size={40} />
+              </span>
+              <h3>Credit Levels</h3>
+              <p>See how credit dose moderates treatment effects with interactive visualizations.</p>
+            </InteractiveSurface>
+            <InteractiveSurface as="link" to="/so-what" className={`${styles.exploreCard} interactiveSurface`}>
+              <span className={styles.exploreIcon}>
+                <Icon name="lightbulb" size={40} />
+              </span>
+              <h3>So, What?</h3>
+              <p>Practical implications for students, advisors, and policy makers.</p>
+            </InteractiveSurface>
           </div>
         </div>
       </div>
@@ -248,9 +237,9 @@ export default function HomePage() {
             Start with the equity frame to see how effects differ across race, first-generation status,
             financial need, and living situations.
           </p>
-          <Link to="/demographics" className="button button-primary button-lg">
+          <InteractiveSurface as="link" to="/demographics" className="button button-primary button-lg interactiveSurface">
             Go to Demographics
-          </Link>
+          </InteractiveSurface>
         </div>
       </section>
     </div>

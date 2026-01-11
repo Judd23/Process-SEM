@@ -1,4 +1,4 @@
-import { useScrollReveal } from '../../lib/hooks/useScrollReveal';
+import { useScrollReveal } from '../../lib/hooks';
 import styles from './AnalysisPipeline.module.css';
 
 interface PipelineStep {

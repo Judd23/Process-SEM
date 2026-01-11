@@ -218,7 +218,6 @@
 }
 
 .diagram:hover {
-  transform: translateY(-3px) scale(1.005);
   border-color: rgba(255, 255, 255, 0.06);
   box-shadow: 
     0 16px 48px rgba(0, 0, 0, 0.03),
@@ -411,7 +410,6 @@
 }
 
 .coefficientCard:not(.dimmed):hover {
-  transform: translateY(-4px) scale(1.01);
   border-color: rgba(255, 255, 255, 0.12);
   box-shadow: 
     0 16px 48px rgba(0, 0, 0, 0.06),
@@ -538,7 +536,6 @@
 }
 
 .indirectCard:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--color-accent);
 }
@@ -678,7 +675,6 @@
 }
 
 .summaryCard:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--color-accent);
 }

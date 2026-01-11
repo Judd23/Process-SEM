@@ -96,6 +96,7 @@ export const DoseEffectsDataSchema = z.object({
     min: z.number(),
     max: z.number(),
     threshold: z.number(),
+    units: z.string().optional(),
   }),
   johnsonNeymanPoints: z.object({
     distress: z.record(z.string(), z.unknown()),

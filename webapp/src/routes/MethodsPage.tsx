@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { useModelData } from '../app/contexts/ModelDataContext';
-import { useScrollReveal, useStaggeredReveal } from '../lib/hooks/useScrollReveal';
+import { useModelData } from '../app/contexts';
+import { useScrollReveal, useStaggeredReveal, useParallax } from '../lib/hooks';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import ProgressRing from '../components/ui/ProgressRing';
 import Accordion from '../components/ui/Accordion';
 import AnalysisPipeline from '../features/charts/AnalysisPipeline';
-import useParallax from '../lib/hooks/useParallax';
+import { InteractiveSurface } from '../components/ui/InteractiveSurface';
 import { Link } from 'react-router-dom';
 import styles from './MethodsPage.module.css';
 
@@ -252,11 +252,11 @@ export default function MethodsPage() {
           </p>
           <div className={styles.specGrid}>
             {modelSpecs.map((spec, index) => (
-              <div key={spec.label} className={`${styles.specCard} reveal`} style={{ animationDelay: `${index * 100}ms` }}>
+              <InteractiveSurface key={spec.label} className={`${styles.specCard} interactiveSurface reveal`} style={{ animationDelay: `${index * 100}ms` }} hoverLift={3}>
                 <dt className={styles.specLabel}>{spec.label}</dt>
                 <dd className={styles.specValue}>{spec.value}</dd>
                 <dd className={styles.specDescription}>{spec.description}</dd>
-              </div>
+              </InteractiveSurface>
             ))}
           </div>
         </section>
@@ -308,7 +308,7 @@ export default function MethodsPage() {
             measurements than single items.
           </p>
           <div className={styles.constructGrid}>
-            <article className={`${styles.constructCard} reveal`} style={{ animationDelay: '0ms' }}>
+            <InteractiveSurface as="article" className={`${styles.constructCard} interactiveSurface reveal`} style={{ animationDelay: '0ms' }} hoverLift={4}>
               <h4 style={{ color: 'var(--color-distress)' }}>Emotional Distress</h4>
               <p>6 questions about challenges faced (6-point scale)</p>
               <ul>
@@ -319,8 +319,8 @@ export default function MethodsPage() {
                 <li>Sleep problems</li>
                 <li>Financial stress</li>
               </ul>
-            </article>
-            <article className={`${styles.constructCard} reveal`} style={{ animationDelay: '100ms' }}>
+            </InteractiveSurface>
+            <InteractiveSurface as="article" className={`${styles.constructCard} interactiveSurface reveal`} style={{ animationDelay: '100ms' }} hoverLift={4}>
               <h4 style={{ color: 'var(--color-engagement)' }}>Quality of Engagement</h4>
               <p>5 questions about campus interactions (7-point scale)</p>
               <ul>
@@ -330,8 +330,8 @@ export default function MethodsPage() {
                 <li>Interactions with staff</li>
                 <li>Interactions with administrators</li>
               </ul>
-            </article>
-            <article className={`${styles.constructCard} reveal`} style={{ animationDelay: '200ms' }}>
+            </InteractiveSurface>
+            <InteractiveSurface as="article" className={`${styles.constructCard} interactiveSurface reveal`} style={{ animationDelay: '200ms' }} hoverLift={4}>
               <h4 style={{ color: 'var(--color-belonging)' }}>College Success</h4>
               <p>15 questions across 4 areas</p>
               <ul>
@@ -340,7 +340,7 @@ export default function MethodsPage() {
                 <li><strong>Support</strong> — Campus resources (5 items)</li>
                 <li><strong>Satisfaction</strong> — Overall experience (2 items)</li>
               </ul>
-            </article>
+            </InteractiveSurface>
           </div>
         </section>
 
@@ -370,7 +370,7 @@ export default function MethodsPage() {
           <p className={styles.plainTalk}>
             Plain talk: we rerun the analysis many times to see how much the results could move around.
           </p>
-          <div className={styles.infoBox}>
+          <InteractiveSurface className={`${styles.infoBox} interactiveSurface`}>
             <h4>Why Bootstrap?</h4>
             <p>
               When we multiply effects together (like in{' '}
@@ -384,7 +384,7 @@ export default function MethodsPage() {
               complicated. Bootstrapping lets the data "speak for itself" by repeatedly
               resampling and recalculating, giving us a realistic picture of uncertainty.
             </p>
-          </div>
+          </InteractiveSurface>
         </section>
 
         <section ref={softwareRef} className={`${styles.section} stagger-children`}>
@@ -393,7 +393,7 @@ export default function MethodsPage() {
             All analyses used open-source software for transparency and reproducibility.
           </p>
           <div className={styles.softwareGrid}>
-            <div className={`${styles.softwareCard} reveal`} style={{ animationDelay: '0ms' }}>
+            <InteractiveSurface className={`${styles.softwareCard} interactiveSurface reveal`} style={{ animationDelay: '0ms' }} hoverLift={4}>
               <h4>R Packages</h4>
               <ul>
                 <li><code>lavaan</code> — Main statistical modeling</li>
@@ -401,15 +401,15 @@ export default function MethodsPage() {
                 <li><code>mice</code> — Handling missing data</li>
                 <li><code>parallel</code> — Faster computation</li>
               </ul>
-            </div>
-            <div className={`${styles.softwareCard} reveal`} style={{ animationDelay: '100ms' }}>
+            </InteractiveSurface>
+            <InteractiveSurface className={`${styles.softwareCard} interactiveSurface reveal`} style={{ animationDelay: '100ms' }} hoverLift={4}>
               <h4>Python Packages</h4>
               <ul>
                 <li><code>pandas</code>, <code>numpy</code> — Data processing</li>
                 <li><code>matplotlib</code>, <code>seaborn</code> — Visualizations</li>
                 <li><code>python-docx</code> — Report generation</li>
               </ul>
-            </div>
+            </InteractiveSurface>
           </div>
           <p className={`${styles.repoNote} reveal`}>
             All analysis code is available in the project repository for full reproducibility.
@@ -449,9 +449,9 @@ export default function MethodsPage() {
           <p>
             Explore the pathway diagram to see how stress and engagement connect to success.
           </p>
-          <Link to="/pathway" className="button button-primary button-lg">
+          <InteractiveSurface as="link" to="/pathway" className="button button-primary button-lg interactiveSurface">
             Go to Pathway
-          </Link>
+          </InteractiveSurface>
         </section>
       </div>
     </div>

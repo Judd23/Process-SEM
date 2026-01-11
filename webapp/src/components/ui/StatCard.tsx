@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { InteractiveSurface } from './InteractiveSurface';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './StatCard.module.css';
 
@@ -165,17 +166,30 @@ export default function StatCard({
     return () => observer.disconnect();
   }, [value, animate]);
 
+  // If layoutId is provided, wrap in motion for shared element animation
+  if (layoutId) {
+    return (
+      <motion.div layoutId={layoutId} layout transition={DANCE_SPRING_HEAVY}>
+        <InteractiveSurface
+          ref={cardRef}
+          className={`${styles.card} ${styles[size]} interactiveSurface`}
+        >
+          <div className={styles.label}>{label}</div>
+          <div className={`${styles.value} ${styles[color]}`}>{displayValue}</div>
+          {subtext && <div className={styles.subtext}>{subtext}</div>}
+        </InteractiveSurface>
+      </motion.div>
+    );
+  }
+
   return (
-    <motion.div
+    <InteractiveSurface
       ref={cardRef}
-      className={`${styles.card} ${styles[size]}`}
-      layoutId={layoutId}
-      layout={!!layoutId}
-      transition={DANCE_SPRING_HEAVY}
+      className={`${styles.card} ${styles[size]} interactiveSurface`}
     >
       <div className={styles.label}>{label}</div>
       <div className={`${styles.value} ${styles[color]}`}>{displayValue}</div>
       {subtext && <div className={styles.subtext}>{subtext}</div>}
-    </motion.div>
+    </InteractiveSurface>
   );
 }

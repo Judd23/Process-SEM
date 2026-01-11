@@ -1,20 +1,28 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import BackToTop from '../../components/ui/BackToTop';
 import MobileNav from './MobileNav';
+import ParallaxBackground from '../../components/ui/ParallaxBackground';
 import { TransitionOrchestrator } from '../../features/transitions';
-import { useScrollRestoration } from '../../lib/hooks/useScrollRestoration';
-import { useModelData } from '../contexts/ModelDataContext';
+import { useScrollRestoration } from '../../lib/hooks';
+import { useModelData } from '../contexts';
 import styles from './Layout.module.css';
 
 export default function Layout() {
+  const location = useLocation();
   const { handleExitComplete } = useScrollRestoration();
   const { validation } = useModelData();
   const showDataInvalidBanner = import.meta.env.DEV && !validation.isValid;
+  
+  // Hide header/footer on landing page
+  const isLandingPage = location.pathname === '/';
 
   return (
     <div className={styles.layout}>
+      {/* Global parallax background layers */}
+      <ParallaxBackground />
+      
       {showDataInvalidBanner && (
         <div
           style={{
@@ -36,13 +44,12 @@ export default function Layout() {
           Data invalid (dev): {validation.errors[0] ?? 'Unknown error'}
         </div>
       )}
-      <a href="#main-content" className={styles.skipLink}>
-        Skip to main content
-      </a>
-      <div className={styles.background}>
-        <div className={styles.gradient} />
-      </div>
-      <Header />
+      {!isLandingPage && (
+        <a href="#main-content" className={styles.skipLink}>
+          Skip to main content
+        </a>
+      )}
+      {!isLandingPage && <Header />}
       <main
         id="main-content"
         className={styles.main}
@@ -54,9 +61,9 @@ export default function Layout() {
           <Outlet />
         </TransitionOrchestrator>
       </main>
-      <BackToTop />
-      <MobileNav />
-      <Footer />
+      {!isLandingPage && <BackToTop />}
+      {!isLandingPage && <MobileNav />}
+      {!isLandingPage && <Footer />}
     </div>
   );
 }

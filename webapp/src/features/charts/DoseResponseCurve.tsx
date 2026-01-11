@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import * as d3 from 'd3';
-import { useResearch } from '../../app/contexts/ResearchContext';
-import { useTheme } from '../../app/contexts/ThemeContext';
-import { useModelData } from '../../app/contexts/ModelDataContext';
+import { useResearch, useTheme, useModelData } from '../../app/contexts';
 import { colors } from '../../lib/colorScales';
 import DataTimestamp from '../../components/ui/DataTimestamp';
 import styles from './DoseResponseCurve.module.css';

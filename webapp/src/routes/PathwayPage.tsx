@@ -1,13 +1,12 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { useResearch } from '../app/contexts/ResearchContext';
-import { useModelData } from '../app/contexts/ModelDataContext';
+import { useResearch, useModelData } from '../app/contexts';
 import PathwayDiagram from '../features/charts/PathwayDiagram';
 import EffectDecomposition from '../features/charts/EffectDecomposition';
 import Toggle from '../components/ui/Toggle';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
-import { useScrollReveal, useStaggeredReveal } from '../lib/hooks/useScrollReveal';
-import useParallax from '../lib/hooks/useParallax';
+import { InteractiveSurface } from '../components/ui/InteractiveSurface';
+import { useScrollReveal, useStaggeredReveal, useParallax } from '../lib/hooks';
 import { Link } from 'react-router-dom';
 import styles from './PathwayPage.module.css';
 
@@ -154,15 +153,17 @@ export default function PathwayPage() {
         <section ref={controlsRef} className={`${styles.controls} ${isStuck ? styles.stuck : ''}`}>
           <div className={styles.pathwayButtons}>
             {pathwayButtons.map((btn) => (
-              <button
+              <InteractiveSurface
                 key={btn.id || 'all'}
-                className={`${styles.pathwayButton} ${highlightedPath === btn.id ? styles.active : ''}`}
+                as="button"
+                className={`${styles.pathwayButton} ${highlightedPath === btn.id ? styles.active : ''} interactiveSurface`}
                 onClick={() => setHighlightedPath(btn.id)}
                 style={{
                   '--button-color': btn.color,
                   '--button-text': btn.textColor ?? 'white',
                 } as React.CSSProperties}
                 aria-pressed={highlightedPath === btn.id}
+                hoverLift={3}
               >
                 {btn.label}
                 {highlightedPath === btn.id && <span className={styles.pathCount}>
@@ -171,7 +172,7 @@ export default function PathwayPage() {
                    btn.id === 'engagement' ? 3 : 
                    btn.id === 'serial' ? 4 : 2} paths
                 </span>}
-              </button>
+              </InteractiveSurface>
             ))}
           </div>
           <div className={styles.toggleContainer}>
@@ -207,9 +208,11 @@ export default function PathwayPage() {
                                     path.pvalue < 0.10 ? 'Suggestive' : 'Uncertain';
 
               return (
-                <article
+                <InteractiveSurface
+                  as="article"
                   key={path.id}
-                  className={`${styles.coefficientCard} ${!isHighlighted ? styles.dimmed : ''} reveal`}
+                  className={`${styles.coefficientCard} ${!isHighlighted ? styles.dimmed : ''} interactiveSurface reveal`}
+                  hoverLift={4}
                 >
                   <div className={styles.coefficientHeader}>
                     <span className={styles.coefficientLabel}>{path.label}</span>
@@ -219,7 +222,7 @@ export default function PathwayPage() {
                     Effect size: {path.estimate > 0 ? '+' : ''}{path.estimate.toFixed(2)}
                   </div>
                   <p className={styles.coefficientInterpretation}>{path.interpretation}</p>
-                </article>
+                </InteractiveSurface>
               );
             })}
           </div>
@@ -232,7 +235,7 @@ export default function PathwayPage() {
             They're calculated by multiplying path coefficients together.
           </p>
           <div className={styles.indirectGrid}>
-            <article className={`${styles.indirectCard} reveal`}>
+            <InteractiveSurface as="article" className={`${styles.indirectCard} interactiveSurface reveal`} hoverLift={4}>
               <div className={styles.indirectHeader}>
                 <h3>Stress Route (Indirect)</h3>
                 <span className={styles.indirectBadge} style={{ backgroundColor: 'var(--color-distress)' }}>
@@ -261,9 +264,9 @@ export default function PathwayPage() {
                 This <strong>negative indirect effect</strong> means FASt status increases stress,
                 which in turn reduces adjustment. This is the "cost" pathway.
               </p>
-            </article>
+            </InteractiveSurface>
 
-            <article className={`${styles.indirectCard} reveal`}>
+            <InteractiveSurface as="article" className={`${styles.indirectCard} interactiveSurface reveal`} hoverLift={4}>
               <div className={styles.indirectHeader}>
                 <h3>Engagement Route (Indirect)</h3>
                 <span className={styles.indirectBadge} style={{ backgroundColor: 'var(--color-engagement)' }}>
@@ -292,7 +295,7 @@ export default function PathwayPage() {
                 This indirect effect is <strong>close to zero</strong> because FASt status doesn't
                 significantly change engagement. The benefit comes through the direct path instead.
               </p>
-            </article>
+            </InteractiveSurface>
           </div>
           <div className={`${styles.decompositionChart} reveal`}>
             <EffectDecomposition />
@@ -302,15 +305,15 @@ export default function PathwayPage() {
         <section ref={summaryRef} className={`${styles.summary} stagger-children`}>
           <h2>The Big Picture</h2>
           <div className={styles.summaryGrid}>
-            <article className={`${styles.summaryCard} reveal`} style={{ transitionDelay: '0ms' }}>
+            <InteractiveSurface as="article" className={`${styles.summaryCard} interactiveSurface reveal`} style={{ transitionDelay: '0ms' }}>
               <h3>The Stress Route</h3>
               <p>
                 Dual enrollment credits <strong>increase first-year stress</strong>, which hurts
                 adjustment. This is the main negative pathway. The effect is small but
                 statistically reliable across different student groups.
               </p>
-            </article>
-            <article className={`${styles.summaryCard} reveal`} style={{ transitionDelay: '100ms' }}>
+            </InteractiveSurface>
+            <InteractiveSurface as="article" className={`${styles.summaryCard} interactiveSurface reveal`} style={{ transitionDelay: '100ms' }}>
               <h3>The Engagement Route</h3>
               <p>
                 The engagement pathway is <strong>not significant</strong>—dual enrollment
@@ -318,8 +321,8 @@ export default function PathwayPage() {
                 <GlossaryTerm term="Path Coefficient" definition="A standardized measure of the strength and direction of a relationship between two variables in our model. Values range from -1 to +1, with larger absolute values indicating stronger relationships.">path from engagement to adjustment</GlossaryTerm>{' '}
                 is one of the strongest in our model.
               </p>
-            </article>
-            <article className={`${styles.summaryCard} reveal`} style={{ transitionDelay: '200ms' }}>
+            </InteractiveSurface>
+            <InteractiveSurface as="article" className={`${styles.summaryCard} interactiveSurface reveal`} style={{ transitionDelay: '200ms' }}>
               <h3>Direct Benefits</h3>
               <p>
                 Beyond stress and engagement, dual enrollment credits provide a{' '}
@@ -327,7 +330,7 @@ export default function PathwayPage() {
                 to college success. This might reflect academic preparation, confidence, or
                 other benefits we didn't measure directly.
               </p>
-            </article>
+            </InteractiveSurface>
           </div>
         </section>
 
@@ -341,9 +344,9 @@ export default function PathwayPage() {
           <p>
             See how different credit doses change the stress and engagement pathways in the model.
           </p>
-          <Link to="/dose" className="button button-primary button-lg">
+          <InteractiveSurface as="link" to="/dose" className="button button-primary button-lg interactiveSurface">
             Go to Credit Levels
-          </Link>
+          </InteractiveSurface>
         </section>
       </div>
     </div>

@@ -17,13 +17,14 @@ import ResearcherPage from '../routes/ResearcherPage';
  * - LayoutGroup namespaces all layoutId morphs within "app" scope
  * - Page transitions are handled inside Layout via TransitionOrchestrator
  *   to keep shared-layout morphs in sync with the outlet
+ * - All pages including LandingPage are wrapped in Layout for consistent background
  */
 export function AppRoutes() {
   return (
     <LayoutGroup id="app">
       <Routes>
-        <Route index element={<LandingPage />} />
         <Route path="/" element={<Layout />}>
+          <Route index element={<LandingPage />} />
           <Route path="home" element={<HomePage />} />
           <Route path="so-what" element={<SoWhatPage />} />
           <Route path="dose" element={<DoseExplorerPage />} />

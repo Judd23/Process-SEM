@@ -1,7 +1,8 @@
-import { useTheme } from '../app/contexts/ThemeContext';
+import { useTheme } from '../app/contexts';
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { InteractiveSurface } from '../components/ui/InteractiveSurface';
 import { DANCE_SPRING_HEAVY, PAGE_FADE } from '../lib/transitionConfig';
 import styles from './LandingPage.module.css';
 
@@ -161,35 +162,31 @@ export default function LandingPage() {
         </div>
 
         {/* CTA Button */}
-        <motion.button
-          className={`${styles.cta} ${styles.fromBottom}`}
+        <InteractiveSurface
+          as="button"
+          className={`${styles.cta} ${styles.fromBottom} interactiveSurface`}
           onClick={handleEnter}
           aria-label="Enter the research visualization"
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.95 }}
-          transition={DANCE_SPRING_HEAVY}
         >
           <span>Explore the Research</span>
           <svg className={styles.ctaIcon} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
-        </motion.button>
+        </InteractiveSurface>
       </main>
 
       {/* Scroll Indicator - FROM BOTTOM */}
-      <motion.button
-        className={`${styles.scrollIndicator} ${styles.fromBottom}`}
+      <InteractiveSurface
+        as="button"
+        className={`${styles.scrollIndicator} ${styles.fromBottom} interactiveSurface`}
         onClick={handleEnter}
         aria-label="Scroll to explore"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        transition={DANCE_SPRING_HEAVY}
       >
         <span className={styles.scrollText}>Scroll to explore</span>
         <svg className={styles.scrollChevron} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="6 9 12 15 18 9" />
         </svg>
-      </motion.button>
+      </InteractiveSurface>
     </motion.div>
   );
 }

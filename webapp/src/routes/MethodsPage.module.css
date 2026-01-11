@@ -3,46 +3,7 @@
   position: relative;
 }
 
-/* Hero glow effect - matches other pages */
-.page::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(var(--parallax-offset, 0px));
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(
-    ellipse at center,
-    color-mix(in srgb, var(--color-accent) 30%, transparent) 0%,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Second background orb for visual depth */
-.page::after {
-  content: '';
-  position: absolute;
-  top: calc(600px + var(--parallax-offset, 0px));
-  right: -200px;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(
-    ellipse at center,
-    color-mix(in srgb, var(--color-engagement) 22%, transparent) 0%,
-    transparent 70%
-  );
-  pointer-events: none;
-  z-index: 0;
-  animation: floatSubtle 20s ease-in-out infinite;
-}
-
-@keyframes floatSubtle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(30px); }
-}
+/* Background now handled by Layout */
 
 .header {
   text-align: left;
@@ -616,11 +577,6 @@
 @media (max-width: 480px) {
   .page {
     padding-bottom: var(--spacing-2xl);
-  }
-
-  .page::before {
-    width: 300px;
-    height: 300px;
   }
 
   .header {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import ThemeToggle from '../../components/ui/ThemeToggle';
 import { TransitionNavLink } from '../../features/transitions';
 import { navItems } from './navItems';
@@ -47,16 +48,22 @@ export default function Header() {
         </TransitionNavLink>
         <nav className={styles.nav} aria-label="Primary navigation">
           {navItems.map((item) => (
-            <TransitionNavLink
+            <motion.span
               key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `${styles.navLink} ${isActive ? styles.active : ''}`
-              }
-              end={item.to === '/home'}
+              whileHover={{ y: -2 }}
+              whileTap={{ y: 0 }}
+              style={{ display: 'inline-block' }}
             >
-              {item.label}
-            </TransitionNavLink>
+              <TransitionNavLink
+                to={item.to}
+                className={({ isActive }) =>
+                  `${styles.navLink} ${isActive ? styles.active : ''}`
+                }
+                end={item.to === '/home'}
+              >
+                {item.label}
+              </TransitionNavLink>
+            </motion.span>
           ))}
           <ThemeToggle />
         </nav>

@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { useResearch } from '../app/contexts/ResearchContext';
-import { useModelData } from '../app/contexts/ModelDataContext';
+import { useResearch, useModelData } from '../app/contexts';
 import Slider from '../components/ui/Slider';
 import Toggle from '../components/ui/Toggle';
 import DoseResponseCurve from '../features/charts/DoseResponseCurve';
@@ -9,7 +8,8 @@ import StatCard from '../components/ui/StatCard';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import DataTimestamp from '../components/ui/DataTimestamp';
-import useParallax from '../lib/hooks/useParallax';
+import { InteractiveSurface } from '../components/ui/InteractiveSurface';
+import { useParallax } from '../lib/hooks';
 import { Link } from 'react-router-dom';
 import styles from './DoseExplorerPage.module.css';
 
@@ -78,18 +78,20 @@ export default function DoseExplorerPage() {
               {DOSE_ZONES.map((zone) => {
                 const midpoint = zone.id === 'high' ? 48 : Math.round((zone.min + zone.max) / 2);
                 return (
-                  <button
+                  <InteractiveSurface
                     key={zone.id}
+                    as="button"
                     type="button"
-                    className={`${styles.doseZone} ${styles[zone.id]} ${currentZone === zone.id ? styles.active : ''}`}
+                    className={`${styles.doseZone} ${styles[zone.id]} ${currentZone === zone.id ? styles.active : ''} interactiveSurface`}
                     onClick={() => setSelectedDose(midpoint)}
                     aria-pressed={currentZone === zone.id}
                     aria-label={`Set dose to ${zone.label} (${zone.range})`}
+                    hoverLift={3}
                   >
                     <span className={styles.zoneDot} />
                     <span className={styles.zoneLabel}>{zone.label}</span>
                     <span className={styles.zoneRange}>{zone.range}</span>
-                  </button>
+                  </InteractiveSurface>
                 );
               })}
             </div>
@@ -169,30 +171,30 @@ export default function DoseExplorerPage() {
         <div className={styles.interpretation}>
           <h2>Understanding These Numbers</h2>
           <div className={styles.interpretationContent}>
-            <article className={styles.interpretationCard}>
+            <InteractiveSurface as="article" className={`${styles.interpretationCard} interactiveSurface`} hoverLift={4}>
               <h3>What Do the Numbers Mean?</h3>
               <p>
                 The <GlossaryTerm term="Effect Size" definition="A standardized measure of how strong a relationship is. Values are in standard deviation units—an effect of 0.10 is small, 0.30 is medium, and 0.50 is large.">effect sizes</GlossaryTerm> are in "standard deviation" units. An effect of +0.13
                 means transfer students score about 0.13 standard deviations higher on
                 stress measures—a small but meaningful difference in a group of students.
               </p>
-            </article>
-            <article className={styles.interpretationCard}>
+            </InteractiveSurface>
+            <InteractiveSurface as="article" className={`${styles.interpretationCard} interactiveSurface`} hoverLift={4}>
               <h3>Why Credit Amount Matters</h3>
               <p>
                 This analysis tests for <GlossaryTerm term="Moderated Mediation" definition="A model where the indirect effect (through a mediator like stress) changes depending on a moderator variable (like credit dose). It answers: 'Does the mediation process work differently at different credit levels?'">moderated mediation</GlossaryTerm>—whether
                 the pathway from credits to adjustment changes at different doses.
                 Someone with 12 credits may experience different effects than someone with 45 credits.
               </p>
-            </article>
-            <article className={styles.interpretationCard}>
+            </InteractiveSurface>
+            <InteractiveSurface as="article" className={`${styles.interpretationCard} interactiveSurface`} hoverLift={4}>
               <h3>What This Means for Colleges</h3>
               <p>
                 The <GlossaryTerm term="Confidence Interval" definition="A range of values within which we're 95% confident the true effect lies. Wider intervals mean more uncertainty. When an interval includes zero, we can't be confident the effect is real.">confidence intervals</GlossaryTerm> help us understand uncertainty.
                 When they don't cross zero, we're more confident the effect is real.
                 Colleges can use this to tailor support based on credit totals.
               </p>
-            </article>
+            </InteractiveSurface>
           </div>
         </div>
 
@@ -207,9 +209,9 @@ export default function DoseExplorerPage() {
             Translate the dose-response patterns into concrete recommendations for students,
             advisors, and policy leaders.
           </p>
-          <Link to="/so-what" className="button button-primary button-lg">
+          <InteractiveSurface as="link" to="/so-what" className="button button-primary button-lg interactiveSurface">
             Go to So, What?
-          </Link>
+          </InteractiveSurface>
         </section>
       </div>
     </div>

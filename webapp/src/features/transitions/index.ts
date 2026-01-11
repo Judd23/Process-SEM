@@ -1,11 +1,10 @@
 // Public transition surface area.
 // NOTE: Transition system work is currently deferred; export only what is actively used.
 
-export { default as TransitionLink } from './TransitionLink';
 export { default as TransitionNavLink } from './TransitionNavLink';
 
 // Layout-level orchestrator (used by App layout)
-export { default as TransitionOrchestrator, PageWrapper } from './TransitionOrchestrator';
+export { default as TransitionOrchestrator } from './TransitionOrchestrator';
 
 // Intentionally NOT exported (currently unused / deferred):
 // ParticleCanvas, SharedElement, MorphProvider, TransitionOverlay,

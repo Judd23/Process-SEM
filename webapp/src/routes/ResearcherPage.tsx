@@ -1,7 +1,6 @@
-import { useTheme } from '../app/contexts/ThemeContext';
-import { useScrollReveal, useStaggeredReveal } from '../lib/hooks/useScrollReveal';
+import { useTheme } from '../app/contexts';
+import { useScrollReveal, useStaggeredReveal, useParallax } from '../lib/hooks';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
-import useParallax from '../lib/hooks/useParallax';
 import styles from './ResearcherPage.module.css';
 
 export default function ResearcherPage() {

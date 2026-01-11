@@ -1,6 +1,7 @@
 import KeyTakeaway from '../components/ui/KeyTakeaway';
-import { useModelData } from '../app/contexts/ModelDataContext';
-import useParallax from '../lib/hooks/useParallax';
+import { InteractiveSurface } from '../components/ui/InteractiveSurface';
+import { useModelData } from '../app/contexts';
+import { useParallax } from '../lib/hooks';
 import { Link } from 'react-router-dom';
 import styles from './SoWhatPage.module.css';
 
@@ -44,7 +45,7 @@ export default function SoWhatPage() {
 
           <div className={styles.stakeholderGrid}>
             {/* Students */}
-            <article className={styles.stakeholderCard}>
+            <InteractiveSurface as="article" className={`${styles.stakeholderCard} interactiveSurface`}>
               <div className={styles.cardIcon}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -71,10 +72,10 @@ export default function SoWhatPage() {
                   campus feel less relevant. Join student organizations and visit office hours.
                 </li>
               </ul>
-            </article>
+            </InteractiveSurface>
 
             {/* Advisors */}
-            <article className={styles.stakeholderCard}>
+            <InteractiveSurface as="article" className={`${styles.stakeholderCard} interactiveSurface`}>
               <div className={styles.cardIcon}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
@@ -99,10 +100,10 @@ export default function SoWhatPage() {
                   with many credits may feel "above" campus involvement.
                 </li>
               </ul>
-            </article>
+            </InteractiveSurface>
 
             {/* Policy Makers */}
-            <article className={styles.stakeholderCard}>
+            <InteractiveSurface as="article" className={`${styles.stakeholderCard} interactiveSurface`}>
               <div className={styles.cardIcon}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -128,7 +129,7 @@ export default function SoWhatPage() {
                   first-year experience programs tailored for FASt students.
                 </li>
               </ul>
-            </article>
+            </InteractiveSurface>
           </div>
         </div>
       </div>
@@ -139,7 +140,7 @@ export default function SoWhatPage() {
           <h2 className={styles.sectionTitle}>Actionable Takeaways</h2>
 
           <div className={styles.actionGrid}>
-            <div className={styles.actionCard}>
+            <InteractiveSurface className={`${styles.actionCard} interactiveSurface`} hoverLift={4}>
               <span className={styles.actionNumber}>1</span>
               <div className={styles.actionContent}>
                 <h4>Early Intervention Matters</h4>
@@ -148,9 +149,9 @@ export default function SoWhatPage() {
                   mental health screening for FASt students during orientation.
                 </p>
               </div>
-            </div>
+            </InteractiveSurface>
 
-            <div className={styles.actionCard}>
+            <InteractiveSurface className={`${styles.actionCard} interactiveSurface`} hoverLift={4}>
               <span className={styles.actionNumber}>2</span>
               <div className={styles.actionContent}>
                 <h4>Credit Dose ≠ Preparation</h4>
@@ -159,9 +160,9 @@ export default function SoWhatPage() {
                   may actually struggle more than those with 15.
                 </p>
               </div>
-            </div>
+            </InteractiveSurface>
 
-            <div className={styles.actionCard}>
+            <InteractiveSurface className={`${styles.actionCard} interactiveSurface`} hoverLift={4}>
               <span className={styles.actionNumber}>3</span>
               <div className={styles.actionContent}>
                 <h4>Engagement is Protective</h4>
@@ -170,9 +171,9 @@ export default function SoWhatPage() {
                   connection may buffer against the stress pathway.
                 </p>
               </div>
-            </div>
+            </InteractiveSurface>
 
-            <div className={styles.actionCard}>
+            <InteractiveSurface className={`${styles.actionCard} interactiveSurface`} hoverLift={4}>
               <span className={styles.actionNumber}>4</span>
               <div className={styles.actionContent}>
                 <h4>Equity Lens Required</h4>
@@ -181,7 +182,7 @@ export default function SoWhatPage() {
                   first-generation, Pell-eligible, and racially minoritized students.
                 </p>
               </div>
-            </div>
+            </InteractiveSurface>
           </div>
         </div>
       </div>
@@ -191,27 +192,27 @@ export default function SoWhatPage() {
         <div className="container">
           <h2 className={styles.sectionTitle}>Important Caveats</h2>
           <div className={styles.limitationsContent}>
-            <div className={styles.limitationItem}>
+            <InteractiveSurface className={`${styles.limitationItem} interactiveSurface`} hoverLift={3}>
               <h4>Correlation ≠ Causation</h4>
               <p>
                 This is observational research. We used propensity score weighting to reduce
                 selection bias, but cannot definitively prove that dual enrollment causes these outcomes.
               </p>
-            </div>
-            <div className={styles.limitationItem}>
+            </InteractiveSurface>
+            <InteractiveSurface className={`${styles.limitationItem} interactiveSurface`} hoverLift={3}>
               <h4>CSU-Specific Context</h4>
               <p>
                 Our sample comes from California State University students. Results may not
                 generalize to private institutions, community colleges, or other state systems.
               </p>
-            </div>
-            <div className={styles.limitationItem}>
+            </InteractiveSurface>
+            <InteractiveSurface className={`${styles.limitationItem} interactiveSurface`} hoverLift={3}>
               <h4>Self-Reported Data</h4>
               <p>
                 Outcome measures (distress, engagement, adjustment) are based on student surveys,
                 not objective behavioral indicators.
               </p>
-            </div>
+            </InteractiveSurface>
           </div>
         </div>
       </section>
@@ -249,9 +250,9 @@ export default function SoWhatPage() {
             equity motivation behind this study.
           </p>
           <div className={styles.ctaButtons}>
-            <Link to="/researcher" className="button button-primary button-lg">
+            <InteractiveSurface as="link" to="/researcher" className="button button-primary button-lg interactiveSurface">
               Meet the Researcher
-            </Link>
+            </InteractiveSurface>
           </div>
         </div>
       </section>

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useResearch } from '../app/contexts/ResearchContext';
+import { useResearch } from '../app/contexts';
 import GroupComparison from '../features/charts/GroupComparison';
 import Toggle from '../components/ui/Toggle';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
-import useParallax from '../lib/hooks/useParallax';
+import { InteractiveSurface } from '../components/ui/InteractiveSurface';
+import { useParallax } from '../lib/hooks';
 import { Link } from 'react-router-dom';
 import { fastComparison } from '../data/adapters/fastComparison';
 import { sampleDescriptives } from '../data/adapters/sampleDescriptives';
@@ -57,7 +58,7 @@ export default function DemographicsPage() {
 
             <div className={`${styles.demographicsGrid} ${showComparison ? styles.comparing : ''}`}>
               {/* Race/Ethnicity Breakdown */}
-              <div className={`${styles.demoCard} reveal`} style={{ transitionDelay: '0ms' }}>
+              <InteractiveSurface className={`${styles.demoCard} interactiveSurface reveal`} style={{ transitionDelay: '0ms' }} hoverLift={4}>
                 <h3>Race & Ethnicity</h3>
                 <div className={styles.demoStats}>
                   {Object.entries(demographics.race).map(([group, data]) => (
@@ -100,10 +101,10 @@ export default function DemographicsPage() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </InteractiveSurface>
 
               {/* First-Gen & Pell */}
-              <div className={`${styles.demoCard} reveal`} style={{ transitionDelay: '100ms' }}>
+              <InteractiveSurface className={`${styles.demoCard} interactiveSurface reveal`} style={{ transitionDelay: '100ms' }} hoverLift={4}>
                 <h3>Access & Equity</h3>
                 <div className={styles.demoStats}>
                   <div className={styles.demoStat}>
@@ -175,7 +176,7 @@ export default function DemographicsPage() {
                     )}
                   </div>
                 </div>
-              </div>
+              </InteractiveSurface>
             </div>
         </div>
 
@@ -188,7 +189,7 @@ export default function DemographicsPage() {
             Plain talk: FASt students came in with more credits but have similar demographic backgrounds.
           </p>
           <div className={styles.sampleGrid}>
-            <div className={styles.sampleCard}>
+            <InteractiveSurface className={`${styles.sampleCard} interactiveSurface`}>
               <div className={styles.sampleHeader}>
                 <span className={styles.sampleLabel}>FASt Students</span>
                 <span className={styles.sampleCount}>{fastComparison.overall.fast_n.toLocaleString()}</span>
@@ -199,8 +200,8 @@ export default function DemographicsPage() {
                 <div className={styles.statRow}><span className={styles.statLabel}>First-Gen:</span> <strong>{fastComparison.demographics.firstgen.yes.fast.pct.toFixed(1)}%</strong></div>
                 <div className={styles.statRow}><span className={styles.statLabel}>Pell:</span> <strong>{fastComparison.demographics.pell.yes.fast.pct.toFixed(1)}%</strong></div>
               </div>
-            </div>
-            <div className={styles.sampleCard}>
+            </InteractiveSurface>
+            <InteractiveSurface className={`${styles.sampleCard} interactiveSurface`}>
               <div className={styles.sampleHeader}>
                 <span className={styles.sampleLabel}>Non-FASt Students</span>
                 <span className={styles.sampleCount}>{fastComparison.overall.nonfast_n.toLocaleString()}</span>
@@ -211,7 +212,7 @@ export default function DemographicsPage() {
                 <div className={styles.statRow}><span className={styles.statLabel}>First-Gen:</span> <strong>{fastComparison.demographics.firstgen.yes.nonfast.pct.toFixed(1)}%</strong></div>
                 <div className={styles.statRow}><span className={styles.statLabel}>Pell:</span> <strong>{fastComparison.demographics.pell.yes.nonfast.pct.toFixed(1)}%</strong></div>
               </div>
-            </div>
+            </InteractiveSurface>
           </div>
         </section>
 
@@ -219,14 +220,16 @@ export default function DemographicsPage() {
           <label className={styles.selectLabel}>Compare students by:</label>
           <div className={styles.groupButtons} role="group" aria-label="Student grouping options">
             {groupingOptions.map((option) => (
-              <button
+              <InteractiveSurface
                 key={option.value}
-                className={`${styles.groupButton} ${groupingVariable === option.value ? styles.active : ''}`}
+                as="button"
+                className={`${styles.groupButton} ${groupingVariable === option.value ? styles.active : ''} interactiveSurface`}
                 onClick={() => setGroupingVariable(option.value)}
                 aria-pressed={groupingVariable === option.value}
+                hoverLift={3}
               >
                 {option.label}
-              </button>
+              </InteractiveSurface>
             ))}
           </div>
           <p className={styles.groupDescription}>
@@ -238,27 +241,27 @@ export default function DemographicsPage() {
         </section>
 
         <div className={styles.charts}>
-          <div className={styles.chartContainer}>
+          <InteractiveSurface className={`${styles.chartContainer} interactiveSurface`} hoverLift={4}>
               <h2>Effect on Stress by {groupingOptions.find((o) => o.value === groupingVariable)?.label}</h2>
               <p className={styles.chartDescription}>
                 Does earning dual enrollment credits lead to different stress levels across equity groups?
               </p>
               <GroupComparison grouping={groupingVariable} pathway="a1" />
-            </div>
+            </InteractiveSurface>
 
-            <div className={styles.chartContainer}>
+            <InteractiveSurface className={`${styles.chartContainer} interactiveSurface`} hoverLift={4}>
               <h2>Effect on Engagement by {groupingOptions.find((o) => o.value === groupingVariable)?.label}</h2>
               <p className={styles.chartDescription}>
                 Does earning dual enrollment credits change campus engagement differently across equity groups?
               </p>
               <GroupComparison grouping={groupingVariable} pathway="a2" />
-            </div>
+            </InteractiveSurface>
         </div>
 
         <div className={styles.interpretation}>
           <h2>Why This Matters for Equity</h2>
           <div className={styles.interpretationGrid}>
-            <article className={styles.interpretationCard}>
+            <InteractiveSurface as="article" className={`${styles.interpretationCard} interactiveSurface`} hoverLift={4}>
                 <h3>Fair Comparisons</h3>
                 <p>
                   Before comparing groups, we tested for{' '}
@@ -266,8 +269,8 @@ export default function DemographicsPage() {
                   to ensure our survey questions work the same way for all students.
                   This confirms we're measuring the same things across different backgrounds.
                 </p>
-              </article>
-            <article className={styles.interpretationCard}>
+              </InteractiveSurface>
+            <InteractiveSurface as="article" className={`${styles.interpretationCard} interactiveSurface`} hoverLift={4}>
                 <h3>Looking for Differences</h3>
                 <p>
                   If the <GlossaryTerm term="Effect Size" definition="A standardized measure of how strong a relationship is. In forest plots, effect sizes near zero indicate little to no effect, while larger values (positive or negative) indicate stronger effects.">effect sizes</GlossaryTerm>{' '}
@@ -275,15 +278,15 @@ export default function DemographicsPage() {
                   affect students similarly regardless of background. If they differ,
                   some students might need different support.
                 </p>
-              </article>
-            <article className={styles.interpretationCard}>
+              </InteractiveSurface>
+            <InteractiveSurface as="article" className={`${styles.interpretationCard} interactiveSurface`} hoverLift={4}>
                 <h3>Targeted Support</h3>
                 <p>
                   If effects are similar for everyone, universal programs may work best.
                   If <GlossaryTerm term="Moderation" definition="When the relationship between two variables changes depending on a third variable. For example, if the effect of dual enrollment credits on stress is stronger for first-generation students than continuing-generation students.">moderation by demographics</GlossaryTerm> exists, colleges might need specialized support for
                   specific student populations.
                 </p>
-              </article>
+              </InteractiveSurface>
           </div>
         </div>
 
@@ -292,9 +295,9 @@ export default function DemographicsPage() {
           <p>
             See the step-by-step method we used to make fair comparisons and test the model.
           </p>
-          <Link to="/methods" className="button button-primary button-lg">
+          <InteractiveSurface as="link" to="/methods" className="button button-primary button-lg interactiveSurface">
             Go to Methods
-          </Link>
+          </InteractiveSurface>
         </section>
       </div>
     </div>

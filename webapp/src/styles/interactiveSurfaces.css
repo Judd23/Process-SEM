@@ -1,0 +1,60 @@
+/* Interactive surfaces: consistent visual hover behavior for buttons, panels, banners */
+/* Transform is owned by Framer Motion for true spring feel. */
+
+:root {
+  --surface-transition: 180ms;
+  --surface-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --surface-border: rgba(255, 255, 255, 0.14);
+  --surface-border-hover: rgba(255, 255, 255, 0.24);
+  --surface-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+/* Base class for anything hoverable/clickable */
+.interactiveSurface {
+  position: relative;
+  transform: translateZ(0);
+  will-change: transform, box-shadow, border-color, background-color, filter;
+
+  border: 1px solid var(--surface-border);
+  box-shadow: none;
+
+  transition:
+    box-shadow var(--surface-transition) var(--surface-ease),
+    border-color var(--surface-transition) var(--surface-ease),
+    background-color var(--surface-transition) var(--surface-ease),
+    filter var(--surface-transition) var(--surface-ease);
+}
+
+/* Hover + keyboard focus (visual only, no transform here) */
+.interactiveSurface:hover,
+.interactiveSurface:focus-visible {
+  border-color: var(--surface-border-hover);
+  box-shadow: var(--surface-shadow);
+  filter: saturate(1.05);
+  outline: none;
+}
+
+/* Optional: subtle sheen overlay */
+.interactiveSurface::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.02) 40%,
+    rgba(255, 255, 255, 0.00)
+  );
+
+  transition: opacity var(--surface-transition) var(--surface-ease);
+}
+
+.interactiveSurface:hover::after,
+.interactiveSurface:focus-visible::after {
+  opacity: 1;
+}

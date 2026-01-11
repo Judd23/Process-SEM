@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { InteractiveSurface } from './InteractiveSurface';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './Accordion.module.css';
 
@@ -49,16 +50,14 @@ export default function Accordion({
             animate={{ backgroundColor: isOpen ? 'rgba(255, 255, 255, 0.02)' : 'transparent' }}
             transition={DANCE_SPRING_HEAVY}
           >
-            <motion.button
+            <InteractiveSurface
+              as="button"
               type="button"
               id={buttonId}
-              className={styles.button}
+              className={`${styles.button} interactiveSurface`}
               aria-expanded={isOpen}
               aria-controls={panelId}
               onClick={() => toggleItem(item.id)}
-              whileHover={{ scale: 1.01, x: 4 }}
-              whileTap={{ scale: 0.99 }}
-              transition={DANCE_SPRING_HEAVY}
             >
               <span className={styles.title}>{item.title}</span>
               <motion.span 
@@ -69,7 +68,7 @@ export default function Accordion({
               >
                 +
               </motion.span>
-            </motion.button>
+            </InteractiveSurface>
             <AnimatePresence initial={false}>
               {isOpen && (
                 <motion.div

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { InteractiveSurface } from './InteractiveSurface';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './KeyTakeaway.module.css';
 
@@ -35,15 +36,22 @@ function InsightIcon() {
 }
 
 export default function KeyTakeaway({ children, layoutId, icon }: KeyTakeawayProps) {
+  // If layoutId is provided, wrap in motion for shared element animation
+  if (layoutId) {
+    return (
+      <motion.div layoutId={layoutId} layout transition={DANCE_SPRING_HEAVY}>
+        <InteractiveSurface as="aside" className={`${styles.takeaway} interactiveSurface`}>
+          {icon ? <span className={styles.emojiIcon} aria-hidden="true">{icon}</span> : <InsightIcon />}
+          <div className={styles.content}>{children}</div>
+        </InteractiveSurface>
+      </motion.div>
+    );
+  }
+
   return (
-    <motion.aside
-      className={styles.takeaway}
-      layoutId={layoutId}
-      layout={!!layoutId}
-      transition={DANCE_SPRING_HEAVY}
-    >
+    <InteractiveSurface as="aside" className={`${styles.takeaway} interactiveSurface`}>
       {icon ? <span className={styles.emojiIcon} aria-hidden="true">{icon}</span> : <InsightIcon />}
       <div className={styles.content}>{children}</div>
-    </motion.aside>
+    </InteractiveSurface>
   );
 }

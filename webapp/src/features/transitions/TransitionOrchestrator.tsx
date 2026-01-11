@@ -15,7 +15,7 @@
 import { type ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useChoreographer } from '../../app/contexts/ChoreographerContext';
+import { useChoreographer } from '../../app/contexts';
 import { pageVariants } from '../../lib/transitionConfig';
 
 interface TransitionOrchestratorProps {

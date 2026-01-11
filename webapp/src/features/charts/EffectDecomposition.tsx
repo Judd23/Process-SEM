@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useModelData } from '../../app/contexts/ModelDataContext';
+import { useModelData } from '../../app/contexts';
 import { colors } from '../../lib/colorScales';
 import styles from './EffectDecomposition.module.css';
 

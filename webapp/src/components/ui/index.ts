@@ -1,16 +1,16 @@
 // UI Components barrel export
 export { default as Accordion } from './Accordion';
 export { default as BackToTop } from './BackToTop';
-export { default as Badge } from './Badge';
 export { default as DataTimestamp } from './DataTimestamp';
-export { default as GlassPanel } from './GlassPanel';
-export type { GlassPanelProps, GlassTint, GlassVariant, GlassThickness } from './GlassPanel';
 export { default as GlossaryTerm } from './GlossaryTerm';
 export { default as Icon } from './Icon';
+export { InteractiveSurface } from './InteractiveSurface';
 export { default as KeyTakeaway } from './KeyTakeaway';
+export { default as ParallaxBackground } from './ParallaxBackground';
 export { default as ProgressRing } from './ProgressRing';
 export { default as ScrollToTop } from './ScrollToTop';
 export { default as Slider } from './Slider';
 export { default as StatCard } from './StatCard';
 export { default as ThemeToggle } from './ThemeToggle';
+export { TiltSurface } from './TiltSurface';
 export { default as Toggle } from './Toggle';

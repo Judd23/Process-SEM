@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { useTheme } from '../../app/contexts/ThemeContext';
+import { useTheme } from '../../app/contexts';
 import { getRaceColor, getSignificanceColor } from '../../lib/colorScales';
 import DataTimestamp from '../../components/ui/DataTimestamp';
 import { groupComparisons } from '../../data/adapters/groupComparisons';

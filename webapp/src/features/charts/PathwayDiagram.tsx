@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import * as d3 from 'd3';
-import { useResearch } from '../../app/contexts/ResearchContext';
-import { useTheme } from '../../app/contexts/ThemeContext';
-import { useModelData } from '../../app/contexts/ModelDataContext';
+import { useResearch, useTheme, useModelData } from '../../app/contexts';
 import { colors } from '../../lib/colorScales';
 import { formatNumber } from '../../lib/formatters';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';

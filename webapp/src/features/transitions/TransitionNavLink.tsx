@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
 import { NavLink, type NavLinkProps } from 'react-router-dom';
-import { usePageTransition } from '../../lib/hooks/usePageTransition';
+import { usePageTransition } from '../../lib/hooks';
 
 type TransitionType = 'particles' | 'morph' | 'auto' | 'none';
 

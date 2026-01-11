@@ -89,7 +89,7 @@ export function parseModelData(): ModelData {
       min: doseRange.min,
       max: doseRange.max,
       threshold: doseRange.threshold,
-      units: (doseRange as any).units ?? '',
+      units: doseRange.units ?? '',
     },
     sampleSize,
     fastCount,

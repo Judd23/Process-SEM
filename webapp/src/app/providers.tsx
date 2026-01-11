@@ -1,20 +1,22 @@
 import type { ReactNode } from 'react';
 import { HashRouter } from 'react-router-dom';
 import { MotionConfig } from 'framer-motion';
-import { ResearchProvider } from '../app/contexts/ResearchContext';
-import { ThemeProvider } from '../app/contexts/ThemeContext';
-import { ModelDataProvider } from '../app/contexts/ModelDataContext';
-import { ChoreographerProvider } from '../app/contexts/ChoreographerContext';
-import { TransitionProvider } from '../app/contexts/TransitionContext';
+import { ResearchProvider, ThemeProvider, ModelDataProvider, ChoreographerProvider, TransitionProvider } from '../app/contexts';
+import { DANCE_SPRING_HEAVY } from '../lib/transitionConfig';
 
 interface AppProvidersProps {
   children: ReactNode;
 }
 
+/**
+ * Global spring physics configuration.
+ * All Framer Motion components inherit this transition by default.
+ * reducedMotion="never" ensures animations run (user can still use CSS prefers-reduced-motion).
+ */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ThemeProvider>
-      <MotionConfig reducedMotion="user">
+      <MotionConfig reducedMotion="never" transition={DANCE_SPRING_HEAVY}>
         <ModelDataProvider>
           <ResearchProvider>
             <TransitionProvider>

@@ -216,7 +216,6 @@
 }
 
 .demoCard:hover {
-  transform: translateY(-4px) scale(1.02);
   border-color: rgba(255, 255, 255, 0.075);
   box-shadow: 
     0 20px 56px rgba(0, 0, 0, 0.036),
@@ -362,7 +361,6 @@
 }
 
 .sampleCard:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--color-accent);
 }
@@ -481,7 +479,6 @@
 }
 
 .chartContainer:hover {
-  transform: translateY(-4px) scale(1.01);
   border-color: rgba(255, 255, 255, 0.12);
   box-shadow: 
     0 16px 48px rgba(0, 0, 0, 0.06),
@@ -563,7 +560,6 @@
 }
 
 .interpretationCard:hover {
-  transform: translateY(-4px) scale(1.01);
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 
     0 16px 48px rgba(0, 0, 0, 0.1),
