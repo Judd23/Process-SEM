@@ -213,7 +213,7 @@ export function ChoreographerProvider({ children }: ChoreographerProviderProps) 
       getDistanceFromCenter,
       startOrchestration,
       completeOrchestration,
-      reducedMotion: false, // Always full cinematic experience
+      reducedMotion,
     }),
     [
       phase,
@@ -226,6 +226,7 @@ export function ChoreographerProvider({ children }: ChoreographerProviderProps) 
       getDistanceFromCenter,
       startOrchestration,
       completeOrchestration,
+      reducedMotion,
     ]
   );
 
