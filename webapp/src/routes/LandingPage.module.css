@@ -444,8 +444,8 @@
     rgba(255, 255, 255, 0.06) 100%
   );
   /* Strong frosted glass blur */
-  -webkit-backdrop-filter: saturate(150%) blur(20px);
-  backdrop-filter: saturate(150%) blur(20px);
+  -webkit-backdrop-filter: saturate(150%) blur(8px);
+  backdrop-filter: saturate(150%) blur(8px);
   /* Crisp glass edge */
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;

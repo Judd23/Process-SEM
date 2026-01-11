@@ -13,8 +13,8 @@
   /* Transform handled by Framer Motion DANCE_SPRING_HEAVY */
   transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  -webkit-backdrop-filter: saturate(150%) blur(12px);
-  backdrop-filter: saturate(150%) blur(12px);
+  -webkit-backdrop-filter: saturate(150%) blur(6px);
+  backdrop-filter: saturate(150%) blur(6px);
 }
 
 .toggle:hover {

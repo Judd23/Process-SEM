@@ -6,8 +6,8 @@
     rgba(255, 255, 255, 0.015) 50%,
     color-mix(in srgb, var(--color-engagement) 2%, rgba(255, 255, 255, 0.015)) 100%
   );
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
-  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(6px);
+  backdrop-filter: saturate(180%) blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.075);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
@@ -131,8 +131,8 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   .card {
-    -webkit-backdrop-filter: saturate(140%) blur(12px);
-    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(6px);
+    backdrop-filter: saturate(140%) blur(6px);
   }
 
   .card:hover {

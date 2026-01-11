@@ -36,8 +36,8 @@
   position: sticky;
   top: calc(var(--header-height) + var(--spacing-sm));
   background: color-mix(in srgb, var(--color-background) 92%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   padding: var(--spacing-md) 0;
   z-index: 100;
   border-bottom: 1px solid transparent;
@@ -80,8 +80,8 @@
   box-shadow: 
     0 2px 8px rgba(0, 0, 0, 0.012),
     inset 0 1px 0 rgba(255, 255, 255, 0.012);
-  -webkit-backdrop-filter: saturate(150%) blur(12px);
-  backdrop-filter: saturate(150%) blur(12px);
+  -webkit-backdrop-filter: saturate(150%) blur(6px);
+  backdrop-filter: saturate(150%) blur(6px);
   position: relative;
 }
 
@@ -160,8 +160,8 @@
     rgba(255, 255, 255, 0.0075) 50%,
     color-mix(in srgb, var(--color-engagement) 2%, rgba(255, 255, 255, 0.009)) 100%
   );
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
-  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(6px);
+  backdrop-filter: saturate(180%) blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.036);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
@@ -374,8 +374,8 @@
     rgba(255, 255, 255, 0.006) 50%,
     rgba(255, 255, 255, 0.009) 100%
   );
-  -webkit-backdrop-filter: saturate(140%) blur(16px);
-  backdrop-filter: saturate(140%) blur(16px);
+  -webkit-backdrop-filter: saturate(140%) blur(6px);
+  backdrop-filter: saturate(140%) blur(6px);
   border: 1px solid rgba(255, 255, 255, 0.048);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
@@ -753,8 +753,8 @@
 
   .diagram,
   .coefficientCard {
-    -webkit-backdrop-filter: saturate(140%) blur(12px);
-    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(6px);
+    backdrop-filter: saturate(140%) blur(6px);
   }
 
   .diagram:hover,
