@@ -35,7 +35,6 @@
   height: min(40vh, 400px);
   pointer-events: none;
   z-index: 0;
-  opacity: 0;
 }
 
 /* Pathway lines and nodes for Motion-driven animation */
@@ -282,7 +281,7 @@
 }
 
 .ctaIcon {
-  transition: transform 0.3s ease;
+  transition: transform 0.4s var(--ease-elegant);
 }
 
 .cta:hover .ctaIcon {

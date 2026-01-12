@@ -74,8 +74,10 @@ const scaleVariants = {
     opacity: 1, 
     scaleX: 1,
     transition: {
-      ...HEAVY_SPRING,
-      scaleX: { ...HEAVY_SPRING, stiffness: 100 },
+      type: 'spring' as const,
+      stiffness: 100,
+      damping: 20,
+      mass: 1,
     },
   },
 };
