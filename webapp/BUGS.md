@@ -1,20 +1,67 @@
 # Webapp Bug Tracker
 
-> **Last Updated:** January 8, 2026  
-> **Status:** 4 open items, 22 archived
+> **Last Updated:** January 11, 2026  
+> **Status:** 5 open items, 22 archived
 
 ---
 
 ## 🎯 Current Focus
 
-1. **GroupComparison hardcoded data** — HIGH priority, blocks accurate equity comparisons
-2. **Data validation layer** — Recommended, catches pipeline/webapp schema drift
-3. **Chart theme centralization** — Recommended, improves maintainability
-4. **E2E test coverage** — Recommended, prevents regressions
+1. **Aria-label audit** — Ensure all interactive elements have proper labels
+2. **GroupComparison hardcoded data** — HIGH priority, blocks accurate equity comparisons
+3. **Data validation layer** — Recommended, catches pipeline/webapp schema drift
+4. **Chart theme centralization** — Recommended, improves maintainability
+5. **E2E test coverage** — Recommended, prevents regressions
 
 ---
 
 ## 🔴 Open Issues
+
+### 0. Aria-Label Audit
+**Priority:** HIGH  
+**Status:** ⏳ In progress
+
+#### ✅ Elements WITH aria-labels (22 total)
+
+| File | Element | Label |
+|------|---------|-------|
+| `LandingPage.tsx` | CTA button | "Enter the research visualization" |
+| `LandingPage.tsx` | Scroll indicator | "Begin exploring the research" |
+| `DoseExplorerPage.tsx` | Dose zone buttons | Dynamic: "Set dose to {zone} ({range})" |
+| `DemographicsPage.tsx` | Group buttons container | "Student grouping options" |
+| `DemographicsPage.tsx` | GroupComparison (a1) | "Chart comparing stress outcomes..." |
+| `DemographicsPage.tsx` | GroupComparison (a2) | "Chart comparing engagement outcomes..." |
+| `Header.tsx` | Progress bar | "Page scroll progress" |
+| `Header.tsx` | Brand link | "Go to home" |
+| `Header.tsx` | Nav | "Primary navigation" |
+| `MobileNav.tsx` | Nav | "Mobile navigation" |
+| `ThemeToggle.tsx` | Button | "Theme: Dark mode" |
+| `BackToTop.tsx` | Button | "Back to top" |
+| `GlossaryTerm.tsx` | Term button | Dynamic: "Definition: {definition}" |
+| `Slider.tsx` | Input | Dynamic via `label` prop |
+| `ProgressRing.tsx` | SVG | Dynamic via `label` prop |
+| `JohnsonNeymanPlot.tsx` | SVG | "Johnson-Neyman plot..." |
+| `DoseResponseCurve.tsx` | SVG | "Dose-response curve..." |
+| `PathwayDiagram.tsx` | SVG | "Pathway diagram..." |
+| `PathwayDiagram.tsx` | Nodes | Dynamic node labels |
+| `EffectDecomposition.tsx` | SVG | "Effect decomposition chart" |
+| `GroupComparison.tsx` | SVG | "Forest plot comparing..." |
+| `Accordion.tsx` | Panels | `aria-labelledby` linked to button |
+
+#### ⚠️ Elements MISSING aria-labels
+
+| File | Element | Suggested Label |
+|------|---------|-----------------|
+| `HomePage.tsx` | "Explore Pathways" link | "View pathway analysis" |
+| `HomePage.tsx` | "Explore Dose Effects" link | "View dose-response analysis" |
+| `HomePage.tsx` | "Explore by Group" link | "View demographic comparisons" |
+| `MethodsPage.tsx` | "View the Model" link | "View pathway model" |
+| `SoWhatPage.tsx` | "About the Researcher" link | "View researcher info" |
+| `DoseExplorerPage.tsx` | "What Does This Mean?" link | "View implications" |
+| `PathwayPage.tsx` | Pathway toggle buttons | Need dynamic labels |
+| `DemographicsPage.tsx` | Individual group buttons | Need per-button labels |
+
+---
 
 ### 1. GroupComparison Hardcoded Data
 **Priority:** HIGH  
