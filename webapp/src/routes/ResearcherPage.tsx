@@ -70,7 +70,7 @@ export default function ResearcherPage() {
       <main className={styles.main}>
         <section ref={factsRef} className={`${styles.factsStrip} stagger-children`}>
           <div className={styles.factsInner}>
-            <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '0ms' }}>
+            <div className={`${styles.fact} reveal-up`}>
               <div className={styles.factLabel}>Focus</div>
               <div className={styles.factValue}>
                 <GlossaryTerm
@@ -82,7 +82,7 @@ export default function ResearcherPage() {
                 | equity | pathways
               </div>
             </div>
-            <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '100ms' }}>
+            <div className={`${styles.fact} reveal-up`}>
               <div className={styles.factLabel}>Methods</div>
               <div className={styles.factValue}>
                 <GlossaryTerm
@@ -101,7 +101,7 @@ export default function ResearcherPage() {
                 , process models
               </div>
             </div>
-            <div className={`${styles.fact} reveal-up`} style={{ animationDelay: '200ms' }}>
+            <div className={`${styles.fact} reveal-up`}>
               <div className={styles.factLabel}>Email</div>
               <a href={`mailto:${RESEARCHER_EMAIL}`} className={styles.factLink}>
                 <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -115,7 +115,7 @@ export default function ResearcherPage() {
         </section>
 
         <section className={styles.grid}>
-          <article ref={blockARef} className={`${styles.blockA} reveal-left`} style={{ animationDelay: '0ms' }}>
+          <article ref={blockARef} className={`${styles.blockA} reveal-left`}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>01</span>
               <h2>Background</h2>
@@ -130,7 +130,7 @@ export default function ResearcherPage() {
             </p>
           </article>
 
-          <aside ref={blockBRef} className={`${styles.blockB} reveal-right`} style={{ animationDelay: '100ms' }}>
+          <aside ref={blockBRef} className={`${styles.blockB} reveal-right`}>
             <div className={styles.quotePanel}>
               <blockquote className={styles.pullQuote}>
                 <p>
@@ -147,7 +147,7 @@ export default function ResearcherPage() {
             </div>
           </aside>
 
-          <article ref={blockCRef} className={`${styles.blockC} reveal-left`} style={{ animationDelay: '200ms' }}>
+          <article ref={blockCRef} className={`${styles.blockC} reveal-left`}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>02</span>
               <h2>Research Areas</h2>
@@ -184,7 +184,7 @@ export default function ResearcherPage() {
             </ul>
           </article>
 
-          <article ref={blockDRef} className={`${styles.blockD} reveal-right`} style={{ animationDelay: '300ms' }}>
+          <article ref={blockDRef} className={`${styles.blockD} reveal-right`}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>03</span>
               <h2>Connect</h2>
