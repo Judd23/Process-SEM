@@ -164,7 +164,7 @@
 
 /* Touch states */
 .navLink:active {
-  transform: scale(0.95);
+  /* transform handled by Motion whileTap */
 }
 
 @media (hover: none) {

@@ -58,7 +58,7 @@
 }
 
 .stepBox:hover {
-  transform: translateY(-4px);
+  /* transform handled by Motion whileHover */
   box-shadow: 
     0 8px 24px rgba(0, 0, 0, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -287,12 +287,12 @@
 /* Touch states */
 .stepBox:active,
 .stepBoxMobile:active {
-  transform: scale(0.98);
+  /* transform handled by Motion whileTap */
 }
 
 @media (hover: none) {
   .stepBox:hover {
-    transform: none;
+    /* transform handled by Motion */
     box-shadow: none;
   }
 }

@@ -64,7 +64,7 @@
 
 .card[data-morph-id]:hover,
 .card[data-morph-id]:active {
-  transform: none;
+  /* transform handled by Motion */
 }
 
 .label {
@@ -83,7 +83,7 @@
   color: var(--color-text);
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
-  transition: transform 0.1s ease-out, text-shadow 0.3s ease-out;
+  transition: text-shadow 0.3s ease-out;
 }
 
 /* Subtle glow on the value when card is hovered */

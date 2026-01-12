@@ -97,7 +97,8 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
   --reveal-duration: 800ms;
-  --reveal-stagger: 100ms;
+  /* Stagger timing aligned with JS TIMING.stagger (150ms) for consistency */
+  --reveal-stagger: 150ms;
   --reveal-delay: 500ms;
 
   /* Page transition timing - consistent regardless of scroll position */

@@ -79,14 +79,13 @@
   padding: var(--spacing-xl);
   position: relative;
   transition:
-    transform var(--transition-fast),
     box-shadow var(--transition-fast),
     border-color var(--transition-fast);
   text-align: left;
 }
 
 .stakeholderCard:hover {
-  transform: translateY(-4px) scale(1.02);
+  /* transform handled by Motion */
 }
 
 .cardIcon {
@@ -187,7 +186,7 @@
 }
 
 .actionCard:hover {
-  transform: translateY(-4px) scale(1.01);
+  /* transform handled by Motion */
 }
 
 .actionNumber {
@@ -389,13 +388,13 @@
    ============================================ */
 .stakeholderCard:active,
 .actionCard:active {
-  transform: scale(0.99);
+  /* transform handled by Motion whileTap */
 }
 
 @media (hover: none) {
   .stakeholderCard:hover,
   .actionCard:hover {
-    transform: none;
+    /* transform handled by Motion */
   }
 }
 

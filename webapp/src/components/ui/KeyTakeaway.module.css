@@ -27,7 +27,7 @@
 }
 
 .takeaway[data-morph-id]:hover {
-  transform: none;
+  /* transform handled by Motion */
 }
 
 .icon {

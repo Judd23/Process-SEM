@@ -267,7 +267,7 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   position: relative;
-  transition: opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: opacity var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Edge reflection handled by glass.css */
@@ -367,7 +367,7 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   position: relative;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Edge reflection handled by glass.css .indirectCard auto-selector */
@@ -482,7 +482,7 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   position: relative;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Edge reflection handled by glass.css */
@@ -646,13 +646,13 @@
 .pathwayButton:active,
 .coefficientCard:active,
 .summaryCard:active {
-  transform: scale(0.98);
+  /* transform handled by Motion whileTap */
 }
 
 @media (hover: none) {
   .pathwayButton:hover,
   .coefficientCard:not(.dimmed):hover,
   .summaryCard:hover {
-    transform: none;
+    /* transform handled by Motion */
   }
 }
