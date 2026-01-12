@@ -297,10 +297,10 @@ tbody tr:nth-child(even) {
    SCROLL REVEAL ANIMATION SYSTEM
    ============================================ */
 
-/* Base reveal state - elements start hidden */
+/* Base reveal state - visible by default (no orchestrator) */
 .reveal {
-  opacity: 0;
-  transform: translateY(16px);
+  opacity: 1;
+  transform: none;
   transition:
     opacity var(--reveal-duration) var(--ease-out-expo),
     transform var(--reveal-duration) var(--ease-out-back);
@@ -309,12 +309,12 @@ tbody tr:nth-child(even) {
 
 .reveal.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
 /* Reveal variants */
 .reveal-fade {
-  opacity: 0;
+  opacity: 1;
   transform: none;
   transition: opacity var(--reveal-duration) var(--ease-out-expo);
 }

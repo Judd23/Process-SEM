@@ -21,14 +21,13 @@
   isolation: isolate;
 
   /* Thick 3D glass - clear with depth */
+  /* Note: backdrop-filter moved to ::before to avoid blurring child content */
   background: linear-gradient(
     145deg,
     rgba(255, 255, 255, 0.08) 0%,
     rgba(255, 255, 255, 0.03) 50%,
     rgba(255, 255, 255, 0.06) 100%
   );
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
   border-radius: var(--radius-lg);
 
   border: 1px solid var(--surface-border);
@@ -53,7 +52,7 @@
     filter var(--surface-transition) var(--surface-ease);
 }
 
-/* Specular shine overlay - polished reflection */
+/* Specular shine overlay - polished reflection + backdrop blur */
 .interactiveSurface::before {
   content: '';
   position: absolute;
@@ -61,6 +60,10 @@
   border-radius: inherit;
   pointer-events: none;
   z-index: 0;
+
+  /* Backdrop blur lives here so it doesn't affect child content */
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
 
   /* Polished reflection */
   background:
