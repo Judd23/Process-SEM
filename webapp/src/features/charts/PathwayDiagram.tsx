@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import * as d3 from 'd3';
 import { useResearch, useTheme, useModelData } from '../../app/contexts';
 import { colors } from '../../lib/colorScales';

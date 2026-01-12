@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { HashRouter } from 'react-router-dom';
-import { MotionConfig } from 'framer-motion';
+import { MotionConfig } from 'motion/react';
 import { ResearchProvider, ThemeProvider, ModelDataProvider, ChoreographerProvider, TransitionProvider } from '../app/contexts';
 import { DANCE_SPRING_HEAVY } from '../lib/transitionConfig';
 

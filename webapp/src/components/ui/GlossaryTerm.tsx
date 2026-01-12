@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect, useId, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './GlossaryTerm.module.css';
 
@@ -107,7 +107,7 @@ export default function GlossaryTerm({ term, definition, children }: GlossaryTer
         onTouchStart={handleTouchStart}
         onFocus={() => setIsOpen(true)}
         onBlur={() => setIsOpen(false)}
-        onKeyDown={(event) => {
+        onKeyDown={(event: React.KeyboardEvent) => {
           if (event.key === 'Escape') {
             setIsOpen(false);
           }

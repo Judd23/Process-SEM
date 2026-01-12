@@ -1,5 +1,5 @@
 import type { ReactNode, CSSProperties, MouseEventHandler, Ref, RefObject } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Link, type LinkProps } from 'react-router-dom';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 

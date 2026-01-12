@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './Toggle.module.css';
 
