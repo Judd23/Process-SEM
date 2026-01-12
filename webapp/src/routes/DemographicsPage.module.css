@@ -178,6 +178,13 @@
     border-color var(--transition-fast);
 }
 
+/* Fallback: if global .reveal logic is not firing, do not allow cards/charts to stay invisible */
+.demoCard.reveal,
+.chartContainer.reveal {
+  opacity: 1;
+  transform: none;
+}
+
 .demoCard[data-morph-id]:hover {
   transform: none;
 }
@@ -369,6 +376,7 @@
   padding: var(--spacing-xl);
   position: relative;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  min-height: 240px;
 }
 
 /* Edge reflection handled by glass.css */
