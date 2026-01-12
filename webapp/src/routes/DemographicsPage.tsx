@@ -26,17 +26,19 @@ export default function DemographicsPage() {
     <div className={styles.page}>
       <div className="container">
         <section className={`${styles.header} page-header-glow`}>
-          <p className={styles.eyebrow}>
-            Equity Framework
-          </p>
-          <h1>Do Effects Differ for Different Students?</h1>
-          <p className="lead">
-            An important question: Do dual enrollment credits affect all students the same way?
-            We use <GlossaryTerm term="Multi-Group Analysis" definition="A statistical technique that tests whether relationships in our model differ across student groups (e.g., race, income, first-generation status). This helps identify whether some students benefit more or less from dual enrollment credits.">multi-group analysis</GlossaryTerm>{' '}
-            to compare whether <GlossaryTerm term="Emotional Distress" definition="A latent construct measuring students' challenges during their first year, including academic difficulties, loneliness, mental health concerns, exhaustion, sleep problems, and financial stress.">stress</GlossaryTerm>{' '}
-            and <GlossaryTerm term="Quality of Engagement" definition="A latent construct measuring the quality of students' interactions on campus with other students, advisors, faculty, staff, and administrators.">engagement</GlossaryTerm> patterns differ across
-            student backgrounds.
-          </p>
+          <div className={styles.headerContent}>
+            <p className={styles.eyebrow}>
+              Equity Framework
+            </p>
+            <h1>Do Effects Differ for Different Students?</h1>
+            <p className="lead">
+              An important question: Do dual enrollment credits affect all students the same way?
+              We use <GlossaryTerm term="Multi-Group Analysis" definition="A statistical technique that tests whether relationships in our model differ across student groups (e.g., race, income, first-generation status). This helps identify whether some students benefit more or less from dual enrollment credits.">multi-group analysis</GlossaryTerm>{' '}
+              to compare whether <GlossaryTerm term="Emotional Distress" definition="A latent construct measuring students' challenges during their first year, including academic difficulties, loneliness, mental health concerns, exhaustion, sleep problems, and financial stress.">stress</GlossaryTerm>{' '}
+              and <GlossaryTerm term="Quality of Engagement" definition="A latent construct measuring the quality of students' interactions on campus with other students, advisors, faculty, staff, and administrators.">engagement</GlossaryTerm> patterns differ across
+              student backgrounds.
+            </p>
+          </div>
         </section>
 
         {/* Demographics Breakdown with Comparison Toggle */}

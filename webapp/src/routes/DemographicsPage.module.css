@@ -10,6 +10,13 @@
   position: relative;
 }
 
+/* Container for the page header/caption - isolates from background orbs */
+.headerContent {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+}
+
 .eyebrow {
   display: block;
   font-size: var(--font-size-sm);
