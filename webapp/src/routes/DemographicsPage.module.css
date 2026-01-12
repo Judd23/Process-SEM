@@ -179,10 +179,10 @@
 }
 
 /* Fallback: if global .reveal logic is not firing, do not allow cards/charts to stay invisible */
-.demoCard.reveal,
-.chartContainer.reveal {
-  opacity: 1;
-  transform: none;
+.demoCard:global(.reveal),
+.chartContainer:global(.reveal) {
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .demoCard[data-morph-id]:hover {
