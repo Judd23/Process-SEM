@@ -31,6 +31,7 @@
 /* Background now handled by Layout */
 
 /* SEM Pathway silhouette */
+/* SEM Pathway silhouette */
 .pathwaySilhouette {
   position: absolute;
   top: 50%;
@@ -44,7 +45,7 @@
 }
 
 .loaded .pathwaySilhouette {
-  animation: fadeInPath 2s ease-out 0.5s forwards;
+  animation: fadeInPath 2.6s var(--ease-elegant) 0.55s forwards;
 }
 
 .pathwayLine {
@@ -57,7 +58,7 @@
 }
 
 .loaded .pathwayLine {
-  animation: drawPath 3s ease-out 1s forwards;
+  animation: drawPath 4.6s var(--ease-out-quint) 1.05s forwards;
 }
 
 .pathwayNode {
@@ -68,13 +69,13 @@
 }
 
 .loaded .pathwayNode {
-  animation: popIn 0.6s var(--ease-out-back) forwards;
+  animation: popIn 1.05s var(--ease-elegant) forwards;
 }
 
-.loaded .pathwayNode:nth-child(1) { animation-delay: 1.2s; }
-.loaded .pathwayNode:nth-child(2) { animation-delay: 1.4s; }
-.loaded .pathwayNode:nth-child(3) { animation-delay: 1.6s; }
-.loaded .pathwayNode:nth-child(4) { animation-delay: 1.8s; }
+.loaded .pathwayNode:nth-child(1) { animation-delay: 1.35s; }
+.loaded .pathwayNode:nth-child(2) { animation-delay: 1.55s; }
+.loaded .pathwayNode:nth-child(3) { animation-delay: 1.75s; }
+.loaded .pathwayNode:nth-child(4) { animation-delay: 1.95s; }
 
 @keyframes fadeInPath {
   to { opacity: 1; }
@@ -87,10 +88,17 @@
 @keyframes popIn {
   0% {
     opacity: 0;
-    transform: scale(0);
+    transform: scale(0.2);
   }
-  70% {
-    transform: scale(1.2);
+  58% {
+    opacity: 0.7;
+    transform: scale(1.07);
+  }
+  76% {
+    transform: scale(0.985);
+  }
+  90% {
+    transform: scale(1.01);
   }
   100% {
     opacity: 0.4;
@@ -125,20 +133,31 @@
   will-change: transform, opacity;
 }
 
+/* Default travel distances (can be overridden per element) */
+.fromTop {
+  --enterY: -96px;
+  transform: translateY(var(--enterY));
+}
+
+.fromBottom {
+  --enterY: 96px;
+  transform: translateY(var(--enterY));
+}
+
 .divider {
   opacity: 0;
-  transform: scaleX(0);
+  transform: scaleX(0.45);
   will-change: transform, opacity;
 }
 
-/* Initial positions - longer travel for deeper spring */
-.kicker.fromTop { transform: translateY(-56px); }
-.title.fromTop { transform: translateY(-72px); }
-.subtitle.fromTop { transform: translateY(-52px); }
-.description.fromBottom { transform: translateY(56px); }
-.nameplate.fromBottom { transform: translateY(64px); }
-.cta.fromBottom { transform: translateY(56px); }
-.scrollIndicator.fromBottom { transform: translateY(44px); }
+/* Element-specific travel distances (longer paths, softer landings) */
+.kicker.fromTop { --enterY: -88px; }
+.title.fromTop { --enterY: -128px; }
+.subtitle.fromTop { --enterY: -92px; }
+.description.fromBottom { --enterY: 92px; }
+.nameplate.fromBottom { --enterY: 116px; }
+.cta.fromBottom { --enterY: 104px; }
+.scrollIndicator.fromBottom { --enterY: 84px; }
 
 /* ============================================
    STAGGERED ENTRANCE ANIMATIONS (LOCKED)
@@ -146,35 +165,35 @@
    ============================================ */
 
 .loaded .kicker.fromTop {
-  animation: springRevealDown 1.0s var(--ease-out-back) 0.1s forwards;
+  animation: springRevealDown 1.35s var(--ease-elegant) 0.10s forwards;
 }
 
 .loaded .title.fromTop {
-  animation: springRevealDownTitle 1.15s var(--ease-out-back) 0.25s forwards;
+  animation: springRevealDownTitle 1.70s var(--ease-elegant) 0.22s forwards;
 }
 
 .loaded .subtitle.fromTop {
-  animation: springRevealDown 1.0s var(--ease-out-back-soft) 0.45s forwards;
+  animation: springRevealDown 1.40s var(--ease-elegant) 0.44s forwards;
 }
 
 .loaded .divider {
-  animation: springExpand 0.95s var(--ease-out-back) 0.55s forwards;
+  animation: springExpand 1.25s var(--ease-elegant) 0.58s forwards;
 }
 
 .loaded .description.fromBottom {
-  animation: springRevealUp 1.05s var(--ease-out-back) 0.65s forwards;
+  animation: springRevealUp 1.45s var(--ease-elegant) 0.70s forwards;
 }
 
 .loaded .nameplate.fromBottom {
-  animation: springRevealUp 1.15s var(--ease-out-back) 0.8s forwards;
+  animation: springRevealUp 1.65s var(--ease-elegant) 0.88s forwards;
 }
 
 .loaded .cta.fromBottom {
-  animation: springRevealCTA 1.05s var(--ease-out-back) 0.95s forwards;
+  animation: springRevealCTA 1.50s var(--ease-elegant) 1.05s forwards;
 }
 
 .loaded .scrollIndicator.fromBottom {
-  animation: springFadeIn 0.9s var(--ease-out-back-soft) 1.2s forwards;
+  animation: springFadeIn 1.25s var(--ease-elegant) 1.28s forwards;
 }
 
 /* ============================================
@@ -185,17 +204,20 @@
 @keyframes springRevealDown {
   0% {
     opacity: 0;
-    transform: translateY(-56px);
+    transform: translateY(var(--enterY));
   }
-  60% {
+  55% {
     opacity: 1;
     transform: translateY(10px);
   }
-  78% {
-    transform: translateY(-6px);
+  72% {
+    transform: translateY(-4px);
   }
-  90% {
+  84% {
     transform: translateY(2px);
+  }
+  92% {
+    transform: translateY(-1px);
   }
   100% {
     opacity: 1;
@@ -206,17 +228,20 @@
 @keyframes springRevealDownTitle {
   0% {
     opacity: 0;
-    transform: translateY(-72px);
+    transform: translateY(var(--enterY));
   }
-  58% {
+  52% {
     opacity: 1;
     transform: translateY(12px);
   }
-  76% {
-    transform: translateY(-7px);
+  70% {
+    transform: translateY(-5px);
   }
-  90% {
+  83% {
     transform: translateY(2px);
+  }
+  92% {
+    transform: translateY(-1px);
   }
   100% {
     opacity: 1;
@@ -227,17 +252,20 @@
 @keyframes springRevealUp {
   0% {
     opacity: 0;
-    transform: translateY(56px);
+    transform: translateY(var(--enterY));
   }
-  60% {
+  55% {
     opacity: 1;
     transform: translateY(-10px);
   }
-  78% {
-    transform: translateY(6px);
+  72% {
+    transform: translateY(4px);
   }
-  90% {
+  84% {
     transform: translateY(-2px);
+  }
+  92% {
+    transform: translateY(1px);
   }
   100% {
     opacity: 1;
@@ -248,17 +276,20 @@
 @keyframes springRevealCTA {
   0% {
     opacity: 0;
-    transform: translateY(56px) scale(0.98);
+    transform: translateY(var(--enterY)) scale(0.985);
   }
-  60% {
+  55% {
     opacity: 1;
-    transform: translateY(-10px) scale(1.03);
+    transform: translateY(-10px) scale(1.02);
   }
-  78% {
-    transform: translateY(6px) scale(0.995);
+  72% {
+    transform: translateY(4px) scale(0.998);
   }
-  90% {
-    transform: translateY(-2px) scale(1.005);
+  84% {
+    transform: translateY(-2px) scale(1.004);
+  }
+  92% {
+    transform: translateY(1px) scale(1.001);
   }
   100% {
     opacity: 1;
@@ -269,11 +300,14 @@
 @keyframes springExpand {
   0% {
     opacity: 0;
-    transform: scaleX(0.6);
+    transform: scaleX(0.45);
   }
-  80% {
+  70% {
     opacity: 1;
-    transform: scaleX(1.03);
+    transform: scaleX(1.02);
+  }
+  86% {
+    transform: scaleX(0.995);
   }
   100% {
     opacity: 1;
@@ -284,16 +318,16 @@
 @keyframes springFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(44px);
+    transform: translateY(var(--enterY));
   }
-  65% {
+  60% {
     opacity: 1;
     transform: translateY(-6px);
   }
-  82% {
+  78% {
     transform: translateY(3px);
   }
-  92% {
+  90% {
     transform: translateY(-1px);
   }
   100% {
