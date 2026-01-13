@@ -1,4 +1,4 @@
-import { LayoutGroup } from 'motion/react';
+import { LayoutGroup } from 'framer-motion';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Layout from './layout/Layout';
 import LandingPage from '../routes/LandingPage';

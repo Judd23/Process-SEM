@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { InteractiveSurface } from './InteractiveSurface';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './StatCard.module.css';

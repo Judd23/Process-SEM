@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { PAGE_FADE } from '../lib/transitionConfig';
 import styles from './LandingPage.module.css';
 
@@ -25,6 +25,8 @@ const GENTLE_SPRING = {
 
 // Stagger timing
 const STAGGER_BASE = 0.08;
+
+const EASE_ELEGANT: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 // Container variants for staggered children
 const containerVariants = {
@@ -105,7 +107,7 @@ const pathwayVariants = {
     opacity: 1,
     transition: {
       duration: 1.2,
-      ease: [0.22, 1, 0.36, 1],
+      ease: EASE_ELEGANT,
       delay: 0.2,
     },
   },

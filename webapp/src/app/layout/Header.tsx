@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { TransitionNavLink } from '../../features/transitions';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import { navItems } from './navItems';

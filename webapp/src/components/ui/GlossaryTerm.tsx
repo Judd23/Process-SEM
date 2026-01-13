@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect, useId, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './GlossaryTerm.module.css';
 

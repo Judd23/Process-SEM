@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { groupComparisons } from '../../data/adapters/groupComparisons';
 import { sampleDescriptives } from '../../data/adapters/sampleDescriptives';
 import styles from './GroupComparison.module.css';

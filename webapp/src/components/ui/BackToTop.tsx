@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { InteractiveSurface } from './InteractiveSurface';
 import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
 import styles from './BackToTop.module.css';
