@@ -75,7 +75,8 @@ export function InteractiveSurface({
     role,
     id,
     title,
-    ref: ref as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ref: ref as any, // Safe: ref forwarding for polymorphic component
   };
 
   // Handle Link special case

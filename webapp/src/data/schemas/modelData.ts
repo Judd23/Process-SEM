@@ -185,8 +185,10 @@ export function safeParseData<T>(
     .map(issue => `${issue.path.join('.')}: ${issue.message}`)
     .join('; ');
   
-  console.error(`Validation failed for ${dataName}:`, result.error.issues);
-  
+  if (import.meta.env.DEV) {
+    console.error(`Validation failed for ${dataName}:`, result.error.issues);
+  }
+
   return {
     success: false,
     error: `Invalid ${dataName}: ${errorMessages}`,
@@ -208,6 +210,8 @@ export function parseWithFallback<T>(
     return result.data;
   }
   
-  console.warn(`Using fallback data for ${dataName}. Error: ${result.error}`);
+  if (import.meta.env.DEV) {
+    console.warn(`Using fallback data for ${dataName}. Error: ${result.error}`);
+  }
   return fallback;
 }

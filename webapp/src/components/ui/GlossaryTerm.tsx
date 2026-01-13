@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import styles from './GlossaryTerm.module.css';
 
 interface GlossaryTermProps {
@@ -7,21 +8,55 @@ interface GlossaryTermProps {
 }
 
 /**
- * Editorial-style glossary term.
- * Renders the term with subtle emphasis. Definition available via title attribute.
- * No tooltips, no "?" buttons—just clean prose.
+ * Editorial-style glossary term with styled tooltip.
+ * Shows definition on hover/focus with smooth animation.
  */
 export default function GlossaryTerm({
   term,
   definition,
   children,
 }: GlossaryTermProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [position, setPosition] = useState<'above' | 'below'>('above');
+  const termRef = useRef<HTMLSpanElement>(null);
+  const tooltipRef = useRef<HTMLSpanElement>(null);
+
+  // Determine tooltip position based on viewport space
+  useEffect(() => {
+    if (isVisible && termRef.current) {
+      const rect = termRef.current.getBoundingClientRect();
+      const spaceAbove = rect.top;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setPosition(spaceAbove > 100 || spaceAbove > spaceBelow ? 'above' : 'below');
+    }
+  }, [isVisible]);
+
+  const showTooltip = () => setIsVisible(true);
+  const hideTooltip = () => setIsVisible(false);
+
   return (
     <span
+      ref={termRef}
       className={styles.term}
-      title={`${term}: ${definition}`}
+      onMouseEnter={showTooltip}
+      onMouseLeave={hideTooltip}
+      onFocus={showTooltip}
+      onBlur={hideTooltip}
+      tabIndex={0}
+      role="term"
+      aria-describedby={isVisible ? `tooltip-${term}` : undefined}
     >
       {children}
+      <span
+        ref={tooltipRef}
+        id={`tooltip-${term}`}
+        className={`${styles.tooltip} ${isVisible ? styles.visible : ''} ${styles[position]}`}
+        role="tooltip"
+        aria-hidden={!isVisible}
+      >
+        <strong className={styles.tooltipTerm}>{term}</strong>
+        <span className={styles.tooltipDefinition}>{definition}</span>
+      </span>
     </span>
   );
 }
