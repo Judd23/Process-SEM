@@ -9,8 +9,9 @@
 .card {
   position: fixed;
   bottom: var(--spacing-xl);
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   z-index: 1001;
   
   width: calc(100% - var(--spacing-xl) * 2);

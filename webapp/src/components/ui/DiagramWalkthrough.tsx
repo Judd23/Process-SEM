@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './DiagramWalkthrough.module.css';
 
@@ -48,10 +48,29 @@ export default function DiagramWalkthrough({
   onStepChange,
   onClose,
 }: DiagramWalkthroughProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const totalSteps = STEPS.length;
   const step = STEPS[currentStep];
   const isLastStep = currentStep === totalSteps - 1;
   const isFirstStep = currentStep === 0;
+
+  // Body scroll lock when open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
+  // Focus trap - focus the card when opened
+  useEffect(() => {
+    if (isOpen && cardRef.current) {
+      cardRef.current.focus();
+    }
+  }, [isOpen]);
 
   const handleNext = useCallback(() => {
     if (isLastStep) {
@@ -111,6 +130,7 @@ export default function DiagramWalkthrough({
 
           {/* Card */}
           <motion.div
+            ref={cardRef}
             className={styles.card}
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -119,6 +139,7 @@ export default function DiagramWalkthrough({
             role="dialog"
             aria-modal="true"
             aria-labelledby="walkthrough-title"
+            tabIndex={-1}
           >
             {/* Step indicator */}
             <div className={styles.stepIndicator} role="tablist" aria-label="Walkthrough steps">
