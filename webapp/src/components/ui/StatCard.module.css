@@ -17,8 +17,8 @@
     0 2px 8px rgba(0, 0, 0, 0.015),
     inset 0 1px 0 rgba(255, 255, 255, 0.075),
     inset 0 -1px 0 rgba(0, 0, 0, 0.015);
-  /* Transform handled by Framer Motion */
-  transition:
+  transition: 
+    transform var(--transition-fast),
     box-shadow var(--transition-fast),
     border-color var(--transition-fast);
   position: relative;
@@ -47,9 +47,9 @@
 }
 
 .card:hover {
-  /* Transform handled by Framer Motion - CSS owns border/shadow only */
+  transform: translateY(-3px) scale(1.02);
   border-color: rgba(255, 255, 255, 0.125);
-  box-shadow:
+  box-shadow: 
     0 16px 48px rgba(0, 0, 0, 0.05),
     0 4px 16px rgba(0, 0, 0, 0.025),
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
@@ -64,7 +64,7 @@
 
 .card[data-morph-id]:hover,
 .card[data-morph-id]:active {
-  /* transform handled by Motion */
+  transform: none;
 }
 
 .label {
@@ -83,7 +83,7 @@
   color: var(--color-text);
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
-  transition: text-shadow 0.3s ease-out;
+  transition: transform 0.1s ease-out, text-shadow 0.3s ease-out;
 }
 
 /* Subtle glow on the value when card is hovered */
@@ -123,7 +123,10 @@
   color: var(--color-accent);
 }
 
-/* Touch states - Transform handled by Framer Motion whileTap */
+/* Touch states */
+.card:active {
+  transform: scale(0.98);
+}
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
@@ -131,13 +134,21 @@
     -webkit-backdrop-filter: saturate(140%) blur(6px);
     backdrop-filter: saturate(140%) blur(6px);
   }
+
+  .card:hover {
+    transform: none;
+  }
 }
 
 @media (hover: none) {
-  /* Touch devices - Motion handles tap states */
   .card:hover {
+    transform: none;
     box-shadow: var(--shadow-sm);
     border-color: var(--color-border);
+  }
+
+  .card:hover::before {
+    transform: scaleX(0);
   }
 
   .card:hover .value {

@@ -179,11 +179,11 @@
 
 /* Touch states */
 .badge:active {
-  /* transform handled by Motion whileTap */
+  transform: scale(0.95);
 }
 
 .link:active {
-  /* transform handled by Motion whileTap */
+  transform: scale(0.98);
 }
 
 @media (hover: none) {

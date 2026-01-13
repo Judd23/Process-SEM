@@ -1,8 +1,7 @@
-import { motion } from 'framer-motion';
 import { useTheme } from '../app/contexts';
 import { useScrollReveal, useStaggeredReveal } from '../lib/hooks';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
-import { heroFigureMotion, factMotion, blockMotion, linkMotion, ctaMotion } from '../lib/motion/interaction';
+import { InteractiveSurface } from '../components/ui/InteractiveSurface';
 import styles from './ResearcherPage.module.css';
 
 const RESEARCHER_EMAIL = 'jjohnson4039@SDSU.edu';
@@ -23,9 +22,9 @@ export default function ResearcherPage() {
 
   return (
     <div className={styles.page}>
-      <header ref={heroRef} className={styles.hero}>
+      <header ref={heroRef} className={`${styles.hero} reveal`}>
         <div className={styles.heroGrid}>
-          <motion.figure className={styles.heroFigure} {...heroFigureMotion}>
+          <figure className={styles.heroFigure}>
             <div className={styles.heroMedia}>
               <picture>
                 <source
@@ -48,7 +47,7 @@ export default function ResearcherPage() {
             <figcaption className={styles.heroCaption}>
               <span className={styles.captionKicker}>Doctoral Candidate</span>
             </figcaption>
-          </motion.figure>
+          </figure>
 
           <div className={styles.heroIntro}>
             <div className={styles.institutionPanel}>
@@ -58,7 +57,7 @@ export default function ResearcherPage() {
                 className={styles.institutionLogo}
               />
             </div>
-            <p className={styles.kicker}>Researcher</p>
+            <p className={styles.eyebrow}>Researcher</p>
             <h1 className={styles.name}>Jay Johnson</h1>
             <div className={styles.metaLine}>
               <span className={styles.credentials}>M.F.A., Ed.D.-(May '26)</span>
@@ -72,7 +71,7 @@ export default function ResearcherPage() {
       <main className={styles.main}>
         <section ref={factsRef} className={`${styles.factsStrip} stagger-children`}>
           <div className={styles.factsInner}>
-            <motion.div className={`${styles.fact} reveal-up`} {...factMotion}>
+            <InteractiveSurface className={`${styles.fact} interactiveSurface reveal-up`} style={{ animationDelay: '0ms' }} hoverLift={3}>
               <div className={styles.factLabel}>Focus</div>
               <div className={styles.factValue}>
                 <GlossaryTerm
@@ -83,8 +82,8 @@ export default function ResearcherPage() {
                 </GlossaryTerm>{' '}
                 | equity | pathways
               </div>
-            </motion.div>
-            <motion.div className={`${styles.fact} reveal-up`} {...factMotion}>
+            </InteractiveSurface>
+            <InteractiveSurface className={`${styles.fact} interactiveSurface reveal-up`} style={{ animationDelay: '100ms' }} hoverLift={3}>
               <div className={styles.factLabel}>Methods</div>
               <div className={styles.factValue}>
                 <GlossaryTerm
@@ -102,22 +101,22 @@ export default function ResearcherPage() {
                 </GlossaryTerm>
                 , process models
               </div>
-            </motion.div>
-            <motion.div className={`${styles.fact} reveal-up`} {...factMotion}>
+            </InteractiveSurface>
+            <InteractiveSurface className={`${styles.fact} interactiveSurface reveal-up`} style={{ animationDelay: '200ms' }} hoverLift={3}>
               <div className={styles.factLabel}>Email</div>
-              <motion.a href={`mailto:${RESEARCHER_EMAIL}`} className={styles.factLink} {...linkMotion}>
+              <a href={`mailto:${RESEARCHER_EMAIL}`} className={styles.factLink}>
                 <svg className={styles.emailIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <rect x="2" y="4" width="20" height="16" rx="2" />
                   <path d="M22 6l-10 7L2 6" />
                 </svg>
                 {RESEARCHER_EMAIL}
-              </motion.a>
-            </motion.div>
+              </a>
+            </InteractiveSurface>
           </div>
         </section>
 
         <section className={styles.grid}>
-          <motion.article ref={blockARef} className={`${styles.blockA} reveal-left`} {...blockMotion}>
+          <InteractiveSurface as="article" ref={blockARef} className={`${styles.blockA} interactiveSurface reveal-left`} style={{ animationDelay: '0ms' }} hoverLift={4}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>01</span>
               <h2>Background</h2>
@@ -130,9 +129,9 @@ export default function ResearcherPage() {
               Now I study how early college experiences shape who stays, who thrives, and who feels
               like they belong. The numbers matter, but so do the stories behind them.
             </p>
-          </motion.article>
+          </InteractiveSurface>
 
-          <motion.aside ref={blockBRef} className={`${styles.blockB} reveal-right`} {...blockMotion}>
+          <InteractiveSurface as="aside" ref={blockBRef} className={`${styles.blockB} interactiveSurface reveal-right`} style={{ animationDelay: '100ms' }} hoverLift={4}>
             <div className={styles.quotePanel}>
               <blockquote className={styles.pullQuote}>
                 <p>
@@ -147,9 +146,9 @@ export default function ResearcherPage() {
                 <footer className={styles.quoteAttribution}>— Research philosophy</footer>
               </blockquote>
             </div>
-          </motion.aside>
+          </InteractiveSurface>
 
-          <motion.article ref={blockCRef} className={`${styles.blockC} reveal-left`} {...blockMotion}>
+          <InteractiveSurface as="article" ref={blockCRef} className={`${styles.blockC} interactiveSurface reveal-left`} style={{ animationDelay: '200ms' }} hoverLift={4}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>02</span>
               <h2>Research Areas</h2>
@@ -184,9 +183,9 @@ export default function ResearcherPage() {
                 </GlossaryTerm>
               </li>
             </ul>
-          </motion.article>
+          </InteractiveSurface>
 
-          <motion.article ref={blockDRef} className={`${styles.blockD} reveal-right`} {...blockMotion}>
+          <InteractiveSurface as="article" ref={blockDRef} className={`${styles.blockD} interactiveSurface reveal-right`} style={{ animationDelay: '300ms' }} hoverLift={4}>
             <div className={styles.blockHeader}>
               <span className={styles.blockNum}>03</span>
               <h2>Connect</h2>
@@ -194,15 +193,15 @@ export default function ResearcherPage() {
             <p>
               For collaboration, speaking, or questions about the work, email me directly.
             </p>
-            <motion.a href={`mailto:${RESEARCHER_EMAIL}`} className={styles.cta} {...ctaMotion}>
+            <a href={`mailto:${RESEARCHER_EMAIL}`} className={styles.cta}>
               <svg className={styles.ctaIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <rect x="2" y="4" width="20" height="16" rx="2" />
                 <path d="M22 6l-10 7L2 6" />
               </svg>
               <span>{RESEARCHER_EMAIL}</span>
               <span className={styles.ctaArrow} aria-hidden="true">→</span>
-            </motion.a>
-          </motion.article>
+            </a>
+          </InteractiveSurface>
         </section>
       </main>
     </div>

@@ -11,14 +11,17 @@
   font-size: var(--font-size-lg);
   line-height: 1.6;
   position: relative;
-  /* Transform handled by Framer Motion */
-  transition:
+  transition: 
+    transform var(--transition-fast), 
     box-shadow var(--transition-fast),
     border-color var(--transition-fast);
 }
 
 /* Edge reflection handled by glass.css */
-/* .takeaway:hover transform handled by Framer Motion */
+
+.takeaway:hover {
+  transform: translateY(-3px) scale(1.01);
+}
 
 .takeaway[data-morph-id] {
   transition:
@@ -27,7 +30,7 @@
 }
 
 .takeaway[data-morph-id]:hover {
-  /* transform handled by Motion */
+  transform: none;
 }
 
 .icon {

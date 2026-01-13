@@ -198,12 +198,12 @@
 
 /* Touch states */
 .container:active {
-  /* transform handled by Motion whileTap */
+  transform: scale(0.99);
 }
 
 @media (hover: none) {
   .container:hover {
-    /* transform handled by Motion */
+    transform: none;
     box-shadow: none;
   }
 }

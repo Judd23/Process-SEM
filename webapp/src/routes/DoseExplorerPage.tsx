@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { useResearch, useModelData } from '../app/contexts';
 import Slider from '../components/ui/Slider';
 import Toggle from '../components/ui/Toggle';
@@ -10,7 +9,6 @@ import KeyTakeaway from '../components/ui/KeyTakeaway';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import DataTimestamp from '../components/ui/DataTimestamp';
 import { InteractiveSurface } from '../components/ui/InteractiveSurface';
-import { chartMotion, doseZoneMotion, doseZoneActiveMotion } from '../lib/motion/interaction';
 
 import styles from './DoseExplorerPage.module.css';
 
@@ -74,22 +72,21 @@ export default function DoseExplorerPage() {
             <div className={styles.doseZones}>
               {DOSE_ZONES.map((zone) => {
                 const midpoint = zone.id === 'high' ? 48 : Math.round((zone.min + zone.max) / 2);
-                const isActive = currentZone === zone.id;
-                const motionProps = isActive ? doseZoneActiveMotion : doseZoneMotion;
                 return (
-                  <motion.button
+                  <InteractiveSurface
                     key={zone.id}
+                    as="button"
                     type="button"
-                    className={`${styles.doseZone} ${styles[zone.id]} ${isActive ? styles.active : ''}`}
+                    className={`${styles.doseZone} ${styles[zone.id]} ${currentZone === zone.id ? styles.active : ''} interactiveSurface`}
                     onClick={() => setSelectedDose(midpoint)}
-                    aria-pressed={isActive}
+                    aria-pressed={currentZone === zone.id}
                     aria-label={`Set dose to ${zone.label} (${zone.range})`}
-                    {...motionProps}
+                    hoverLift={3}
                   >
                     <span className={styles.zoneDot} />
                     <span className={styles.zoneLabel}>{zone.label}</span>
                     <span className={styles.zoneRange}>{zone.range}</span>
-                  </motion.button>
+                  </InteractiveSurface>
                 );
               })}
             </div>
@@ -129,7 +126,7 @@ export default function DoseExplorerPage() {
         </div>
 
         <div className={styles.charts}>
-          <motion.div className={styles.chartContainer} {...chartMotion}>
+          <div className={styles.chartContainer}>
             <h3>Stress Levels by Credit Amount</h3>
             <p className={styles.chartDescription}>
               Students with FASt status report higher stress regardless of how many
@@ -137,9 +134,9 @@ export default function DoseExplorerPage() {
               this pattern—whether you have 12 or 40 credits, the stress increase is similar.
             </p>
             <DoseResponseCurve outcome="distress" selectedDose={selectedDose} />
-          </motion.div>
+          </div>
 
-          <motion.div className={styles.chartContainer} {...chartMotion}>
+          <div className={styles.chartContainer}>
             <h3>Campus Engagement by Credit Amount</h3>
             <p className={styles.chartDescription}>
               There's a hint of an interesting pattern here: students with fewer transfer
@@ -147,7 +144,7 @@ export default function DoseExplorerPage() {
               engage slightly less. However, we'd need more evidence to be confident.
             </p>
             <DoseResponseCurve outcome="engagement" selectedDose={selectedDose} />
-          </motion.div>
+          </div>
         </div>
 
         {/* Johnson-Neyman Analysis */}

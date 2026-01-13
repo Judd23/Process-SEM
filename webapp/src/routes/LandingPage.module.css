@@ -281,11 +281,11 @@
 }
 
 .ctaIcon {
-  /* transform handled by Motion */
+  transition: transform 0.4s var(--ease-elegant);
 }
 
 .cta:hover .ctaIcon {
-  /* transform: translateX(3px) — handled by Motion */
+  transform: translateX(3px);
 }
 
 /* ============================================

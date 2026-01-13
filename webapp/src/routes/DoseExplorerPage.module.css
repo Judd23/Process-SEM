@@ -72,7 +72,7 @@
 
 .doseZone:hover {
   opacity: 0.85;
-  /* transform handled by Motion */
+  transform: scale(1.02);
 }
 
 .doseZone:focus-visible {
@@ -82,7 +82,7 @@
 
 .doseZone.active {
   opacity: 1;
-  /* transform handled by Motion */
+  transform: scale(1.05);
   box-shadow: var(--shadow-md);
 }
 
@@ -177,7 +177,7 @@
 
 /* Make the StatCard values animate smoothly when they change */
 .effectCards :global(.value) {
-  transition: color var(--transition-normal);
+  transition: color var(--transition-normal), transform 0.15s ease-out;
 }
 
 /* Subtle pulse when value changes - applied via CSS will-change */
@@ -192,8 +192,8 @@
   border-radius: var(--radius-lg);
   border: 2px solid var(--color-accent);
   opacity: 0;
-  /* transform removed - visual pulse uses opacity only */
-  transition: opacity 0.3s ease-out;
+  transform: scale(1.02);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
   pointer-events: none;
 }
 
@@ -216,7 +216,7 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   position: relative;
-  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Edge reflection handled by glass.css */
@@ -224,7 +224,7 @@
 /* Inner glass layer handled by glass.css */
 
 .chartContainer:hover {
-  /* transform handled by Motion */
+  transform: translateY(-4px) scale(1.01);
 }
 
 .chartContainer h3 {
@@ -311,11 +311,11 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   position: relative;
-  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .interpretationCard:hover {
-  /* transform handled by Motion */
+  transform: translateY(-4px);
 }
 
 /* Next step CTA */
@@ -371,7 +371,7 @@
   }
 
   .chartContainer:hover {
-    /* Motion handles transform - disabled on mobile via component */
+    transform: none;
   }
 
   .chartContainer h3 {
@@ -387,7 +387,7 @@
   }
 
   .interpretationCard:hover {
-    /* Motion handles transform - disabled on mobile via component */
+    transform: none;
   }
 
   .effectCards {
@@ -458,12 +458,12 @@
 /* Touch states */
 .chartContainer:active,
 .interpretationCard:active {
-  /* transform handled by Motion whileTap */
+  transform: scale(0.99);
 }
 
 @media (hover: none) {
   .chartContainer:hover,
   .interpretationCard:hover {
-    /* Motion handles transform - disabled on touch via component */
+    transform: none;
   }
 }

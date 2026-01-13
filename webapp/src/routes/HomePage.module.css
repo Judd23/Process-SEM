@@ -198,11 +198,11 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   position: relative;
-  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .diagramContainer:hover {
-  /* transform handled by Motion */
+  transform: translateY(-4px) scale(1.01);
 }
 
 .actions {
@@ -262,13 +262,13 @@
   border-radius: var(--radius-md);
   margin-bottom: var(--spacing-md);
   color: var(--color-accent);
-  transition: background-color var(--transition-fast);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .exploreCard:hover .exploreIcon {
   background: var(--color-accent);
   color: white;
-  /* transform: scale(1.05) — handled by Motion */
+  transform: scale(1.05);
 }
 
 .exploreCard h3 {
@@ -357,7 +357,7 @@
   }
 
   .exploreCard:hover {
-    /* transform handled by Motion */
+    transform: none;
   }
 
   .diagramContainer {
@@ -367,7 +367,7 @@
   }
 
   .diagramContainer:hover {
-    /* transform handled by Motion */
+    transform: none;
   }
 
   .preview {
@@ -421,12 +421,12 @@
    TOUCH/ACTIVE STATES
    ============================================ */
 .exploreCard:active {
-  /* transform handled by Motion whileTap */
+  transform: scale(0.98);
 }
 
 @media (hover: none) {
   .exploreCard:hover {
-    /* transform handled by Motion */
+    transform: none;
     /* Keep a little depth on touch devices (avoid "flat" look) */
     box-shadow: var(--shadow-sm);
   }

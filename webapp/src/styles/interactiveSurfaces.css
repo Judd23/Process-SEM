@@ -84,7 +84,7 @@
 
 .interactiveSurface > * {
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
 /* Hover + keyboard focus (visual only, no transform here - Motion owns it) */

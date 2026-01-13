@@ -7,33 +7,6 @@
 
 /* Background now handled by Layout */
 
-/* Floating orb animations (kept for other elements) */
-@keyframes floatGlow {
-  0%, 100% {
-    transform: translate(0, 0) scale(1) rotate(0deg);
-  }
-  25% {
-    transform: translate(30px, -40px) scale(1.08) rotate(5deg);
-  }
-  50% {
-    transform: translate(-20px, 30px) scale(0.92) rotate(-3deg);
-  }
-  75% {
-    transform: translate(-40px, -15px) scale(1.04) rotate(2deg);
-  }
-}
-
-@keyframes pulseGlow {
-  0%, 100% {
-    opacity: 1;
-    filter: blur(0px);
-  }
-  50% {
-    opacity: 0.7;
-    filter: blur(10px);
-  }
-}
-
 /* Shimmer effect keyframes */
 @keyframes shimmer {
   0% {
@@ -41,15 +14,6 @@
   }
   100% {
     background-position: 200% 0;
-  }
-}
-
-@keyframes borderGlow {
-  0%, 100% {
-    box-shadow: var(--shadow-sm), 0 0 0 rgba(var(--color-accent-rgb), 0);
-  }
-  50% {
-    box-shadow: var(--shadow-sm), 0 0 20px rgba(var(--color-accent-rgb), 0.15);
   }
 }
 
@@ -91,16 +55,17 @@
   position: relative;
   margin: 0;
   border: 2px solid var(--color-border);
-  background: var(--color-surface);
+  background: transparent;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: 
+    transform 0.4s var(--ease-out-back),
     box-shadow 0.4s var(--ease-out-back),
     border-color var(--transition-fast);
 }
 
 .heroFigure:hover {
-  /* transform handled by Motion */
+  transform: translateY(-8px) rotate(-1deg) scale(1.01);
   box-shadow: 
     var(--shadow-lg),
     0 0 40px color-mix(in srgb, var(--color-accent) 20%, transparent);
@@ -147,17 +112,19 @@
   );
   opacity: 0;
   transition: 
-    opacity var(--transition-fast);
+    opacity var(--transition-fast),
+    transform 0.4s var(--ease-out-back);
+  transform: translate(20px, -20px);
 }
 
 .heroFigure:hover::after {
   opacity: 1;
-  /* transform removed - decoration fades in only */
+  transform: translate(0, 0);
 }
 
 .heroMedia {
   padding: var(--spacing-lg);
-  background: var(--color-surface);
+  background: transparent;
 }
 
 .heroMedia picture,
@@ -212,59 +179,21 @@
 }
 
 .institutionPanel {
-  /* 50% MORE TRANSPARENT */
+  /* Glass handled by glass.css */
   margin-bottom: var(--spacing-lg);
   display: inline-block;
   padding: var(--spacing-md) var(--spacing-lg);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.012) 0%,
-    rgba(255, 255, 255, 0.006) 50%,
-    rgba(255, 255, 255, 0.009) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.036);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.024),
-    0 2px 8px rgba(0, 0, 0, 0.012),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
   margin-left: 0;
   margin-right: 0;
-  transition: 
-    box-shadow var(--transition-fast);
+  transition: transform var(--transition-fast);
+  border-radius: 16px;
   position: relative;
 }
 
-/* Edge reflection - 50% MORE TRANSPARENT */
-.institutionPanel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.06) 20%,
-    rgba(255, 255, 255, 0.105) 50%,
-    rgba(255, 255, 255, 0.06) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* Edge reflection handled by glass.css */
 
 .institutionPanel:hover {
-  /* transform handled by Motion */
-  box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.03),
-    0 4px 12px rgba(0, 0, 0, 0.015),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
+  transform: translateY(-2px);
 }
 
 .institutionLogo {
@@ -272,14 +201,6 @@
   height: 80px;
   width: auto;
   max-width: 320px;
-}
-
-.kicker {
-  font-size: var(--font-size-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.28em;
-  color: var(--color-text-muted);
-  margin-bottom: var(--spacing-md);
 }
 
 .name {
@@ -371,10 +292,11 @@
 }
 
 .fact {
-  background: var(--color-surface);
+  background: transparent;
   padding: var(--spacing-lg);
   transition: 
     background var(--transition-fast), 
+    transform 0.4s var(--ease-out-back),
     box-shadow var(--transition-fast);
   position: relative;
   overflow: hidden;
@@ -395,8 +317,9 @@
     var(--color-accent)
   );
   background-size: 200% 100%;
-  opacity: 0;
-  transition: opacity 0.4s var(--ease-out-back);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease-out-back);
 }
 
 /* Shine effect overlay */
@@ -419,14 +342,14 @@
 
 .fact:hover {
   background: var(--color-background);
-  /* transform handled by Motion */
+  transform: scale(1.03) translateY(-2px);
   box-shadow: 
     var(--shadow-md),
     0 0 20px color-mix(in srgb, var(--color-accent) 10%, transparent);
 }
 
 .fact:hover::before {
-  opacity: 1;
+  transform: scaleX(1);
   animation: shimmer 2s linear infinite;
 }
 
@@ -486,8 +409,9 @@
   width: 100%;
   height: 2px;
   background: var(--color-accent);
-  opacity: 0;
-  transition: opacity 0.3s var(--ease-out-back);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s var(--ease-out-back);
 }
 
 .factLink:hover {
@@ -495,7 +419,8 @@
 }
 
 .factLink:hover::after {
-  opacity: 1;
+  transform: scaleX(1);
+  transform-origin: left;
 }
 
 .factLink:focus-visible {
@@ -525,14 +450,14 @@
   color: var(--color-accent);
   font-weight: 700;
   letter-spacing: 0.12em;
-  transition: color var(--transition-fast);
+  transition: transform var(--transition-fast), color var(--transition-fast);
 }
 
 .blockA:hover .blockNum,
 .blockB:hover .blockNum,
 .blockC:hover .blockNum,
 .blockD:hover .blockNum {
-  /* transform removed - handled by parent Motion if needed */
+  transform: scale(1.1);
   color: var(--color-accent-hover);
 }
 
@@ -555,24 +480,12 @@
 }
 
 .blockA {
-  /* 50% MORE TRANSPARENT */
+  /* Glass handled by glass.css */
   grid-column: 1 / span 5;
   padding: var(--spacing-2xl);
-  border: 1px solid rgba(255, 255, 255, 0.024);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.003) 50%,
-    rgba(255, 255, 255, 0.0045) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.024),
-    0 2px 8px rgba(0, 0, 0, 0.012),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
+  border-radius: 16px;
   transition: 
+    transform 0.4s var(--ease-out-back), 
     box-shadow 0.4s var(--ease-out-back),
     border-color var(--transition-fast),
     background var(--transition-fast);
@@ -590,8 +503,9 @@
   height: 100%;
   background: linear-gradient(180deg, var(--color-accent), var(--color-engagement), var(--color-accent));
   background-size: 100% 200%;
-  opacity: 0;
-  transition: opacity 0.5s var(--ease-out-back);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.5s var(--ease-out-back);
 }
 
 /* Corner glow decoration */
@@ -608,51 +522,32 @@
     transparent 70%
   );
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity var(--transition-fast), transform 0.4s var(--ease-out-back);
   pointer-events: none;
 }
 
 .blockA:hover {
-  /* transform handled by Motion */
-  box-shadow: 
-    var(--shadow-lg),
-    0 0 30px color-mix(in srgb, var(--color-accent) 15%, transparent);
+  transform: translateY(-6px);
   border-color: var(--color-accent);
-  background: linear-gradient(
-    135deg,
-    var(--color-surface) 0%,
-    color-mix(in srgb, var(--color-accent) 3%, var(--color-surface)) 100%
-  );
 }
 
 .blockA:hover::before {
-  opacity: 1;
+  transform: scaleY(1);
   animation: shimmer 3s linear infinite;
 }
 
 .blockA:hover::after {
   opacity: 1;
+  transform: scale(1.2);
 }
 
 .blockB {
-  /* 50% MORE TRANSPARENT */
+  /* Glass handled by glass.css */
   grid-column: 6 / span 7;
   padding: var(--spacing-2xl);
-  border: 1px solid rgba(255, 255, 255, 0.024);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.003) 50%,
-    rgba(255, 255, 255, 0.0045) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.024),
-    0 2px 8px rgba(0, 0, 0, 0.012),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.015);
+  border-radius: 16px;
   transition: 
+    transform 0.4s var(--ease-out-back), 
     box-shadow 0.4s var(--ease-out-back),
     border-color var(--transition-fast),
     background var(--transition-fast);
@@ -676,7 +571,8 @@
   line-height: 1;
   pointer-events: none;
   transition: 
-    opacity var(--transition-fast);
+    opacity var(--transition-fast), 
+    transform 0.5s var(--ease-out-back);
 }
 
 /* Closing quote */
@@ -694,30 +590,25 @@
   opacity: 0.08;
   line-height: 1;
   pointer-events: none;
-  /* rotate kept as static positioning, not animated */
+  transform: rotate(180deg);
   transition: 
-    opacity var(--transition-fast);
+    opacity var(--transition-fast), 
+    transform 0.5s var(--ease-out-back);
 }
 
 .blockB:hover {
-  /* transform handled by Motion */
-  box-shadow: 
-    var(--shadow-lg),
-    0 0 30px color-mix(in srgb, var(--color-engagement) 15%, transparent);
+  transform: translateY(-6px);
   border-color: var(--color-engagement);
-  background: linear-gradient(
-    135deg,
-    var(--color-background) 0%,
-    color-mix(in srgb, var(--color-engagement) 2%, var(--color-background)) 100%
-  );
 }
 
 .blockB:hover::before {
   opacity: 0.2;
+  transform: scale(1.15) translate(5px, 5px);
 }
 
 .blockB:hover::after {
   opacity: 0.12;
+  transform: rotate(180deg) scale(1.1) translate(5px, 5px);
 }
 
 .quotePanel {
@@ -815,24 +706,12 @@
 }
 
 .blockC {
-  /* 50% MORE TRANSPARENT */
+  /* Glass handled by glass.css */
   grid-column: 1 / span 7;
   padding: var(--spacing-2xl);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.01) 0%,
-    rgba(255, 255, 255, 0.005) 50%,
-    rgba(255, 255, 255, 0.0075) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.04),
-    0 2px 8px rgba(0, 0, 0, 0.02),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.025);
+  border-radius: 16px;
   transition: 
+    transform 0.4s var(--ease-out-back), 
     box-shadow 0.4s var(--ease-out-back),
     border-color var(--transition-fast),
     background var(--transition-fast);
@@ -850,8 +729,9 @@
   height: 100%;
   background: linear-gradient(180deg, var(--color-engagement), var(--color-accent), var(--color-engagement));
   background-size: 100% 200%;
-  opacity: 0;
-  transition: opacity 0.5s var(--ease-out-back);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.5s var(--ease-out-back);
 }
 
 /* Corner glow - bottom right */
@@ -868,30 +748,23 @@
     transparent 70%
   );
   opacity: 0;
-  transition: opacity var(--transition-fast);
+  transition: opacity var(--transition-fast), transform 0.4s var(--ease-out-back);
   pointer-events: none;
 }
 
 .blockC:hover {
-  /* transform handled by Motion */
-  box-shadow: 
-    var(--shadow-lg),
-    0 0 30px color-mix(in srgb, var(--color-engagement) 15%, transparent);
+  transform: translateY(-6px);
   border-color: var(--color-engagement);
-  background: linear-gradient(
-    135deg,
-    var(--color-surface) 0%,
-    color-mix(in srgb, var(--color-engagement) 3%, var(--color-surface)) 100%
-  );
 }
 
 .blockC:hover::before {
-  opacity: 1;
+  transform: scaleY(1);
   animation: shimmer 3s linear infinite reverse;
 }
 
 .blockC:hover::after {
   opacity: 1;
+  transform: scale(1.2);
 }
 
 .list {
@@ -908,7 +781,8 @@
   position: relative;
   padding-left: var(--spacing-md);
   transition: 
-    color var(--transition-fast);
+    color var(--transition-fast),
+    transform 0.3s var(--ease-out-back);
 }
 
 /* Custom bullet with gradient */
@@ -922,16 +796,17 @@
   background: linear-gradient(135deg, var(--color-accent), var(--color-engagement));
   border-radius: 50%;
   transition: 
+    transform 0.3s var(--ease-out-back),
     box-shadow var(--transition-fast);
 }
 
 .list li:hover {
   color: var(--color-text);
-  /* transform handled by Motion if needed */
+  transform: translateX(8px);
 }
 
 .list li:hover::before {
-  /* transform removed */
+  transform: scale(1.3);
   box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 50%, transparent);
 }
 
@@ -940,24 +815,12 @@
 }
 
 .blockD {
-  /* 50% MORE TRANSPARENT */
+  /* Glass handled by glass.css */
   grid-column: 8 / span 5;
   padding: var(--spacing-2xl);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.01) 0%,
-    rgba(255, 255, 255, 0.005) 50%,
-    rgba(255, 255, 255, 0.0075) 100%
-  );
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.04),
-    0 2px 8px rgba(0, 0, 0, 0.02),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.025);
+  border-radius: 16px;
   transition: 
+    transform 0.4s var(--ease-out-back), 
     box-shadow 0.4s var(--ease-out-back),
     border-color var(--transition-fast);
   position: relative;
@@ -979,8 +842,9 @@
     var(--color-accent)
   );
   background-size: 200% 100%;
-  opacity: 0;
-  transition: opacity 0.5s var(--ease-out-back);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.5s var(--ease-out-back);
 }
 
 /* Corner gradient decoration - enhanced */
@@ -998,23 +862,22 @@
     transparent 70%
   );
   transition: 
+    transform 0.4s var(--ease-out-back), 
     opacity var(--transition-fast);
 }
 
 .blockD:hover {
-  /* transform handled by Motion */
-  box-shadow: 
-    var(--shadow-lg),
-    0 0 30px color-mix(in srgb, var(--color-accent) 15%, transparent);
+  transform: translateY(-6px);
   border-color: var(--color-accent);
 }
 
 .blockD:hover::before {
-  opacity: 1;
+  transform: scaleX(1);
   animation: shimmer 2s linear infinite;
 }
 
 .blockD:hover::after {
+  transform: scale(1.8);
   opacity: 0.9;
 }
 
@@ -1029,7 +892,7 @@
   font-weight: 700;
   font-size: var(--font-size-xl);
   position: relative;
-  background: var(--color-surface);
+  background: transparent;
   border: 2px solid var(--color-border);
   border-radius: 8px;
   transition: 
@@ -1037,7 +900,8 @@
     color var(--transition-fast),
     background var(--transition-fast),
     border-color var(--transition-fast),
-    box-shadow 0.3s var(--ease-out-back);
+    box-shadow 0.3s var(--ease-out-back),
+    transform 0.3s var(--ease-out-back);
   min-height: 44px;
   overflow: hidden;
 }
@@ -1063,8 +927,9 @@
     var(--color-accent)
   );
   background-size: 200% 100%;
-  opacity: 0;
-  transition: opacity 0.4s var(--ease-out-back);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease-out-back);
 }
 
 /* Shine overlay */
@@ -1097,11 +962,11 @@
   box-shadow: 
     var(--shadow-md),
     0 0 20px color-mix(in srgb, var(--color-accent) 20%, transparent);
-  /* transform handled by Motion */
+  transform: translateY(-2px);
 }
 
 .cta:hover::after {
-  opacity: 1;
+  transform: scaleX(1);
   animation: shimmer 2s linear infinite;
 }
 
@@ -1118,14 +983,22 @@
 .ctaArrow {
   color: var(--color-accent);
   font-size: var(--font-size-2xl);
-  /* transform handled by Motion if needed */
+  transition: transform 0.3s var(--ease-out-back);
 }
 
 .cta:hover .ctaArrow {
-  /* transform handled by Motion */
+  transform: translateX(6px);
+  animation: pulse 1s ease-in-out infinite;
 }
 
-/* pulse keyframes removed - transform animations moved to Motion */
+@keyframes pulse {
+  0%, 100% {
+    transform: translateX(6px);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
 
 /* ============================================
    RESPONSIVE
@@ -1187,8 +1060,7 @@
   .blockD,
   .institutionPanel {
     padding: var(--spacing-xl);
-    -webkit-backdrop-filter: saturate(140%) blur(6px);
-    backdrop-filter: saturate(140%) blur(6px);
+    /* Glass handled by glass.css */
   }
 
   .blockA:hover,
@@ -1196,7 +1068,7 @@
   .blockC:hover,
   .blockD:hover,
   .institutionPanel:hover {
-    /* transform handled by Motion - disabled on mobile via component */
+    transform: none;
   }
 
   .grid p,
@@ -1293,155 +1165,27 @@
 /* Touch states for mobile */
 @media (hover: none) {
   .heroFigure:active {
-    /* transform handled by Motion whileTap */
+    transform: scale(0.98);
   }
 
   .fact:active {
-    /* transform handled by Motion whileTap */
+    transform: scale(0.98);
   }
 
   .blockA:active,
   .blockB:active,
   .blockC:active,
   .blockD:active {
-    /* transform handled by Motion whileTap */
+    transform: scale(0.98);
   }
 
   .cta:active {
-    /* transform handled by Motion whileTap */
+    transform: scale(0.96);
   }
 
   .list li:active {
-    /* transform handled by Motion whileTap */
+    transform: translateX(4px);
     color: var(--color-accent);
   }
 }
 
-/* ============================================
-   LIGHT MODE - 100% MORE TRANSPARENT
-   ============================================ */
-
-:global([data-theme="light"]) .heroFigure {
-  background: rgba(255, 255, 255, 0.125);
-  border-color: rgba(0, 0, 0, 0.025);
-}
-
-:global([data-theme="light"]) .fact {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.00375) 50%,
-    rgba(255, 255, 255, 0.0045) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.018);
-}
-
-/* Edge reflection for fact cards */
-:global([data-theme="light"]) .fact::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.03) 20%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.03) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
-
-:global([data-theme="light"]) .blockA,
-:global([data-theme="light"]) .blockB,
-:global([data-theme="light"]) .blockC,
-:global([data-theme="light"]) .blockD {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.00375) 50%,
-    rgba(255, 255, 255, 0.0045) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.018);
-}
-
-/* Edge reflections for blocks */
-:global([data-theme="light"]) .blockA::before,
-:global([data-theme="light"]) .blockB::before,
-:global([data-theme="light"]) .blockC::before,
-:global([data-theme="light"]) .blockD::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.03) 20%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.03) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
-
-:global([data-theme="light"]) .pullQuote,
-:global([data-theme="light"]) .pullQuoteAlt {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.0075) 0%,
-    rgba(255, 255, 255, 0.0045) 50%,
-    rgba(255, 255, 255, 0.006) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.018);
-}
-
-:global([data-theme="light"]) .institutionPanel {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.006) 0%,
-    rgba(255, 255, 255, 0.00375) 50%,
-    rgba(255, 255, 255, 0.0045) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.018);
-}
-
-/* Edge reflection for institutionPanel */
-:global([data-theme="light"]) .institutionPanel::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.03) 20%,
-    rgba(255, 255, 255, 0.06) 50%,
-    rgba(255, 255, 255, 0.03) 80%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
-
-:global([data-theme="light"]) .cta {
-  background: linear-gradient(
-    135deg,
-    rgba(37, 99, 235, 0.175) 0%,
-    rgba(59, 130, 246, 0.15) 50%,
-    rgba(37, 99, 235, 0.175) 100%
-  );
-  border-color: rgba(37, 99, 235, 0.075);
-}

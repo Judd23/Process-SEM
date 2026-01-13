@@ -4,11 +4,11 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .container:hover {
-  /* transform handled by Motion */
+  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--color-accent);
 }
@@ -104,12 +104,12 @@
 
 /* Touch states */
 .container:active {
-  /* transform handled by Motion whileTap */
+  transform: scale(0.99);
 }
 
 @media (hover: none) {
   .container:hover {
-    /* transform handled by Motion */
+    transform: none;
     box-shadow: none;
   }
 }

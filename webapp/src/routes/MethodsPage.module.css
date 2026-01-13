@@ -178,6 +178,7 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   transition:
+    transform var(--transition-fast),
     box-shadow var(--transition-fast),
     border-color var(--transition-fast);
   position: relative;
@@ -192,14 +193,15 @@
   width: 4px;
   height: 100%;
   background: linear-gradient(to bottom, var(--color-accent), var(--color-engagement));
-  opacity: 0;
-  transition: opacity var(--transition-normal);
+  transform: scaleY(0);
+  transition: transform var(--transition-normal);
+  transform-origin: bottom;
 }
 
 /* Edge reflection handled by glass.css */
 
 .specCard:hover {
-  /* transform handled by Motion */
+  transform: translateY(-4px) scale(1.01);
 }
 
 .specCard[data-morph-id] {
@@ -216,7 +218,7 @@
 }
 
 .specCard:hover::before {
-  opacity: 1;
+  transform: scaleY(1);
 }
 
 .specLabel {
@@ -251,6 +253,7 @@
   margin-top: var(--spacing-lg);
   position: relative;
   transition:
+    transform var(--transition-fast),
     box-shadow var(--transition-fast),
     border-color var(--transition-fast);
 }
@@ -258,7 +261,7 @@
 /* Edge reflection handled by glass.css */
 
 .codeBlock:hover {
-  /* transform handled by Motion */
+  transform: translateY(-4px) scale(1.01);
 }
 
 .codeBlock h4 {
@@ -292,12 +295,13 @@
   padding: var(--spacing-lg);
   position: relative;
   transition:
+    transform var(--transition-fast),
     box-shadow var(--transition-fast),
     border-color var(--transition-fast);
 }
 
 .constructCard:hover {
-  /* transform handled by Motion */
+  transform: translateY(-4px) scale(1.01);
 }
 
 .constructCard h4 {
@@ -329,12 +333,13 @@
   margin-top: var(--spacing-lg);
   position: relative;
   transition:
+    transform var(--transition-fast),
     box-shadow var(--transition-fast),
     border-color var(--transition-fast);
 }
 
 .infoBox:hover {
-  /* transform handled by Motion */
+  transform: translateY(-4px) scale(1.01);
 }
 
 .infoBox h4 {
@@ -363,12 +368,13 @@
   padding: var(--spacing-lg);
   position: relative;
   transition:
+    transform var(--transition-fast),
     box-shadow var(--transition-fast),
     border-color var(--transition-fast);
 }
 
 .softwareCard:hover {
-  /* transform handled by Motion */
+  transform: translateY(-4px) scale(1.01);
 }
 
 .softwareCard h4 {
@@ -454,7 +460,7 @@
   .specCard:hover,
   .codeBlock:hover,
   .tableWrapper:hover {
-    /* transform handled by Motion */
+    transform: none;
   }
 
   .table {
@@ -531,7 +537,8 @@
   .codeBlock:active,
   .infoBox:active,
   .softwareCard:active {
-    /* transform handled by Motion whileTap */
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
   }
 }
 
