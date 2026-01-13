@@ -431,6 +431,7 @@ export default function JohnsonNeymanPlot({
           </div>
         </div>
       )}
+      <p className={styles.dataNote}>Data simulated for illustration</p>
     </div>
   );
 }

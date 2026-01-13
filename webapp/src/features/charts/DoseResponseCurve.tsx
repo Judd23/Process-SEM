@@ -395,6 +395,7 @@ export default function DoseResponseCurve({
         </div>
       </div>
       <DataTimestamp />
+      <p className={styles.dataNote}>Data simulated for illustration</p>
     </div>
   );
 }

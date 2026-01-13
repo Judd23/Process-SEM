@@ -188,6 +188,7 @@ export default function GroupComparison({ grouping, pathway }: GroupComparisonPr
           p ≥ .05
         </span>
       </div>
+      <p className={styles.dataNote}>Data simulated for illustration</p>
     </div>
   );
 }

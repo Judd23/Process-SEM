@@ -699,6 +699,7 @@ export default function PathwayDiagram({
         </div>
       )}
       <DataTimestamp />
+      <p className={styles.dataNote}>Data simulated for illustration</p>
     </motion.div>
   );
 }

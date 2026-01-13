@@ -9,6 +9,22 @@ import { Link } from 'react-router-dom';
 import { useModelData } from '../app/contexts';
 import styles from './HomePage.module.css';
 
+// Describe effect size in qualitative terms (editorial style)
+function describeEffect(beta: number): string {
+  const abs = Math.abs(beta);
+  const direction = beta > 0 ? 'higher' : 'lower';
+  if (abs < 0.2) return `slightly ${direction}`;
+  if (abs < 0.5) return `moderately ${direction}`;
+  return `substantially ${direction}`;
+}
+
+function describeEffectSize(beta: number): string {
+  const abs = Math.abs(beta);
+  if (abs < 0.2) return 'a small';
+  if (abs < 0.5) return 'a moderate';
+  return 'a substantial';
+}
+
 export default function HomePage() {
   const { sampleSize, fitMeasures, paths, fastPercent } = useModelData();
 
@@ -90,7 +106,7 @@ export default function HomePage() {
                 <h3>The Stress Connection</h3>
                 <p>
                   Students who earned college credits in high school report <strong>higher stress
-                  and anxiety</strong> during their first year—<span className={styles.effectCallout}>about {Math.abs(keyFindings.distressEffect * 100).toFixed(0)}% higher</span>—which makes it harder for them
+                  and anxiety</strong> during their first year—<span className={styles.effectCallout}>{describeEffect(keyFindings.distressEffect)} than peers without early credits</span>—which makes it harder for them
                   to adjust to college.
                 </p>
                 <p className={styles.implication}>
@@ -114,7 +130,7 @@ export default function HomePage() {
                 <p>
                   There's a <strong>sweet spot</strong> for dual enrollment credits: students with a
                   moderate amount engage more on campus, while those with lots of credits
-                  tend to be less involved—<span className={styles.effectCallout}>baseline effect is small (β = {keyFindings.engagementEffect.toFixed(2)})</span>. This is called a <GlossaryTerm term="Dose-Response Effect" definition="The relationship between the amount of something (like dual enrollment credits) and its impact. In this study, we examine how different amounts of credits produce different effects on student outcomes.">dose-response effect</GlossaryTerm>.
+                  tend to be less involved—<span className={styles.effectCallout}>{describeEffectSize(keyFindings.engagementEffect)} but meaningful effect</span>. This is called a dose-response pattern.
                 </p>
                 <p className={styles.implication}>
                   How many credits you earn in high school can shape how connected you feel
@@ -136,7 +152,7 @@ export default function HomePage() {
                 <h3>More Credits = Bigger Impact</h3>
                 <p>
                   The <strong>amount of credits matters</strong>: having 12 credits affects you
-                  differently than having 30+. Beyond stress and engagement, credits provide a <span className={styles.effectCallout}>direct {(keyFindings.adjustmentDirect * 100).toFixed(0)}% boost</span> to first-year success.
+                  differently than having 30+. Beyond stress and engagement, credits provide <span className={styles.effectCallout}>{describeEffectSize(keyFindings.adjustmentDirect)} direct benefit</span> to first-year success.
                 </p>
                 <p className={styles.implication}>
                   Students with 12 credits need different support than those who completed

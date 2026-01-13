@@ -179,6 +179,7 @@ export default function EffectDecomposition() {
           {metrics.hasData ? `${metrics.total >= 0 ? '+' : ''}${metrics.total.toFixed(2)}` : '—'}
         </strong>
       </div>
+      <p className={styles.dataNote}>Data simulated for illustration</p>
     </div>
   );
 }
