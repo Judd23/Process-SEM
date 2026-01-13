@@ -124,9 +124,13 @@ export default function DoseResponseCurve({
       g.append('path')
         .datum(data)
         .attr('fill', color)
-        .attr('opacity', 0.15)
+        .attr('opacity', 0)
         .attr('d', area)
-        .attr('class', 'ci-area');
+        .attr('class', 'ci-area')
+        .transition()
+        .delay(300)
+        .duration(600)
+        .attr('opacity', 0.15);
 
       const upperLine = d3
         .line<(typeof data)[0]>()
@@ -146,8 +150,12 @@ export default function DoseResponseCurve({
         .attr('stroke', color)
         .attr('stroke-width', 1.5)
         .attr('stroke-dasharray', '4,3')
-        .attr('opacity', 0.5)
-        .attr('d', upperLine);
+        .attr('opacity', 0)
+        .attr('d', upperLine)
+        .transition()
+        .delay(300)
+        .duration(600)
+        .attr('opacity', 0.5);
 
       g.append('path')
         .datum(data)
@@ -155,8 +163,12 @@ export default function DoseResponseCurve({
         .attr('stroke', color)
         .attr('stroke-width', 1.5)
         .attr('stroke-dasharray', '4,3')
-        .attr('opacity', 0.5)
-        .attr('d', lowerLine);
+        .attr('opacity', 0)
+        .attr('d', lowerLine)
+        .transition()
+        .delay(300)
+        .duration(600)
+        .attr('opacity', 0.5);
     }
 
     // Main line
@@ -165,12 +177,23 @@ export default function DoseResponseCurve({
       .x((d) => xScale(d.dose))
       .y((d) => yScale(d.effect));
 
-    g.append('path')
+    const mainLine = g.append('path')
       .datum(data)
       .attr('fill', 'none')
       .attr('stroke', color)
       .attr('stroke-width', 3)
       .attr('d', line);
+
+    // Stroke draw-on animation
+    const totalLength = (mainLine.node() as SVGPathElement)?.getTotalLength() || 0;
+    mainLine
+      .attr('stroke-dasharray', `${totalLength} ${totalLength}`)
+      .attr('stroke-dashoffset', totalLength)
+      .transition()
+      .delay(400)
+      .duration(800)
+      .ease(d3.easeQuadOut)
+      .attr('stroke-dashoffset', 0);
 
     // Zero reference line
     const textMutedColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim() || '#666666';
@@ -242,10 +265,15 @@ export default function DoseResponseCurve({
       g.append('circle')
         .attr('cx', xScale(selectedData.dose))
         .attr('cy', yScale(selectedData.effect))
-        .attr('r', 8)
+        .attr('r', 0)
         .attr('fill', color)
         .attr('stroke', 'white')
-        .attr('stroke-width', 2);
+        .attr('stroke-width', 2)
+        .transition()
+        .delay(900)
+        .duration(400)
+        .ease(d3.easeBackOut.overshoot(1.5))
+        .attr('r', 8);
 
       g.append('text')
         .attr('x', xScale(selectedData.dose))
@@ -255,7 +283,12 @@ export default function DoseResponseCurve({
         .attr('font-family', 'var(--font-mono)')
         .attr('font-size', 12)
         .attr('font-weight', 600)
-        .text(selectedData.effect.toFixed(3));
+        .attr('opacity', 0)
+        .text(selectedData.effect.toFixed(3))
+        .transition()
+        .delay(900)
+        .duration(400)
+        .attr('opacity', 1);
     }
 
     // Axes

@@ -224,7 +224,12 @@ export default function PathwayDiagram({
       .attr('stroke', colors.credits)
       .attr('stroke-width', 2)
       .attr('stroke-dasharray', '5,3')
-      .attr('marker-end', 'url(#arrow-dose)');
+      .attr('marker-end', 'url(#arrow-dose)')
+      .attr('opacity', 0)
+      .transition()
+      .delay(200)
+      .duration(400)
+      .attr('opacity', 1);
 
     // Define arrow markers and filters
     const defs = svg.append('defs');
@@ -262,7 +267,7 @@ export default function PathwayDiagram({
     });
 
     // Draw paths
-    const pathsGroup = g.append('g').attr('class', 'paths');
+    const pathsGroup = g.append('g').attr('class', 'paths').attr('opacity', 0);
     const getFocusPosition = (element: Element) => {
       const rect = element.getBoundingClientRect();
       return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
@@ -441,8 +446,15 @@ export default function PathwayDiagram({
       }
     });
 
+    // Fade in paths group
+    pathsGroup
+      .transition()
+      .delay(300)
+      .duration(500)
+      .attr('opacity', 1);
+
     // Draw nodes
-    const nodesGroup = g.append('g').attr('class', 'nodes');
+    const nodesGroup = g.append('g').attr('class', 'nodes').attr('opacity', 0);
 
     const nodeData = [
       { id: 'FASt', label: 'FASt\nStudent', color: colors.fast },
@@ -585,10 +597,18 @@ export default function PathwayDiagram({
       });
     });
 
+    // Fade in nodes group
+    nodesGroup
+      .transition()
+      .delay(500)
+      .duration(500)
+      .attr('opacity', 1);
+
     if (showLegend && !isMobile) {
       const legendX = Math.min(width - 160, width - 155);
       const legendBg = svg.append('g')
-        .attr('transform', `translate(${legendX}, 12)`);
+        .attr('transform', `translate(${legendX}, 12)`)
+        .attr('opacity', 0);
 
       legendBg.append('rect')
         .attr('x', -8)
@@ -635,6 +655,13 @@ export default function PathwayDiagram({
           .attr('fill', 'var(--color-text)')
           .text(item.label);
       });
+
+      // Fade in legend
+      legendBg
+        .transition()
+        .delay(800)
+        .duration(400)
+        .attr('opacity', 1);
     }
 
   }, [dimensions, highlightedPath, interactive, setHighlightedPath, resolvedTheme, selectedDose, modelData, getAdjustedEstimate, isMobile, showLegend, showPathLabels]);

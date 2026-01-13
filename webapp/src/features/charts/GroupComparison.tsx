@@ -121,7 +121,7 @@ export default function GroupComparison({ grouping, pathway }: GroupComparisonPr
               className={styles.row}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.3 }}
+              transition={{ delay: 0.3 + i * 0.05, duration: 0.3 }}
             >
               {/* Label */}
               <div className={styles.label}>
@@ -132,28 +132,47 @@ export default function GroupComparison({ grouping, pathway }: GroupComparisonPr
               {/* Chart area */}
               <div className={styles.chartArea}>
                 {/* Confidence interval line */}
-                <div 
+                <motion.div 
                   className={styles.ciLine}
                   style={{
                     left: `${toPercent(ciLow)}%`,
                     width: `${toPercent(ciHigh) - toPercent(ciLow)}%`,
+                    transformOrigin: 'left',
                   }}
+                  initial={{ scaleX: 0, opacity: 0 }}
+                  animate={{ scaleX: 1, opacity: 1 }}
+                  transition={{ delay: 0.3 + i * 0.05 + 0.1, duration: 0.3 }}
                 />
                 
                 {/* CI caps */}
-                <div 
+                <motion.div 
                   className={styles.ciCap}
                   style={{ left: `${toPercent(ciLow)}%` }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 + i * 0.05 + 0.15, duration: 0.2 }}
                 />
-                <div 
+                <motion.div 
                   className={styles.ciCap}
                   style={{ left: `${toPercent(ciHigh)}%` }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 + i * 0.05 + 0.15, duration: 0.2 }}
                 />
                 
                 {/* Point estimate */}
                 <motion.div 
                   className={`${styles.point} ${isSignificant ? styles.significant : ''}`}
                   style={{ left: `${toPercent(d.estimate)}%` }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ 
+                    delay: 0.3 + i * 0.05 + 0.2, 
+                    duration: 0.3,
+                    type: 'spring',
+                    stiffness: 400,
+                    damping: 15
+                  }}
                   whileHover={{ scale: 1.3 }}
                 />
               </div>
