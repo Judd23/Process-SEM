@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { useResearch, useModelData } from '../app/contexts';
 import PathwayDiagram from '../features/charts/PathwayDiagram';
 import EffectDecomposition from '../features/charts/EffectDecomposition';
@@ -6,6 +6,8 @@ import Toggle from '../components/ui/Toggle';
 import KeyTakeaway from '../components/ui/KeyTakeaway';
 import GlossaryTerm from '../components/ui/GlossaryTerm';
 import { InteractiveSurface } from '../components/ui/InteractiveSurface';
+import { DiagramWalkthrough, WALKTHROUGH_STORAGE_KEY } from '../components/ui';
+import type { HighlightedPath } from '../components/ui';
 import { useScrollReveal, useStaggeredReveal } from '../lib/hooks';
 
 import styles from './PathwayPage.module.css';
@@ -22,6 +24,38 @@ export default function PathwayPage() {
   const coefficientsRef = useStaggeredReveal<HTMLElement>({ id: 'pathway-coefficients' });
   const indirectRef = useStaggeredReveal<HTMLElement>({ id: 'pathway-indirect' });
   const summaryRef = useStaggeredReveal<HTMLElement>({ id: 'pathway-summary' });
+
+  // Walkthrough state
+  const [showWalkthrough, setShowWalkthrough] = useState(false);
+  const [walkthroughStep, setWalkthroughStep] = useState(0);
+
+  // Check if first visit and auto-open walkthrough
+  useEffect(() => {
+    const hasSeenWalkthrough = localStorage.getItem(WALKTHROUGH_STORAGE_KEY);
+    if (!hasSeenWalkthrough) {
+      // Small delay to let page render first
+      const timer = setTimeout(() => setShowWalkthrough(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleWalkthroughStepChange = useCallback((step: number, highlightedPath: HighlightedPath) => {
+    setWalkthroughStep(step);
+    setHighlightedPath(highlightedPath);
+  }, [setHighlightedPath]);
+
+  const handleWalkthroughClose = useCallback(() => {
+    setShowWalkthrough(false);
+    setWalkthroughStep(0);
+    setHighlightedPath(null);
+    localStorage.setItem(WALKTHROUGH_STORAGE_KEY, 'true');
+  }, [setHighlightedPath]);
+
+  const handleShowGuide = useCallback(() => {
+    setWalkthroughStep(0);
+    setHighlightedPath(null);
+    setShowWalkthrough(true);
+  }, [setHighlightedPath]);
 
   // Detect sticky state (using -10px rootMargin for reliable triggering across zoom levels)
   useEffect(() => {
@@ -180,6 +214,13 @@ export default function PathwayPage() {
               checked={showPathLabels}
               onChange={togglePathLabels}
             />
+            <button
+              className={styles.guideButton}
+              onClick={handleShowGuide}
+              type="button"
+            >
+              Show Guide
+            </button>
           </div>
         </section>
 
@@ -347,6 +388,14 @@ export default function PathwayPage() {
           </InteractiveSurface>
         </section>
       </div>
+
+      {/* Diagram Walkthrough */}
+      <DiagramWalkthrough
+        isOpen={showWalkthrough}
+        currentStep={walkthroughStep}
+        onStepChange={handleWalkthroughStepChange}
+        onClose={handleWalkthroughClose}
+      />
     </div>
   );
 }

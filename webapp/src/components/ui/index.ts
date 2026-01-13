@@ -2,6 +2,8 @@
 export { default as Accordion } from './Accordion';
 export { default as BackToTop } from './BackToTop';
 export { default as DataTimestamp } from './DataTimestamp';
+export { default as DiagramWalkthrough, WALKTHROUGH_STORAGE_KEY } from './DiagramWalkthrough';
+export type { HighlightedPath } from './DiagramWalkthrough';
 export { default as GlossaryTerm } from './GlossaryTerm';
 export { default as Icon } from './Icon';
 export { InteractiveSurface } from './InteractiveSurface';

@@ -122,7 +122,34 @@
 .toggleContainer {
   flex-shrink: 0;
   display: flex;
+  align-items: center;
   gap: var(--spacing-md);
+}
+
+.guideButton {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: 
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.guideButton:hover {
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+  background: var(--color-surface-alt);
+}
+
+@media (max-width: 600px) {
+  .guideButton {
+    display: none;
+  }
 }
 
 /* Diagram - glass handled by glass.css */
