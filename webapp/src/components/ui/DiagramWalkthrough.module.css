@@ -4,6 +4,7 @@
   background: rgba(0, 0, 0, 0.6);
   z-index: 1000;
   backdrop-filter: blur(2px);
+  cursor: pointer;
 }
 
 .card {
@@ -27,6 +28,10 @@
   padding: var(--spacing-lg);
 }
 
+.card:focus {
+  outline: none;
+}
+
 .stepIndicator {
   display: flex;
   justify-content: center;
@@ -44,17 +49,20 @@
   padding: 0;
   transition: 
     background-color 0.2s ease,
-    transform 0.2s ease;
+    width 0.2s ease,
+    height 0.2s ease;
 }
 
 .dot:hover {
   background: var(--color-text-muted);
-  transform: scale(1.2);
+  width: 10px;
+  height: 10px;
 }
 
 .dot.active {
   background: var(--color-primary);
-  transform: scale(1.2);
+  width: 10px;
+  height: 10px;
 }
 
 .content {
@@ -144,11 +152,11 @@
 
 .nextButton:hover {
   opacity: 0.9;
-  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .nextButton:active {
-  transform: translateY(0);
+  box-shadow: none;
 }
 
 /* Mobile adjustments */

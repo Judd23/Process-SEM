@@ -50,7 +50,7 @@ export default function DiagramWalkthrough({
 }: DiagramWalkthroughProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const totalSteps = STEPS.length;
-  const step = STEPS[currentStep];
+  const step = STEPS[currentStep] ?? STEPS[0];
   const isLastStep = currentStep === totalSteps - 1;
   const isFirstStep = currentStep === 0;
 
@@ -142,15 +142,15 @@ export default function DiagramWalkthrough({
             tabIndex={-1}
           >
             {/* Step indicator */}
-            <div className={styles.stepIndicator} role="tablist" aria-label="Walkthrough steps">
+            <div className={styles.stepIndicator} aria-label="Walkthrough steps">
               {STEPS.map((_, index) => (
                 <button
                   key={index}
                   className={`${styles.dot} ${index === currentStep ? styles.active : ''}`}
                   onClick={() => handleDotClick(index)}
-                  aria-label={`Step ${index + 1} of ${totalSteps}`}
-                  aria-selected={index === currentStep}
-                  role="tab"
+                  aria-label={`Go to step ${index + 1} of ${totalSteps}${index === currentStep ? ' (current)' : ''}`}
+                  aria-current={index === currentStep ? 'step' : undefined}
+                  type="button"
                 />
               ))}
             </div>

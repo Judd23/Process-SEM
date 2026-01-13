@@ -34,10 +34,13 @@ export default function PathwayPage() {
     const hasSeenWalkthrough = localStorage.getItem(WALKTHROUGH_STORAGE_KEY);
     if (!hasSeenWalkthrough) {
       // Small delay to let page render first
-      const timer = setTimeout(() => setShowWalkthrough(true), 800);
+      const timer = setTimeout(() => {
+        setHighlightedPath(null); // Sync initial state (step 0 = show all)
+        setShowWalkthrough(true);
+      }, 500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [setHighlightedPath]);
 
   const handleWalkthroughStepChange = useCallback((step: number, highlightedPath: HighlightedPath) => {
     setWalkthroughStep(step);
