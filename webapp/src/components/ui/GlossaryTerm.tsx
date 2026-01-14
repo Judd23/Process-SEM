@@ -54,7 +54,7 @@ export default function GlossaryTerm({
           styles[position]
         }`}
         role="tooltip"
-        aria-hidden={!isVisible}
+        {...(!isVisible && { "aria-hidden": "true" })}
       >
         <strong className={styles.tooltipTerm}>{term}</strong>
         <span className={styles.tooltipDefinition}>{definition}</span>
