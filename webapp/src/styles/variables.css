@@ -95,17 +95,17 @@
   --sidebar-width: 280px;
   --header-height: 64px;
 
-  /* Transitions - elegant slower timing (50% slower for polish) */
-  --transition-fast: 300ms ease-out;
-  --transition-normal: 600ms ease-out;
-  --transition-slow: 1000ms ease-out;
+  /* Transitions - dramatic yet elegant timing */
+  --transition-fast: 400ms ease-out;
+  --transition-normal: 800ms ease-out;
+  --transition-slow: 1400ms ease-out;
 
-  /* Animation timing */
+  /* Animation timing - dramatic yet elegant */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --reveal-duration: 800ms;
-  --reveal-stagger: 100ms;
-  --reveal-delay: 500ms;
+  --reveal-duration: 1200ms;
+  --reveal-stagger: 150ms;
+  --reveal-delay: 600ms;
 
   /* Page transition timing - consistent regardless of scroll position */
   --transition-page-duration: 800ms;

@@ -21,45 +21,45 @@ import { type Transition, type Variants } from 'framer-motion';
 
 /**
  * The "dance" spring - elegant, slow, natural motion
- * ~1200ms settle time at stiffness=60, damping=20, mass=1.2
+ * ~1600ms settle time at stiffness=45, damping=18, mass=1.4
  */
 export const DANCE_SPRING = {
   type: 'spring' as const,
-  stiffness: 60,
-  damping: 20,
-  mass: 1.2,
+  stiffness: 45,
+  damping: 18,
+  mass: 1.4,
 } satisfies Transition;
 
 /**
  * Lighter spring for smaller elements (cards, buttons)
- * ~800ms settle time
+ * ~1100ms settle time with graceful deceleration
  */
 export const DANCE_SPRING_LIGHT = {
   type: 'spring' as const,
-  stiffness: 80,
-  damping: 18,
-  mass: 0.8,
+  stiffness: 60,
+  damping: 16,
+  mass: 1.0,
 } satisfies Transition;
 
 /**
  * Heavier spring for page-level morphs and interactive elements
  * Lower damping creates visible bounce/overshoot
- * ~900ms settle time with noticeable bounce
+ * ~1200ms settle time with dramatic bounce
  */
 export const DANCE_SPRING_HEAVY = {
   type: 'spring' as const,
-  stiffness: 100,
-  damping: 14,
-  mass: 1.0,
+  stiffness: 70,
+  damping: 12,
+  mass: 1.2,
 } satisfies Transition;
 
 /**
  * Page fade transition - use tween for opacity (springs look weird on opacity)
- * Quick, clean fade with no bounce
+ * Graceful, unhurried fade for editorial feel
  */
 export const PAGE_FADE = {
-  duration: 0.3,
-  ease: [0.4, 0, 0.2, 1], // Material Design standard easing
+  duration: 0.6,
+  ease: [0.16, 1, 0.3, 1], // Expo out for elegant deceleration
 } satisfies Transition;
 
 // =============================================================================
@@ -68,19 +68,19 @@ export const PAGE_FADE = {
 
 export const TIMING = {
   /** Interactive feedback (hover, press) */
-  hover: 600,
+  hover: 800,
   /** Element reveals (scroll, viewport enter) */
-  reveal: 1000,
+  reveal: 1400,
   /** Orchestrated entrances (page load, route change) */
-  enter: 1200,
+  enter: 1600,
   /** Exit phase duration */
-  exit: 700,
+  exit: 900,
   /** Morph/transition phase duration */
-  morph: 900,
+  morph: 1200,
   /** Stagger delay between sequential elements */
-  stagger: 150,
+  stagger: 200,
   /** Total page transition time */
-  pageTransition: 2800, // exit + morph + enter
+  pageTransition: 3700, // exit + morph + enter
 } as const;
 
 export const TIMING_SECONDS = {
@@ -151,10 +151,10 @@ export const pageVariants: Variants = {
   visible: {
     opacity: 1,
     transition: {
-      duration: 0.25,
+      duration: 0.5,
       ease: EASING.dance,
       when: 'beforeChildren',
-      staggerChildren: 0.06,
+      staggerChildren: 0.12,
     },
   },
   exit: {
@@ -186,7 +186,7 @@ export const pageVariantsSubtle: Variants = {
 export const revealVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
+    y: 50,
   },
   visible: {
     opacity: 1,
@@ -198,7 +198,7 @@ export const revealVariants: Variants = {
 export const revealVariantsScale: Variants = {
   hidden: {
     opacity: 0,
-    scale: 0.95,
+    scale: 0.9,
   },
   visible: {
     opacity: 1,
@@ -210,7 +210,7 @@ export const revealVariantsScale: Variants = {
 export const revealVariantsLeft: Variants = {
   hidden: {
     opacity: 0,
-    x: -30,
+    x: -60,
   },
   visible: {
     opacity: 1,
@@ -222,7 +222,7 @@ export const revealVariantsLeft: Variants = {
 export const revealVariantsRight: Variants = {
   hidden: {
     opacity: 0,
-    x: 30,
+    x: 60,
   },
   visible: {
     opacity: 1,
@@ -242,7 +242,7 @@ export const revealVariantsRight: Variants = {
 export const revealVariantsDynamic: Variants = {
   hidden: {
     opacity: 0,
-    y: 30,
+    y: 50,
   },
   visible: (distanceFromCenter: number = 0) => ({
     opacity: 1,

@@ -325,7 +325,7 @@ tbody tr:nth-child(even) {
 
 .reveal-up {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(48px);
   transition:
     opacity var(--reveal-duration) var(--ease-out-expo),
     transform var(--reveal-duration) var(--ease-out-back);
@@ -352,7 +352,7 @@ tbody tr:nth-child(even) {
 
 .reveal-left {
   opacity: 0;
-  transform: translateX(-40px);
+  transform: translateX(-70px);
   transition:
     opacity var(--reveal-duration) var(--ease-out-expo),
     transform var(--reveal-duration) var(--ease-out-back);
@@ -365,7 +365,7 @@ tbody tr:nth-child(even) {
 
 .reveal-right {
   opacity: 0;
-  transform: translateX(40px);
+  transform: translateX(70px);
   transition:
     opacity var(--reveal-duration) var(--ease-out-expo),
     transform var(--reveal-duration) var(--ease-out-back);
@@ -376,19 +376,19 @@ tbody tr:nth-child(even) {
   transform: translateX(0);
 }
 
-/* Stagger delays for children */
+/* Stagger delays for children - dramatic cascade */
 .stagger-children > .reveal:nth-child(1) { transition-delay: 0ms; }
-.stagger-children > .reveal:nth-child(2) { transition-delay: 100ms; }
-.stagger-children > .reveal:nth-child(3) { transition-delay: 200ms; }
-.stagger-children > .reveal:nth-child(4) { transition-delay: 300ms; }
-.stagger-children > .reveal:nth-child(5) { transition-delay: 400ms; }
-.stagger-children > .reveal:nth-child(6) { transition-delay: 500ms; }
-.stagger-children > .reveal:nth-child(7) { transition-delay: 600ms; }
-.stagger-children > .reveal:nth-child(8) { transition-delay: 700ms; }
-.stagger-children > .reveal:nth-child(9) { transition-delay: 800ms; }
-.stagger-children > .reveal:nth-child(10) { transition-delay: 900ms; }
-.stagger-children > .reveal:nth-child(11) { transition-delay: 1000ms; }
-.stagger-children > .reveal:nth-child(12) { transition-delay: 1100ms; }
+.stagger-children > .reveal:nth-child(2) { transition-delay: 150ms; }
+.stagger-children > .reveal:nth-child(3) { transition-delay: 300ms; }
+.stagger-children > .reveal:nth-child(4) { transition-delay: 450ms; }
+.stagger-children > .reveal:nth-child(5) { transition-delay: 600ms; }
+.stagger-children > .reveal:nth-child(6) { transition-delay: 750ms; }
+.stagger-children > .reveal:nth-child(7) { transition-delay: 900ms; }
+.stagger-children > .reveal:nth-child(8) { transition-delay: 1050ms; }
+.stagger-children > .reveal:nth-child(9) { transition-delay: 1200ms; }
+.stagger-children > .reveal:nth-child(10) { transition-delay: 1350ms; }
+.stagger-children > .reveal:nth-child(11) { transition-delay: 1500ms; }
+.stagger-children > .reveal:nth-child(12) { transition-delay: 1650ms; }
 
 /* ============================================
    UNIFIED BUTTON SYSTEM
