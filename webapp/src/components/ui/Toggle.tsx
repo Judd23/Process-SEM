@@ -1,6 +1,10 @@
-import { motion } from 'framer-motion';
-import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
-import styles from './Toggle.module.css';
+import { motion } from "framer-motion";
+import {
+  DANCE_SPRING_HEAVY,
+  HOVER_SUBTLE,
+  TAP_SUBTLE,
+} from "../../lib/transitionConfig";
+import styles from "./Toggle.module.css";
 
 interface ToggleProps {
   checked: boolean;
@@ -14,8 +18,8 @@ export default function Toggle({ checked, onChange, label, id }: ToggleProps) {
     <motion.label
       className={`${styles.toggle} interactiveSurface`}
       htmlFor={id}
-      whileHover={{ y: -2, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={HOVER_SUBTLE}
+      whileTap={TAP_SUBTLE}
       transition={DANCE_SPRING_HEAVY}
     >
       <input

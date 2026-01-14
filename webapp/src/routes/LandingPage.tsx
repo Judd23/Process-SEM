@@ -1,32 +1,21 @@
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { PAGE_FADE } from '../lib/transitionConfig';
-import styles from './LandingPage.module.css';
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  PAGE_FADE,
+  DANCE_SPRING,
+  DANCE_SPRING_HEAVY,
+  EASING,
+  HOVER_SUBTLE,
+  TAP_SUBTLE,
+} from "../lib/transitionConfig";
+import styles from "./LandingPage.module.css";
 
 // ============================================
-// MOTION SYSTEM - Heavy, cinematic springs
+// LANDING PAGE VARIANTS - Using canonical springs
 // ============================================
-
-// Heavy spring for long-travel entrances (120-200px travel)
-const HEAVY_SPRING = {
-  type: 'spring' as const,
-  mass: 1.2,
-  stiffness: 80,
-  damping: 18,
-};
-
-// Gentle spring for subtle movements
-const GENTLE_SPRING = {
-  type: 'spring' as const,
-  mass: 0.8,
-  stiffness: 120,
-  damping: 16,
-};
 
 // Stagger timing
-const STAGGER_BASE = 0.08;
-
-const EASE_ELEGANT: [number, number, number, number] = [0.22, 1, 0.36, 1];
+const STAGGER_BASE = 0.12;
 
 // Container variants for staggered children
 const containerVariants = {
@@ -42,59 +31,54 @@ const containerVariants = {
 
 // From top entrance (kicker, title, subtitle)
 const fromTopVariants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: -100,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
-    transition: HEAVY_SPRING,
+    transition: DANCE_SPRING,
   },
 };
 
 // From bottom entrance (description, nameplate, CTA)
 const fromBottomVariants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: 120,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
-    transition: HEAVY_SPRING,
+    transition: DANCE_SPRING,
   },
 };
 
 // Center scale entrance (divider)
 const scaleVariants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     scaleX: 0,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     scaleX: 1,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 100,
-      damping: 20,
-      mass: 1,
-    },
+    transition: DANCE_SPRING_HEAVY,
   },
 };
 
 // Scroll indicator entrance
 const scrollIndicatorVariants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: 60,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     transition: {
-      ...HEAVY_SPRING,
+      ...DANCE_SPRING,
       delay: 0.5,
     },
   },
@@ -103,11 +87,11 @@ const scrollIndicatorVariants = {
 // Pathway silhouette fade
 const pathwayVariants = {
   hidden: { opacity: 0 },
-  visible: { 
+  visible: {
     opacity: 1,
     transition: {
       duration: 1.2,
-      ease: EASE_ELEGANT,
+      ease: EASING.dance,
       delay: 0.2,
     },
   },
@@ -117,10 +101,12 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   // Dark mode only - always use reverse logo
-  const logoSrc = `${import.meta.env.BASE_URL}researcher/sdsu_primary-logo_rgb_horizontal_reverse.png`;
+  const logoSrc = `${
+    import.meta.env.BASE_URL
+  }researcher/sdsu_primary-logo_rgb_horizontal_reverse.png`;
 
   const handleEnter = () => {
-    navigate('/home');
+    navigate("/home");
   };
 
   return (
@@ -140,26 +126,11 @@ export default function LandingPage() {
         animate="visible"
       >
         {/* Connecting paths */}
-        <path
-          className={styles.pathwayLine}
-          d="M120 200 Q 300 120, 400 120"
-        />
-        <path
-          className={styles.pathwayLine}
-          d="M120 200 Q 300 280, 400 280"
-        />
-        <path
-          className={styles.pathwayLine}
-          d="M400 120 Q 550 120, 680 200"
-        />
-        <path
-          className={styles.pathwayLine}
-          d="M400 280 Q 550 280, 680 200"
-        />
-        <path
-          className={styles.pathwayLine}
-          d="M120 200 L 680 200"
-        />
+        <path className={styles.pathwayLine} d="M120 200 Q 300 120, 400 120" />
+        <path className={styles.pathwayLine} d="M120 200 Q 300 280, 400 280" />
+        <path className={styles.pathwayLine} d="M400 120 Q 550 120, 680 200" />
+        <path className={styles.pathwayLine} d="M400 280 Q 550 280, 680 200" />
+        <path className={styles.pathwayLine} d="M120 200 L 680 200" />
         {/* Nodes */}
         <circle className={styles.pathwayNode} cx="120" cy="200" r="24" />
         <circle className={styles.pathwayNode} cx="400" cy="120" r="20" />
@@ -168,7 +139,7 @@ export default function LandingPage() {
       </motion.svg>
 
       {/* Main Content */}
-      <motion.main 
+      <motion.main
         className={styles.content}
         variants={containerVariants}
         initial="hidden"
@@ -177,62 +148,43 @@ export default function LandingPage() {
         <div className={styles.titleGhost} aria-hidden="true">
           Psychosocial Effects of Accelerated Dual Credit
         </div>
-        
+
         {/* Kicker */}
-        <motion.p 
-          className={styles.kicker}
-          variants={fromTopVariants}
-        >
+        <motion.p className={styles.kicker} variants={fromTopVariants}>
           Ed.D. Dissertation Research
         </motion.p>
 
         {/* Title */}
-        <motion.h1 
-          className={styles.title}
-          variants={fromTopVariants}
-        >
+        <motion.h1 className={styles.title} variants={fromTopVariants}>
           <span className={styles.titleLine}>Psychosocial Effects of</span>
           <span className={styles.titleLine}>
-            <span className={styles.titleAccent}>
-              Accelerated Dual Credit
-            </span>
+            <span className={styles.titleAccent}>Accelerated Dual Credit</span>
           </span>
         </motion.h1>
 
         {/* Subtitle */}
-        <motion.p 
-          className={styles.subtitle}
-          variants={fromTopVariants}
-        >
+        <motion.p className={styles.subtitle} variants={fromTopVariants}>
           On First-Year Developmental Adjustment
         </motion.p>
 
         {/* Divider - CENTER (scale) */}
-        <motion.div 
-          className={styles.divider}
-          variants={scaleVariants}
-        />
+        <motion.div className={styles.divider} variants={scaleVariants} />
 
         {/* Description - FROM BOTTOM */}
-        <motion.p 
-          className={styles.description}
-          variants={fromBottomVariants}
-        >
-          Investigating how <strong>accelerated dual credit</strong> accumulation affects
-          psychosocial development among equity-impacted California students.
+        <motion.p className={styles.description} variants={fromBottomVariants}>
+          Investigating how <strong>accelerated dual credit</strong>{" "}
+          accumulation affects psychosocial development among equity-impacted
+          California students.
         </motion.p>
 
         {/* Author Nameplate */}
-        <motion.div 
-          className={styles.nameplate}
-          variants={fromBottomVariants}
-        >
+        <motion.div className={styles.nameplate} variants={fromBottomVariants}>
           <h2 className={styles.authorName}>Jay Johnson</h2>
           <p className={styles.authorTitle}>Doctoral Candidate</p>
-          <motion.div 
+          <motion.div
             className={styles.institution}
-            whileHover={{ scale: 1.02 }}
-            transition={GENTLE_SPRING}
+            whileHover={HOVER_SUBTLE}
+            transition={DANCE_SPRING_HEAVY}
           >
             <img
               className={styles.logo}
@@ -248,20 +200,20 @@ export default function LandingPage() {
             className={`${styles.cta} interactiveSurface`}
             onClick={handleEnter}
             aria-label="Enter the research visualization"
-            whileHover={{ y: -2 }}
-            whileTap={{ y: 1, scale: 0.99 }}
-            transition={GENTLE_SPRING}
+            whileHover={HOVER_SUBTLE}
+            whileTap={TAP_SUBTLE}
+            transition={DANCE_SPRING_HEAVY}
           >
             <span>Explore the Research</span>
-            <svg 
-              className={styles.ctaIcon} 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
+            <svg
+              className={styles.ctaIcon}
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
               strokeLinejoin="round"
             >
               <path d="M5 12h14M12 5l7 7-7 7" />
@@ -281,19 +233,19 @@ export default function LandingPage() {
           className={`${styles.scrollIndicator} interactiveSurface`}
           onClick={handleEnter}
           aria-label="Scroll to explore"
-          whileHover={{ y: -2 }}
-          transition={GENTLE_SPRING}
+          whileHover={HOVER_SUBTLE}
+          transition={DANCE_SPRING_HEAVY}
         >
           <span className={styles.scrollText}>Scroll to explore</span>
-          <motion.svg 
-            className={styles.scrollChevron} 
-            width="18" 
-            height="18" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
+          <motion.svg
+            className={styles.scrollChevron}
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
             strokeLinejoin="round"
             animate={{
               y: [0, 6, 0],

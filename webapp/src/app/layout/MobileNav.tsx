@@ -1,8 +1,12 @@
-import { motion } from 'framer-motion';
-import { TransitionNavLink } from '../../features/transitions';
-import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
-import { navItems } from './navItems';
-import styles from './MobileNav.module.css';
+import { motion } from "framer-motion";
+import { TransitionNavLink } from "../../features/transitions";
+import {
+  DANCE_SPRING_HEAVY,
+  HOVER_SUBTLE,
+  TAP_SUBTLE,
+} from "../../lib/transitionConfig";
+import { navItems } from "./navItems";
+import styles from "./MobileNav.module.css";
 
 export default function MobileNav() {
   return (
@@ -10,21 +14,27 @@ export default function MobileNav() {
       {navItems.map((item) => (
         <motion.span
           key={item.to}
-          whileHover={{ y: -2, scale: 1.02 }}
-          whileTap={{ y: 0, scale: 0.96 }}
+          whileHover={HOVER_SUBTLE}
+          whileTap={TAP_SUBTLE}
           transition={DANCE_SPRING_HEAVY}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
           <TransitionNavLink
             to={item.to}
             className={({ isActive }) =>
-              `${styles.link} interactiveSurface ${isActive ? styles.active : ''}`
+              `${styles.link} interactiveSurface ${
+                isActive ? styles.active : ""
+              }`
             }
-            end={item.to === '/home'}
+            end={item.to === "/home"}
           >
-            <svg 
-              className={styles.icon} 
-              viewBox="0 0 24 24" 
+            <svg
+              className={styles.icon}
+              viewBox="0 0 24 24"
               fill="currentColor"
               aria-hidden="true"
             >

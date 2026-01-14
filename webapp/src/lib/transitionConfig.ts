@@ -1,7 +1,19 @@
 /**
  * transitionConfig.ts
  * ==================
+ * CANONICAL ANIMATION SETTINGS - DO NOT OVERRIDE IN COMPONENTS
+ *
  * Single source of truth for all transition timing, spring physics, and animation orchestration.
+ * All components MUST import from this file. Do not define inline springs or timing.
+ *
+ * PERMANENT SETTINGS (Established 2026-01-14):
+ * - DANCE_SPRING: stiffness=45, damping=18, mass=1.4 (~1600ms)
+ * - DANCE_SPRING_LIGHT: stiffness=60, damping=16, mass=1.0 (~1100ms)
+ * - DANCE_SPRING_HEAVY: stiffness=70, damping=12, mass=1.2 (~1200ms + bounce)
+ * - Hover: y=-8px, scale=1.035
+ * - Tap: scale=0.98
+ * - Reveal travel: 48-50px vertical, 60-70px horizontal
+ * - Stagger: 150-200ms between elements
  *
  * DESIGN PRINCIPLES:
  * - "Everything moves like an organized dance" — NO fast transitions
@@ -10,7 +22,6 @@
  * - Spring physics — natural motion with unified spring constants
  *
  * @link See variables.css for CSS-side timing tokens
- * @link See Debugs.md Phase 27 for implementation checklist
  */
 
 import { type Transition, type Variants } from "framer-motion";
@@ -104,6 +115,33 @@ export const STAGGER_CONFIG = {
   from: "center" as const,
   /** Easing redistribution for stagger timing */
   ease: "easeOut" as const,
+} as const;
+
+// =============================================================================
+// HOVER PRESETS - Use these instead of inline values
+// =============================================================================
+
+/** Standard hover animation props for interactive elements */
+export const HOVER_PROPS = {
+  y: -8,
+  scale: 1.035,
+} as const;
+
+/** Standard tap animation props */
+export const TAP_PROPS = {
+  scale: 0.98,
+} as const;
+
+/** Subtle hover for small elements (nav links, toggles) */
+export const HOVER_SUBTLE = {
+  y: -4,
+  scale: 1.02,
+} as const;
+
+/** Subtle tap for small elements */
+export const TAP_SUBTLE = {
+  y: 0,
+  scale: 0.98,
 } as const;
 
 /**

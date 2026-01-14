@@ -56,6 +56,51 @@ interface TooltipContent {
   estimate?: number;
   pvalue?: number;
   finding?: string;
+  plainTalk?: string;
+}
+
+// Generate plain-language interpretation of effect
+function getPlainInterpretation(pathId: string, estimate: number, pvalue: number): string {
+  const magnitude = Math.abs(estimate);
+  const strength = magnitude > 0.3 ? 'strong' : magnitude > 0.15 ? 'moderate' : 'slight';
+  const direction = estimate > 0 ? 'positive' : 'negative';
+  const significant = pvalue < 0.05;
+
+  if (!significant) {
+    return 'This relationship is not statistically reliable in this sample.';
+  }
+
+  const interpretations: Record<string, string> = {
+    a1: `FASt students show a ${strength} increase in stress levels.`,
+    a2: `FASt status has a ${strength} effect on campus engagement.`,
+    b1: `Higher stress leads to ${strength}ly lower first-year success.`,
+    b2: `More engagement leads to ${strength}ly better first-year outcomes.`,
+    c: `FASt status provides a ${strength} direct boost to college success.`,
+  };
+
+  return interpretations[pathId] || `This path shows a ${strength} ${direction} effect.`;
+}
+
+// Clamp tooltip position to viewport
+function clampToViewport(x: number, y: number, isTouch: boolean = false): { x: number; y: number } {
+  const padding = 20;
+  const tooltipWidth = 320;
+  const tooltipHeight = 180;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  // For touch, position above finger
+  const yOffset = isTouch ? -tooltipHeight - 50 : 15;
+  const xOffset = isTouch ? -tooltipWidth / 2 : 15;
+
+  let clampedX = x + xOffset;
+  let clampedY = y + yOffset;
+
+  // Clamp to viewport bounds
+  clampedX = Math.max(padding, Math.min(clampedX, viewportWidth - tooltipWidth - padding));
+  clampedY = Math.max(padding, Math.min(clampedY, viewportHeight - tooltipHeight - padding));
+
+  return { x: clampedX, y: clampedY };
 }
 
 interface PathwayDiagramProps {
@@ -332,6 +377,8 @@ export default function PathwayDiagram({
         .attr('aria-describedby', interactive ? tooltipId : null);
 
       if (interactive) {
+        const plainTalk = getPlainInterpretation(path.id, adjustedEstimate, path.pvalue);
+
         pathElement
           .on('mouseenter', function(event) {
             d3.select(this)
@@ -340,17 +387,19 @@ export default function PathwayDiagram({
             if (allowHoverHighlight) {
               setHighlightedPath(pathType);
             }
+            const pos = clampToViewport(event.clientX, event.clientY);
             setTooltip({
               show: true,
-              x: event.clientX,
-              y: event.clientY,
-              content: { 
+              x: pos.x,
+              y: pos.y,
+              content: {
                 type: 'path',
                 title: path.title,
                 description: path.description,
                 estimate: adjustedEstimate,
                 pvalue: path.pvalue,
-                finding: path.finding
+                finding: path.finding,
+                plainTalk
               },
             });
           })
@@ -363,6 +412,46 @@ export default function PathwayDiagram({
             }
             setTooltip(null);
           })
+          .on('touchstart', function(event) {
+            event.preventDefault();
+            const touch = event.touches[0];
+            d3.select(this)
+              .attr('filter', 'url(#glow)')
+              .attr('stroke-width', baseStrokeWidth + 2);
+            if (allowHoverHighlight) {
+              setHighlightedPath(pathType);
+            }
+            // Haptic feedback if available
+            if (navigator.vibrate) navigator.vibrate(10);
+            const pos = clampToViewport(touch.clientX, touch.clientY, true);
+            setTooltip({
+              show: true,
+              x: pos.x,
+              y: pos.y,
+              content: {
+                type: 'path',
+                title: path.title,
+                description: path.description,
+                estimate: adjustedEstimate,
+                pvalue: path.pvalue,
+                finding: path.finding,
+                plainTalk
+              },
+            });
+            // Auto-hide after 3s on touch
+            setTimeout(() => {
+              setTooltip(null);
+              d3.select(this)
+                .attr('filter', selectedFilter)
+                .attr('stroke-width', baseStrokeWidth);
+              if (allowHoverHighlight) {
+                setHighlightedPath(null);
+              }
+            }, 3000);
+          }, { passive: false })
+          .on('touchend', function() {
+            // Keep tooltip visible, will auto-hide
+          })
           .on('focus', function() {
             const { x, y } = getFocusPosition(this);
             d3.select(this)
@@ -371,17 +460,19 @@ export default function PathwayDiagram({
             if (allowHoverHighlight) {
               setHighlightedPath(pathType);
             }
+            const pos = clampToViewport(x, y);
             setTooltip({
               show: true,
-              x,
-              y,
-              content: { 
+              x: pos.x,
+              y: pos.y,
+              content: {
                 type: 'path',
                 title: path.title,
                 description: path.description,
                 estimate: adjustedEstimate,
                 pvalue: path.pvalue,
-                finding: path.finding
+                finding: path.finding,
+                plainTalk
               },
             });
           })
@@ -704,19 +795,24 @@ export default function PathwayDiagram({
           id={tooltipId}
           role="tooltip"
           aria-live="polite"
-          style={{ left: tooltip.x + 15, top: tooltip.y + 15 }}
+          style={{ left: tooltip.x, top: tooltip.y }}
         >
           <div className={styles.tooltipTitle}>{tooltip.content.title}</div>
           <div className={styles.tooltipDescription}>{tooltip.content.description}</div>
           {tooltip.content.type === 'path' && (
             <>
+              {tooltip.content.plainTalk && (
+                <div className={styles.tooltipPlainTalk}>
+                  <strong>Plain talk:</strong> {tooltip.content.plainTalk}
+                </div>
+              )}
               <div className={styles.tooltipStats}>
                 <span className={styles.tooltipFinding}>{tooltip.content.finding}</span>
                 <span className={styles.tooltipEffect}>
                   β = {formatNumber(tooltip.content.estimate!)}
                 </span>
                 <span className={styles.tooltipPvalue}>
-                  {tooltip.content.pvalue! < 0.001 ? 'p < .001' : 
+                  {tooltip.content.pvalue! < 0.001 ? 'p < .001' :
                    tooltip.content.pvalue! < 0.05 ? `p = ${tooltip.content.pvalue!.toFixed(3)}` :
                    'Not significant'}
                 </span>

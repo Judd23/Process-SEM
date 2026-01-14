@@ -10,6 +10,9 @@
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
   padding: var(--spacing-sm);
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-text-muted) var(--color-border-light);
 }
 
 @media (max-width: 768px) {
@@ -43,6 +46,14 @@
 
   .legendItem {
     font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .mobileLegend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
   }
 }
 
@@ -89,7 +100,7 @@
 
 .tooltip {
   position: fixed;
-  background: var(--color-surface);
+  background: rgba(12, 22, 37, 0.95);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-md) var(--spacing-lg);
@@ -139,6 +150,21 @@
   color: var(--color-text-muted);
   line-height: 1.5;
   margin-bottom: var(--spacing-sm);
+}
+
+.tooltipPlainTalk {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  line-height: 1.5;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--color-accent);
+}
+
+.tooltipPlainTalk strong {
+  color: var(--color-accent);
 }
 
 .tooltipStats {
