@@ -39,7 +39,8 @@
   padding: var(--spacing-md) 0;
   z-index: 100;
   border-bottom: 1px solid transparent;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .controls.stuck {
@@ -90,9 +91,17 @@
 }
 
 .pathwayButton:hover {
-  border-color: color-mix(in srgb, var(--button-color, var(--color-accent)) 50%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--button-color, var(--color-accent)) 50%,
+    transparent
+  );
   color: var(--button-color, var(--color-accent));
-  background: color-mix(in srgb, var(--button-color, var(--color-accent)) 12%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--button-color, var(--color-accent)) 12%,
+    transparent
+  );
 }
 
 .pathwayButton:focus-visible {
@@ -104,8 +113,12 @@
   background: var(--button-color, var(--color-accent));
   border-color: var(--button-color, var(--color-accent));
   color: var(--button-text, white);
-  box-shadow: 
-    0 2px 12px color-mix(in srgb, var(--button-color, var(--color-accent)) 40%, transparent),
+  box-shadow: 0 2px 12px
+      color-mix(
+        in srgb,
+        var(--button-color, var(--color-accent)) 40%,
+        transparent
+      ),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
@@ -134,9 +147,7 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   cursor: pointer;
-  transition: 
-    color 0.2s ease,
-    border-color 0.2s ease,
+  transition: color 0.2s ease, border-color 0.2s ease,
     background-color 0.2s ease;
 }
 
@@ -163,10 +174,8 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   position: relative;
-  transition: 
-    transform var(--transition-fast), 
-    box-shadow var(--transition-fast), 
-    border-color var(--transition-fast);
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .mobileHint {
@@ -181,7 +190,7 @@
 }
 
 .mobileHint::before {
-  content: '↔ ';
+  content: "↔ ";
 }
 
 @media (max-width: 768px) {
@@ -198,7 +207,7 @@
   }
 
   .diagram::after {
-    content: '';
+    content: "";
     position: absolute;
     right: 0;
     top: 0;
@@ -222,7 +231,6 @@
     flex-direction: column;
     gap: var(--spacing-sm);
   }
-
 }
 
 /* Coefficients */
@@ -294,7 +302,8 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   position: relative;
-  transition: opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: opacity var(--transition-fast), transform var(--transition-fast),
+    box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Edge reflection handled by glass.css */
@@ -414,7 +423,8 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   position: relative;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Edge reflection handled by glass.css .indirectCard auto-selector */
@@ -529,7 +539,8 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   position: relative;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Edge reflection handled by glass.css */
