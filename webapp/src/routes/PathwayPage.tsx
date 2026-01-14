@@ -201,7 +201,16 @@ export default function PathwayPage() {
                 aria-label={`${btn.label}: ${btn.id === null ? 'Show all pathways' : `Highlight ${btn.label.toLowerCase()} pathways`}`}
                 hoverLift={3}
               >
-                {btn.label}
+                {btn.id === 'serial' ? (
+                  <GlossaryTerm
+                    term="Serial Mediation"
+                    definition="A model where the treatment affects the outcome through multiple linked mediators. Here, FASt status affects adjustment through both stress AND engagement pathways working together."
+                  >
+                    {btn.label}
+                  </GlossaryTerm>
+                ) : (
+                  btn.label
+                )}
                 {highlightedPath === btn.id && <span className={styles.pathCount} aria-hidden="true">
                   {btn.id === null ? pathData.length :
                    btn.id === 'distress' ? 3 :
