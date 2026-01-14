@@ -144,6 +144,42 @@ export const TAP_SUBTLE = {
   scale: 0.98,
 } as const;
 
+// =============================================================================
+// VIEWPORT CONFIG - For whileInView reveals
+// =============================================================================
+
+/** Standard viewport detection for scroll reveals */
+export const VIEWPORT_CONFIG = {
+  once: true,
+  amount: 0.2,
+  margin: "0px 0px -100px 0px",
+} as const;
+
+/** Looser viewport for large elements */
+export const VIEWPORT_LOOSE = {
+  once: true,
+  amount: 0.1,
+  margin: "0px 0px -50px 0px",
+} as const;
+
+// =============================================================================
+// BREATHING ANIMATION - For infinite subtle animations
+// =============================================================================
+
+/** Slow breathing animation for scroll indicators, loading states */
+export const BREATHING_ANIMATION = {
+  animate: {
+    y: [0, 8, 0],
+    scale: [1, 1.05, 1],
+    opacity: [0.5, 1, 0.5],
+  },
+  transition: {
+    duration: 3,
+    repeat: Infinity,
+    ease: "easeInOut" as const,
+  },
+} as const;
+
 /**
  * Calculate stagger delay based on distance from viewport center
  * Elements closer to center animate first

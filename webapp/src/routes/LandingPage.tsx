@@ -7,6 +7,7 @@ import {
   EASING,
   HOVER_SUBTLE,
   TAP_SUBTLE,
+  BREATHING_ANIMATION,
 } from "../lib/transitionConfig";
 import styles from "./LandingPage.module.css";
 
@@ -247,15 +248,8 @@ export default function LandingPage() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            animate={{
-              y: [0, 6, 0],
-              opacity: [0.6, 1, 0.6],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: [0.4, 0, 0.2, 1],
-            }}
+            animate={BREATHING_ANIMATION.animate}
+            transition={BREATHING_ANIMATION.transition}
           >
             <polyline points="6 9 12 15 18 9" />
           </motion.svg>
