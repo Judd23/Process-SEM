@@ -290,7 +290,7 @@
    NEXT STEP CTA
    ============================================ */
 .nextStep {
-  text-align: left;
+  text-align: center;
   padding: var(--spacing-4xl) 0;
   border-top: 1px solid var(--color-border-light);
 }
