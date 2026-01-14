@@ -595,6 +595,7 @@
     align-items: stretch;
     position: static; /* Disable sticky on mobile */
     background: transparent;
+    -webkit-backdrop-filter: none;
     backdrop-filter: none;
     padding: var(--spacing-sm) 0;
     gap: var(--spacing-sm);

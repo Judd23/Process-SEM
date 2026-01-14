@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import styles from './GlossaryTerm.module.css';
+import { useState, useRef } from "react";
+import styles from "./GlossaryTerm.module.css";
 
 interface GlossaryTermProps {
   term: string;
@@ -17,21 +17,21 @@ export default function GlossaryTerm({
   children,
 }: GlossaryTermProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState<'above' | 'below'>('above');
+  const [position, setPosition] = useState<"above" | "below">("above");
   const termRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLSpanElement>(null);
 
-  // Determine tooltip position based on viewport space
-  useEffect(() => {
-    if (isVisible && termRef.current) {
+  const showTooltip = () => {
+    if (termRef.current) {
       const rect = termRef.current.getBoundingClientRect();
       const spaceAbove = rect.top;
       const spaceBelow = window.innerHeight - rect.bottom;
-      setPosition(spaceAbove > 100 || spaceAbove > spaceBelow ? 'above' : 'below');
+      setPosition(
+        spaceAbove > 100 || spaceAbove > spaceBelow ? "above" : "below"
+      );
     }
-  }, [isVisible]);
-
-  const showTooltip = () => setIsVisible(true);
+    setIsVisible(true);
+  };
   const hideTooltip = () => setIsVisible(false);
 
   return (
@@ -50,7 +50,9 @@ export default function GlossaryTerm({
       <span
         ref={tooltipRef}
         id={`tooltip-${term}`}
-        className={`${styles.tooltip} ${isVisible ? styles.visible : ''} ${styles[position]}`}
+        className={`${styles.tooltip} ${isVisible ? styles.visible : ""} ${
+          styles[position]
+        }`}
         role="tooltip"
         aria-hidden={!isVisible}
       >

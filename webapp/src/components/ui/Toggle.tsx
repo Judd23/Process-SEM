@@ -28,6 +28,7 @@ export default function Toggle({ checked, onChange, label, id }: ToggleProps) {
         checked={checked}
         onChange={onChange}
         className={styles.input}
+        aria-label={label}
       />
       <span className={styles.slider} />
       <span className={styles.label}>{label}</span>
