@@ -31,7 +31,7 @@
   line-height: 1.1;
   letter-spacing: -0.03em;
   max-width: 900px;
-  margin: 0 0 var(--spacing-xl);
+  margin: 0 auto var(--spacing-xl);
   font-weight: 700;
   color: var(--color-text);
 }
@@ -41,7 +41,7 @@
   color: var(--color-text-muted);
   line-height: 1.7;
   max-width: 700px;
-  margin: 0;
+  margin: 0 auto;
   padding-bottom: var(--spacing-2xl);
   position: relative;
 }
@@ -50,7 +50,8 @@
   content: '';
   position: absolute;
   bottom: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 120px;
   height: 1px;
   background: linear-gradient(
@@ -94,10 +95,6 @@
   margin-bottom: var(--spacing-md);
 }
 
-.findings :global(.section-divider) {
-  margin: var(--spacing-2xl) 0;
-}
-
 .findingSection {
   padding: var(--spacing-4xl) 0;
   border-bottom: 1px solid var(--color-border-light);
@@ -116,9 +113,9 @@
   grid-template-columns: auto 1fr;
   gap: var(--spacing-2xl);
   align-items: start;
-  justify-content: start;
+  justify-content: center;
   max-width: 800px;
-  margin: 0;
+  margin: 0 auto;
   text-align: left;
 }
 
@@ -184,7 +181,7 @@
 .previewText {
   text-align: left;
   max-width: 700px;
-  margin: 0 0 var(--spacing-2xl);
+  margin: 0 auto var(--spacing-2xl);
   color: var(--color-text-muted);
   font-size: var(--font-size-lg);
   line-height: 1.7;
@@ -343,7 +340,7 @@
   .statsGrid {
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-md);
-    justify-items: stretch;
+    justify-items: center;
   }
 
   .findingContent {
@@ -390,7 +387,7 @@
 @media (max-width: 480px) {
   .statsGrid {
     grid-template-columns: 1fr;
-    justify-items: stretch;
+    justify-items: center;
   }
 
   .actions {

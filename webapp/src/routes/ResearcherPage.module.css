@@ -30,7 +30,7 @@
    HERO (Magazine / Asymmetric)
    ============================================ */
 .hero {
-  padding: var(--spacing-2xl) var(--spacing-lg) var(--spacing-xl);
+  padding: var(--spacing-2xl) var(--spacing-xl) var(--spacing-xl);
   position: relative;
   z-index: 1;
   /* Hero glow background */
@@ -250,7 +250,7 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--spacing-sm);
-  justify-content: flex-start;
+  justify-content: center;
   color: var(--color-text-muted);
   font-size: var(--font-size-lg);
 }
@@ -278,7 +278,7 @@
 }
 
 .factsStrip {
-  padding: 0 var(--spacing-lg) var(--spacing-2xl);
+  padding: 0 var(--spacing-xl) var(--spacing-2xl);
 }
 
 .factsInner {
@@ -432,7 +432,7 @@
 .grid {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 var(--spacing-lg);
+  padding: 0 var(--spacing-xl);
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: var(--spacing-xl);
