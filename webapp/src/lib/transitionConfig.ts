@@ -2,18 +2,18 @@
  * transitionConfig.ts
  * ==================
  * Single source of truth for all transition timing, spring physics, and animation orchestration.
- * 
+ *
  * DESIGN PRINCIPLES:
  * - "Everything moves like an organized dance" — NO fast transitions
  * - Center-out awareness — elements closer to viewport center animate first
  * - Phase orchestration — exit completes → morph happens → enter begins
  * - Spring physics — natural motion with unified spring constants
- * 
+ *
  * @link See variables.css for CSS-side timing tokens
  * @link See Debugs.md Phase 27 for implementation checklist
  */
 
-import { type Transition, type Variants } from 'framer-motion';
+import { type Transition, type Variants } from "framer-motion";
 
 // =============================================================================
 // SPRING PHYSICS
@@ -24,7 +24,7 @@ import { type Transition, type Variants } from 'framer-motion';
  * ~1600ms settle time at stiffness=45, damping=18, mass=1.4
  */
 export const DANCE_SPRING = {
-  type: 'spring' as const,
+  type: "spring" as const,
   stiffness: 45,
   damping: 18,
   mass: 1.4,
@@ -35,7 +35,7 @@ export const DANCE_SPRING = {
  * ~1100ms settle time with graceful deceleration
  */
 export const DANCE_SPRING_LIGHT = {
-  type: 'spring' as const,
+  type: "spring" as const,
   stiffness: 60,
   damping: 16,
   mass: 1.0,
@@ -47,7 +47,7 @@ export const DANCE_SPRING_LIGHT = {
  * ~1200ms settle time with dramatic bounce
  */
 export const DANCE_SPRING_HEAVY = {
-  type: 'spring' as const,
+  type: "spring" as const,
   stiffness: 70,
   damping: 12,
   mass: 1.2,
@@ -101,9 +101,9 @@ export const STAGGER_CONFIG = {
   /** Base delay between elements (seconds) */
   delay: 0.15,
   /** Stagger direction: center-out creates ripple effect */
-  from: 'center' as const,
+  from: "center" as const,
   /** Easing redistribution for stagger timing */
-  ease: 'easeOut' as const,
+  ease: "easeOut" as const,
 } as const;
 
 /**
@@ -139,7 +139,7 @@ export const EASING = {
 
 /**
  * Page transition variants for seamless "one page" feel.
- * 
+ *
  * NO EXIT: Pages swap instantly via mode="sync"
  * MORPH: SharedElements animate via layoutId
  * ENTER: Content fades in with staggered children
@@ -153,7 +153,7 @@ export const pageVariants: Variants = {
     transition: {
       duration: 0.5,
       ease: EASING.dance,
-      when: 'beforeChildren',
+      when: "beforeChildren",
       staggerChildren: 0.12,
     },
   },
@@ -263,7 +263,7 @@ export const containerVariants: Variants = {
   visible: {
     opacity: 1,
     transition: {
-      when: 'beforeChildren',
+      when: "beforeChildren",
       staggerChildren: TIMING_SECONDS.stagger,
       delayChildren: 0.1,
     },
@@ -271,7 +271,7 @@ export const containerVariants: Variants = {
   exit: {
     opacity: 0,
     transition: {
-      when: 'afterChildren',
+      when: "afterChildren",
       staggerChildren: 0.05,
       staggerDirection: -1,
     },
@@ -296,7 +296,7 @@ export const itemVariants: Variants = {
 // MORPH ELEMENT CATEGORIES
 // =============================================================================
 
-export type MorphCategory = 'hero' | 'card' | 'text' | 'chart' | 'decoration';
+export type MorphCategory = "hero" | "card" | "text" | "chart" | "decoration";
 
 /**
  * Spring configs by element category
@@ -322,7 +322,7 @@ export const VIEWPORT_CONFIG = {
   /** Only animate once (don't re-trigger on scroll back) */
   once: true,
   /** Root margin for early triggering */
-  margin: '-50px 0px -50px 0px',
+  margin: "-50px 0px -50px 0px",
 } as const;
 
 // =============================================================================
@@ -355,7 +355,7 @@ export function getTransition(
  * Read a CSS variable value from the document
  */
 export function getCSSVariable(name: string): string {
-  if (typeof document === 'undefined') return '';
+  if (typeof document === "undefined") return "";
   return getComputedStyle(document.documentElement)
     .getPropertyValue(`--${name}`)
     .trim();
@@ -366,10 +366,10 @@ export function getCSSVariable(name: string): string {
  */
 export function getCSSTimingMs(name: string): number {
   const value = getCSSVariable(name);
-  if (value.endsWith('ms')) {
+  if (value.endsWith("ms")) {
     return parseInt(value, 10);
   }
-  if (value.endsWith('s')) {
+  if (value.endsWith("s")) {
     return parseFloat(value) * 1000;
   }
   return parseInt(value, 10) || 0;

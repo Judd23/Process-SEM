@@ -1,16 +1,30 @@
-import type { ReactNode, CSSProperties, MouseEventHandler, Ref, RefObject } from 'react';
-import { motion } from 'framer-motion';
-import { Link, type LinkProps } from 'react-router-dom';
-import { DANCE_SPRING_HEAVY } from '../../lib/transitionConfig';
+import type {
+  ReactNode,
+  CSSProperties,
+  MouseEventHandler,
+  Ref,
+  RefObject,
+} from "react";
+import { motion } from "framer-motion";
+import { Link, type LinkProps } from "react-router-dom";
+import { DANCE_SPRING_HEAVY } from "../../lib/transitionConfig";
 
 // Create motion-compatible Link
 const MotionLink = motion.create(Link);
 
-type SupportedElement = 'div' | 'article' | 'section' | 'button' | 'a' | 'span' | 'link' | 'aside';
+type SupportedElement =
+  | "div"
+  | "article"
+  | "section"
+  | "button"
+  | "a"
+  | "span"
+  | "link"
+  | "aside";
 
 interface InteractiveSurfaceProps {
   as?: SupportedElement;
-  to?: LinkProps['to'];
+  to?: LinkProps["to"];
   hoverLift?: number;
   hoverScale?: number;
   tapScale?: number;
@@ -18,12 +32,12 @@ interface InteractiveSurfaceProps {
   className?: string;
   style?: CSSProperties;
   onClick?: MouseEventHandler;
-  'aria-label'?: string;
-  'aria-pressed'?: boolean;
-  'aria-expanded'?: boolean;
-  'aria-controls'?: string;
+  "aria-label"?: string;
+  "aria-pressed"?: boolean;
+  "aria-expanded"?: boolean;
+  "aria-controls"?: string;
   role?: string;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
   id?: string;
   title?: string;
   ref?: Ref<HTMLElement> | RefObject<HTMLElement | null>;
@@ -35,7 +49,7 @@ interface InteractiveSurfaceProps {
  * CSS should handle border/shadow/sheen only (no transform rules).
  */
 export function InteractiveSurface({
-  as = 'div',
+  as = "div",
   to,
   className,
   children,
@@ -44,10 +58,10 @@ export function InteractiveSurface({
   hoverScale = 1.035,
   tapScale = 0.98,
   onClick,
-  'aria-label': ariaLabel,
-  'aria-pressed': ariaPressed,
-  'aria-expanded': ariaExpanded,
-  'aria-controls': ariaControls,
+  "aria-label": ariaLabel,
+  "aria-pressed": ariaPressed,
+  "aria-expanded": ariaExpanded,
+  "aria-controls": ariaControls,
   role,
   type,
   id,
@@ -71,7 +85,7 @@ export function InteractiveSurface({
     whileTap: tapProps,
     transition: DANCE_SPRING_HEAVY,
     onClick,
-    'aria-label': ariaLabel,
+    "aria-label": ariaLabel,
     role,
     id,
     title,
@@ -80,7 +94,7 @@ export function InteractiveSurface({
   };
 
   // Handle Link special case
-  if (as === 'link' && to) {
+  if (as === "link" && to) {
     return (
       <MotionLink to={to} {...commonProps}>
         {children}
@@ -88,10 +102,10 @@ export function InteractiveSurface({
     );
   }
 
-  if (as === 'button') {
+  if (as === "button") {
     return (
       <motion.button
-        type={type || 'button'}
+        type={type || "button"}
         aria-pressed={ariaPressed}
         aria-expanded={ariaExpanded}
         aria-controls={ariaControls}
@@ -102,50 +116,26 @@ export function InteractiveSurface({
     );
   }
 
-  if (as === 'a') {
-    return (
-      <motion.a {...commonProps}>
-        {children}
-      </motion.a>
-    );
+  if (as === "a") {
+    return <motion.a {...commonProps}>{children}</motion.a>;
   }
 
-  if (as === 'article') {
-    return (
-      <motion.article {...commonProps}>
-        {children}
-      </motion.article>
-    );
+  if (as === "article") {
+    return <motion.article {...commonProps}>{children}</motion.article>;
   }
 
-  if (as === 'section') {
-    return (
-      <motion.section {...commonProps}>
-        {children}
-      </motion.section>
-    );
+  if (as === "section") {
+    return <motion.section {...commonProps}>{children}</motion.section>;
   }
 
-  if (as === 'span') {
-    return (
-      <motion.span {...commonProps}>
-        {children}
-      </motion.span>
-    );
+  if (as === "span") {
+    return <motion.span {...commonProps}>{children}</motion.span>;
   }
 
-  if (as === 'aside') {
-    return (
-      <motion.aside {...commonProps}>
-        {children}
-      </motion.aside>
-    );
+  if (as === "aside") {
+    return <motion.aside {...commonProps}>{children}</motion.aside>;
   }
 
   // Default: div
-  return (
-    <motion.div {...commonProps}>
-      {children}
-    </motion.div>
-  );
+  return <motion.div {...commonProps}>{children}</motion.div>;
 }

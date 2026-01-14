@@ -1,17 +1,17 @@
 /* Design tokens matching existing matplotlib color palette */
 :root {
   /* Construct colors - semantic meaning (same in both themes) */
-  --color-distress: #dc2626;      /* Red - Emotional Distress mediator */
-  --color-engagement: #2563eb;    /* Blue - Quality of Engagement mediator */
-  --color-fast: #f97316;          /* Orange - FASt treatment status */
-  --color-nonfast: #6b7280;       /* Gray - Non-FASt control */
-  --color-credits: #eab308;       /* Yellow - Credit dose */
+  --color-distress: #dc2626; /* Red - Emotional Distress mediator */
+  --color-engagement: #2563eb; /* Blue - Quality of Engagement mediator */
+  --color-fast: #f97316; /* Orange - FASt treatment status */
+  --color-nonfast: #6b7280; /* Gray - Non-FASt control */
+  --color-credits: #eab308; /* Yellow - Credit dose */
 
   /* Outcome subdimensions */
-  --color-belonging: #16a34a;     /* Green - Belonging */
-  --color-gains: #3b82f6;         /* Blue - Perceived Gains (adjusted for visibility) */
-  --color-support: #8b5cf6;       /* Purple - Supportive Environment */
-  --color-satisfaction: #a16207;  /* Brown - Satisfaction */
+  --color-belonging: #16a34a; /* Green - Belonging */
+  --color-gains: #3b82f6; /* Blue - Perceived Gains (adjusted for visibility) */
+  --color-support: #8b5cf6; /* Purple - Supportive Environment */
+  --color-satisfaction: #a16207; /* Brown - Satisfaction */
 
   /* Significance indicators */
   --color-significant: #4ade80;
@@ -21,8 +21,8 @@
 
   /* UI colors - Dark Mode Only */
   --color-background: transparent; /* Let background orbs show through */
-  --color-surface: rgba(12, 22, 37, 0.60);
-  --color-surface-elevated: rgba(21, 32, 48, 0.60);
+  --color-surface: rgba(12, 22, 37, 0.6);
+  --color-surface-elevated: rgba(21, 32, 48, 0.6);
   --color-text: #f0f4f8;
   --color-text-muted: #a4b3c8;
   --color-text-light: #7488a0;
@@ -61,20 +61,21 @@
   --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
 
   /* Typography */
-  --font-heading: 'Source Serif Pro', Georgia, 'Times New Roman', serif;
-  --font-body: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Source Code Pro', 'SF Mono', Consolas, monospace;
+  --font-heading: "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --font-body: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --font-mono: "Source Code Pro", "SF Mono", Consolas, monospace;
 
   /* Font sizes */
-  --font-size-xs: 0.75rem;     /* 12px */
-  --font-size-sm: 0.875rem;    /* 14px */
-  --font-size-base: 1rem;      /* 16px */
-  --font-size-lg: 1.125rem;    /* 18px */
-  --font-size-xl: 1.5rem;      /* 24px */
-  --font-size-2xl: 2rem;       /* 32px */
-  --font-size-3xl: 2.5rem;     /* 40px */
-  --font-size-4xl: 3.5rem;     /* 56px - editorial headlines */
-  --font-size-5xl: 4.5rem;     /* 72px - dramatic statements */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.5rem; /* 24px */
+  --font-size-2xl: 2rem; /* 32px */
+  --font-size-3xl: 2.5rem; /* 40px */
+  --font-size-4xl: 3.5rem; /* 56px - editorial headlines */
+  --font-size-5xl: 4.5rem; /* 72px - dramatic statements */
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -84,8 +85,8 @@
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
   --spacing-3xl: 4rem;
-  --spacing-4xl: 6rem;         /* Editorial sections */
-  --spacing-5xl: 8rem;         /* Large section breaks */
+  --spacing-4xl: 6rem; /* Editorial sections */
+  --spacing-5xl: 8rem; /* Large section breaks */
 
   /* Layout */
   --max-width: 1200px;
@@ -140,14 +141,13 @@
 @media (max-width: 768px) {
   :root {
     /* Increase base font sizes on mobile for readability */
-    --font-size-xs: 0.8125rem;   /* 13px */
-    --font-size-sm: 0.9375rem;   /* 15px */
+    --font-size-xs: 0.8125rem; /* 13px */
+    --font-size-sm: 0.9375rem; /* 15px */
     --font-size-base: 1.0625rem; /* 17px */
-    --font-size-lg: 1.1875rem;   /* 19px */
-    --font-size-xl: 1.375rem;    /* 22px */
-    --font-size-2xl: 1.625rem;   /* 26px */
-    --font-size-3xl: 1.875rem;   /* 30px */
+    --font-size-lg: 1.1875rem; /* 19px */
+    --font-size-xl: 1.375rem; /* 22px */
+    --font-size-2xl: 1.625rem; /* 26px */
+    --font-size-3xl: 1.875rem; /* 30px */
     --sidebar-width: 100%;
   }
 }
-
