@@ -16,7 +16,7 @@ export default function Layout() {
     location.pathname === "/" || location.pathname === "/landing-alt";
 
   return (
-    <div className={styles.layout}>
+    <div className={isLandingPage ? styles.layoutLanding : styles.layout}>
       {showDataInvalidBanner && (
         <div
           style={{

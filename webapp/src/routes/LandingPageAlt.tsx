@@ -70,9 +70,21 @@ function useParticleSphere(
         const alpha = Math.max(0.1, Math.min(1, scale));
         const size = Math.max(1, 3 * scale);
 
+        // Two-tone sphere: cyan on top, violet on bottom
+        const normalizedY = (p.y + radius) / (radius * 2); // 0 = top, 1 = bottom
+        const cyanR = 56,
+          cyanG = 189,
+          cyanB = 248;
+        const violetR = 167,
+          violetG = 139,
+          violetB = 250;
+        const r = Math.round(cyanR + (violetR - cyanR) * normalizedY);
+        const g = Math.round(cyanG + (violetG - cyanG) * normalizedY);
+        const b = Math.round(cyanB + (violetB - cyanB) * normalizedY);
+
         ctx.beginPath();
         ctx.arc(centerX + p.x, centerY + p.y, size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(56, 189, 248, ${alpha * 0.8})`;
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.8})`;
         ctx.fill();
       });
 
@@ -186,7 +198,7 @@ export default function LandingPageAlt() {
           <motion.h1 className={styles.title} variants={fadeUpVariants}>
             Psychosocial Effects of
             <br />
-            <span className={styles.titleAccent}>Accelerated Dual Credit</span>
+            Accelerated Dual Credit
           </motion.h1>
 
           {/* Subtitle */}
@@ -273,8 +285,13 @@ export default function LandingPageAlt() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          <span className={styles.authorName}>Jay Johnson</span>
-          <span className={styles.authorTitle}>Doctoral Candidate • SDSU</span>
+          <h2 className={styles.authorName}>Jay Johnson</h2>
+          <span className={styles.authorTitle}>Doctoral Candidate</span>
+          <img
+            src={logoSrc}
+            alt="San Diego State University"
+            className={styles.authorLogo}
+          />
         </motion.div>
       </main>
     </motion.div>
