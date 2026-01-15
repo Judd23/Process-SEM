@@ -122,12 +122,15 @@ export default function LandingPageAlt() {
     import.meta.env.BASE_URL
   }researcher/sdsu_primary-logo_rgb_horizontal_reverse.png`;
 
+  console.log("LandingPageAlt mounted", styles);
+
   return (
     <motion.div
       className={styles.landing}
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={PAGE_FADE}
+      style={{ background: "#030712", minHeight: "100vh" }}
     >
       {/* Background Ambient Glow Blobs */}
       <div className={`${styles.blob} ${styles.blobCyan}`} />

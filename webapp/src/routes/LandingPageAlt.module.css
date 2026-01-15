@@ -5,6 +5,7 @@
   position: relative;
   overflow: hidden;
   background: #030712;
+  z-index: 1;
 }
 
 /* ============================================

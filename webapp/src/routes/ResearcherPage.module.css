@@ -282,9 +282,8 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 1px;
-  border: 1px solid var(--color-border);
-  background: var(--color-border);
+  gap: var(--spacing-lg);
+  background: transparent;
 }
 
 .fact {
