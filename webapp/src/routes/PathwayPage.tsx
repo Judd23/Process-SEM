@@ -445,8 +445,7 @@ export default function PathwayPage() {
                 <div className={styles.indirectHeader}>
                   <h3>Stress Route (Indirect)</h3>
                   <span
-                    className={styles.indirectBadge}
-                    style={{ backgroundColor: "var(--color-distress)" }}
+                    className={`${styles.indirectBadge} ${styles.indirectBadgeDistress}`}
                   >
                     a₁ × b₁
                   </span>
@@ -494,8 +493,7 @@ export default function PathwayPage() {
                 <div className={styles.indirectHeader}>
                   <h3>Engagement Route (Indirect)</h3>
                   <span
-                    className={styles.indirectBadge}
-                    style={{ backgroundColor: "var(--color-engagement)" }}
+                    className={`${styles.indirectBadge} ${styles.indirectBadgeEngagement}`}
                   >
                     a₂ × b₂
                   </span>
