@@ -25,7 +25,7 @@
 
 /* Animated floating glow orbs - editorial polish */
 .landing::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -10%;
   right: -10%;
@@ -43,7 +43,7 @@
 }
 
 .landing::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -5%;
   left: -10%;
@@ -61,10 +61,19 @@
 }
 
 @keyframes floatGlow {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(20px, -30px) scale(1.05); }
-  50% { transform: translate(-15px, 20px) scale(0.95); }
-  75% { transform: translate(-25px, -10px) scale(1.02); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(20px, -30px) scale(1.05);
+  }
+  50% {
+    transform: translate(-15px, 20px) scale(0.95);
+  }
+  75% {
+    transform: translate(-25px, -10px) scale(1.02);
+  }
 }
 
 /* SEM Pathway silhouette */
