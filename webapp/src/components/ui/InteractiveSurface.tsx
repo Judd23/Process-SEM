@@ -4,10 +4,12 @@ import type {
   MouseEventHandler,
   Ref,
   RefObject,
+  MouseEvent,
 } from "react";
 import { motion } from "framer-motion";
 import { Link, type LinkProps } from "react-router-dom";
 import { DANCE_SPRING_HEAVY } from "../../lib/transitionConfig";
+import { usePageTransition } from "../../lib/hooks";
 
 // Create motion-compatible Link
 const MotionLink = motion.create(Link);
@@ -68,6 +70,8 @@ export function InteractiveSurface({
   title,
   ref,
 }: InteractiveSurfaceProps) {
+  const { navigate } = usePageTransition();
+
   const hoverProps = {
     y: -hoverLift,
     scale: hoverScale,
@@ -93,10 +97,17 @@ export function InteractiveSurface({
     ref: ref as any, // Safe: ref forwarding for polymorphic component
   };
 
-  // Handle Link special case
+  // Handle Link special case with page transition
   if (as === "link" && to) {
+    const handleLinkClick = (e: MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      onClick?.(e);
+      const path = typeof to === "string" ? to : to.pathname ?? "";
+      if (path) void navigate(path);
+    };
+
     return (
-      <MotionLink to={to} {...commonProps}>
+      <MotionLink to={to} {...commonProps} onClick={handleLinkClick}>
         {children}
       </MotionLink>
     );

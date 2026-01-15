@@ -32,17 +32,15 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [location.pathname]);
 
+  const progressPercent = Math.round(scrollProgress * 100);
+
   return (
     <header className={styles.header}>
       {showProgress && (
         <div
           className={styles.progressBar}
-          data-progress={Math.round(scrollProgress * 100)}
-          role="progressbar"
-          aria-valuenow={Math.round(scrollProgress * 100)}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Page scroll progress"
+          data-progress={progressPercent}
+          aria-hidden="true"
         />
       )}
       <div className={styles.container}>
