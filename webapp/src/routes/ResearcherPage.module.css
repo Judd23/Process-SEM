@@ -120,7 +120,7 @@
   position: relative;
   margin: 0;
   border: 2px solid var(--color-border);
-  background: transparent;
+  background: var(--color-surface);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: transform 0.4s var(--ease-out-back),
@@ -185,7 +185,7 @@
 
 .heroMedia {
   padding: var(--spacing-lg);
-  background: transparent;
+  background: var(--color-surface);
 }
 
 .heroMedia picture,

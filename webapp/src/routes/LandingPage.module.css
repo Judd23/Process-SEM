@@ -23,7 +23,49 @@
   overflow: hidden;
 }
 
-/* Background now handled by Layout */
+/* Animated floating glow orbs - editorial polish */
+.landing::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--navy-accent) 8%, transparent) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatGlow 20s ease-in-out infinite;
+}
+
+.landing::after {
+  content: '';
+  position: absolute;
+  bottom: -5%;
+  left: -10%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--color-accent) 6%, transparent) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation: floatGlow 24s ease-in-out infinite reverse;
+}
+
+@keyframes floatGlow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(20px, -30px) scale(1.05); }
+  50% { transform: translate(-15px, 20px) scale(0.95); }
+  75% { transform: translate(-25px, -10px) scale(1.02); }
+}
 
 /* SEM Pathway silhouette */
 .pathwaySilhouette {
