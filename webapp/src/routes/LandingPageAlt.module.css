@@ -186,7 +186,7 @@
    TITLE
    ============================================ */
 .title {
-  font-family: "IBM Plex Serif", "Source Serif Pro", var(--font-heading), serif;
+  font-family: var(--font-heading);
   font-size: clamp(2.5rem, 6vw, 4rem);
   font-weight: 500;
   color: white;
@@ -395,7 +395,7 @@
 
 .authorName {
   /* Reduced by ~23pt */
-  font-family: "IBM Plex Serif", "Source Serif Pro", var(--font-heading), serif;
+  font-family: var(--font-heading);
   color: white;
   font-weight: 600;
   font-size: var(--font-size-xl);

@@ -65,8 +65,8 @@
   --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
 
   /* Typography */
-  --font-heading: "Source Serif Pro", Georgia, "Times New Roman", serif;
-  --font-body: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI",
+  --font-heading: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-body: "Merriweather", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, sans-serif;
   --font-mono: "Source Code Pro", "SF Mono", Consolas, monospace;
 
