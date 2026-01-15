@@ -5,6 +5,11 @@ export default defineConfig({
   plugins: [react()],
   base: "/Dissertation-Model-Simulation/",
 
+  server: {
+    host: "127.0.0.1",
+    port: 5173,
+  },
+
   optimizeDeps: {
     include: [
       "react",
