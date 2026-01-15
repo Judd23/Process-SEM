@@ -503,21 +503,21 @@ tbody tr:nth-child(even) {
 .button-primary {
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--color-engagement, #2563eb) 45%, transparent) 0%,
-    color-mix(in srgb, var(--color-engagement, #2563eb) 35%, transparent) 50%,
-    color-mix(in srgb, var(--color-engagement, #2563eb) 45%, transparent) 100%
+    var(--color-button-primary) 0%,
+    color-mix(in srgb, var(--color-button-primary) 85%, black) 50%,
+    var(--color-button-primary) 100%
   );
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(30, 58, 95, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .button-primary:hover {
-  background: rgba(37, 99, 235, 0.85);
+  background: var(--color-button-primary-hover);
   color: white;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 16px rgba(30, 58, 95, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .button-primary:active {
@@ -539,9 +539,9 @@ tbody tr:nth-child(even) {
 }
 
 .button-secondary:hover {
-  background: rgba(37, 99, 235, 0.15);
+  background: rgba(30, 58, 95, 0.35);
   color: var(--color-accent);
-  border-color: rgba(37, 99, 235, 0.6);
+  border-color: rgba(42, 74, 115, 0.7);
 }
 
 .button-ghost {
