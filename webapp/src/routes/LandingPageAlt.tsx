@@ -203,8 +203,8 @@ export default function LandingPageAlt() {
 
           {/* Subtitle */}
           <motion.p className={styles.subtitle} variants={fadeUpVariants}>
-            How early college credits shape student
-            success and well-being.
+            Examining the psychosocial effects of accelerated dual credit on
+            first-year developmental adjustment among equity-impacted California students.
           </motion.p>
         </motion.div>
 

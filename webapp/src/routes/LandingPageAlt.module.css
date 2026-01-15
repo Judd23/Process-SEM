@@ -241,8 +241,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 12px;
-  height: 12px;
+  width: 24px;
+  height: 24px;
   background: radial-gradient(circle, rgba(6, 244, 255, 0.8) 0%, rgba(196, 181, 253, 0.4) 50%, transparent 70%);
   border-radius: 50%;
   animation: orbBreathe 3s ease-in-out infinite;
@@ -251,7 +251,7 @@
 
 @keyframes orbBreathe {
   0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-  50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(1.6); opacity: 1; }
 }
 
 .particleCanvas {
@@ -340,7 +340,7 @@
 .ctaWrapper {
   position: relative;
   z-index: 20;
-  margin-top: auto; margin-bottom: 4rem; padding-bottom: env(safe-area-inset-bottom);
+  margin-top: auto; margin-bottom: 6rem; padding-bottom: env(safe-area-inset-bottom);
 }
 
 .ctaGlow {
