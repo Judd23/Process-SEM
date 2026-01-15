@@ -247,12 +247,27 @@ export default function LandingPageAlt() {
           </motion.div>
         </motion.div>
 
+        {/* Author Attribution */}
+        <motion.div
+          className={styles.author}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          <h2 className={styles.authorName}>Jay Johnson</h2>
+          <span className={styles.authorTitle}>Doctoral Candidate</span>
+          <img
+            src={logoSrc}
+            alt="San Diego State University"
+            className={styles.authorLogo}
+          />
+        </motion.div>
         {/* CTA Button */}
         <motion.div
           className={styles.ctaWrapper}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ ...DANCE_SPRING, delay: 0.6 }}
+          transition={{ ...DANCE_SPRING, delay: 1.0 }}
         >
           <div className={styles.ctaGlow} />
           <motion.button
@@ -278,21 +293,6 @@ export default function LandingPageAlt() {
           </motion.button>
         </motion.div>
 
-        {/* Author Attribution */}
-        <motion.div
-          className={styles.author}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          <h2 className={styles.authorName}>Jay Johnson</h2>
-          <span className={styles.authorTitle}>Doctoral Candidate</span>
-          <img
-            src={logoSrc}
-            alt="San Diego State University"
-            className={styles.authorLogo}
-          />
-        </motion.div>
       </main>
     </motion.div>
   );
