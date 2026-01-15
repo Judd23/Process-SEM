@@ -350,7 +350,7 @@
 }
 
 .fact {
-  background: transparent;
+  background: var(--color-surface);
   padding: var(--spacing-lg);
   transition: background var(--transition-fast),
     transform 0.4s var(--ease-out-back), box-shadow var(--transition-fast);
@@ -397,7 +397,7 @@
 }
 
 .fact:hover {
-  background: var(--color-background);
+  background: var(--color-surface);
   transform: scale(1.03) translateY(-2px);
   box-shadow: var(--shadow-md),
     0 0 20px color-mix(in srgb, var(--color-accent) 10%, transparent);
