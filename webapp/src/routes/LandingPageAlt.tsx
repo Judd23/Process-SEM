@@ -72,12 +72,12 @@ function useParticleSphere(
 
         // Two-tone sphere: cyan on top, violet on bottom
         const normalizedY = (p.y + radius) / (radius * 2); // 0 = top, 1 = bottom
-        const cyanR = 56,
-          cyanG = 189,
-          cyanB = 248;
-        const violetR = 167,
-          violetG = 139,
-          violetB = 250;
+        const cyanR = 6,
+          cyanG = 244,
+          cyanB = 255;
+        const violetR = 196,
+          violetG = 181,
+          violetB = 253;
         const r = Math.round(cyanR + (violetR - cyanR) * normalizedY);
         const g = Math.round(cyanG + (violetG - cyanG) * normalizedY);
         const b = Math.round(cyanB + (violetB - cyanB) * normalizedY);
@@ -166,7 +166,7 @@ export default function LandingPageAlt() {
             rel="noopener noreferrer"
             className={styles.institutionBadge}
             whileHover={HOVER_SUBTLE}
-            transition={DANCE_SPRING_HEAVY}
+            transition={{ opacity: { duration: 0.8 }, scale: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
           >
             <img
               src={logoSrc}
@@ -203,8 +203,8 @@ export default function LandingPageAlt() {
 
           {/* Subtitle */}
           <motion.p className={styles.subtitle} variants={fadeUpVariants}>
-            Investigating how accelerated dual credit accumulation affects
-            psychosocial development among equity-impacted California students.
+            How early college credits shape student
+            success and well-being.
           </motion.p>
         </motion.div>
 
@@ -212,8 +212,8 @@ export default function LandingPageAlt() {
         <motion.div
           className={styles.sphereContainer}
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={DANCE_SPRING_HEAVY}
+          animate={{ opacity: 1, scale: [0.97, 1.03, 0.97] }}
+          transition={{ opacity: { duration: 0.8 }, scale: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
         >
           <canvas
             ref={canvasRef}
@@ -256,12 +256,6 @@ export default function LandingPageAlt() {
         >
           <h2 className={styles.authorName}>Jay Johnson</h2>
           <span className={styles.authorTitle}>Doctoral Candidate</span>
-          <img
-            src={logoSrc}
-            alt="San Diego State University"
-            className={styles.authorLogo}
-          />
-        </motion.div>
         {/* CTA Button */}
         <motion.div
           className={styles.ctaWrapper}
@@ -275,7 +269,7 @@ export default function LandingPageAlt() {
             onClick={handleEnter}
             whileHover={HOVER_SUBTLE}
             whileTap={TAP_SUBTLE}
-            transition={DANCE_SPRING_HEAVY}
+            transition={{ opacity: { duration: 0.8 }, scale: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
           >
             <span>Explore the Research</span>
             <svg
