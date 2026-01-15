@@ -416,7 +416,6 @@
 
 .repoNote {
   text-align: left;
-  font-style: italic;
   color: var(--color-text-muted);
 }
 
@@ -436,7 +435,6 @@
 }
 
 .references em {
-  font-style: italic;
 }
 
 /* Next step CTA */

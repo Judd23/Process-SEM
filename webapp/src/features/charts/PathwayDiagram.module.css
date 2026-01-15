@@ -192,12 +192,10 @@
 
 .tooltipPvalue {
   color: var(--color-text-muted);
-  font-style: italic;
 }
 
 .dataNote {
   font-size: var(--font-size-xs);
-  font-style: italic;
   color: var(--color-text-muted);
   text-align: center;
   margin-top: var(--spacing-sm);
