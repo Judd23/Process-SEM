@@ -23,79 +23,86 @@ function useParticleSphere(
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const particles: {
+    const particleCount = 800;
+    const sphereRadius = 180;
+    const rotationSpeed = 0.003;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    let animationId: number;
+
+    class Particle {
       x: number;
       y: number;
       z: number;
-      baseX: number;
-      baseY: number;
-      baseZ: number;
-    }[] = [];
-    const particleCount = 800;
-    const radius = 180;
-    let animationId: number;
-    let rotation = 0;
+      size: number;
+      baseOpacity: number;
 
-    // Initialize particles on sphere surface
+      constructor() {
+        const theta = Math.random() * 2 * Math.PI;
+        const phi = Math.acos(2 * Math.random() - 1);
+        this.x = sphereRadius * Math.sin(phi) * Math.cos(theta);
+        this.y = sphereRadius * Math.sin(phi) * Math.sin(theta);
+        this.z = sphereRadius * Math.cos(phi);
+        this.size = Math.random() * 1.5 + 0.5;
+        this.baseOpacity = Math.random() * 0.5 + 0.2;
+      }
+
+      rotate(angleX: number, angleY: number) {
+        let cos = Math.cos(angleY);
+        let sin = Math.sin(angleY);
+        let x = this.x * cos - this.z * sin;
+        let z = this.z * cos + this.x * sin;
+        this.x = x;
+        this.z = z;
+        cos = Math.cos(angleX);
+        sin = Math.sin(angleX);
+        let y = this.y * cos - this.z * sin;
+        z = this.z * cos + this.y * sin;
+        this.y = y;
+        this.z = z;
+      }
+
+      draw(ctx: CanvasRenderingContext2D, centerX: number, centerY: number) {
+        const scale = 300 / (300 + this.z);
+        const x2d = centerX + this.x * scale;
+        const y2d = centerY + this.y * scale;
+        const opacity = Math.max(0, this.baseOpacity + (this.z / sphereRadius) * 0.4);
+        ctx.beginPath();
+        ctx.arc(x2d, y2d, this.size * scale, 0, Math.PI * 2);
+        if (this.x > 50) {
+          ctx.fillStyle = `rgba(6, 244, 255, ${opacity})`;
+        } else if (this.x < -50) {
+          ctx.fillStyle = `rgba(196, 181, 253, ${opacity})`;
+        } else {
+          ctx.fillStyle = `rgba(203, 213, 225, ${opacity})`;
+        }
+        ctx.fill();
+      }
+    }
+
+    const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const x = radius * Math.sin(phi) * Math.cos(theta);
-      const y = radius * Math.sin(phi) * Math.sin(theta);
-      const z = radius * Math.cos(phi);
-      particles.push({ x, y, z, baseX: x, baseY: y, baseZ: z });
+      particles.push(new Particle());
     }
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      rotation += 0.003;
-
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-
-      // Sort by z for depth
-      const sortedParticles = particles
-        .map((p) => {
-          // Rotate around Y axis
-          const cosR = Math.cos(rotation);
-          const sinR = Math.sin(rotation);
-          const x = p.baseX * cosR - p.baseZ * sinR;
-          const z = p.baseX * sinR + p.baseZ * cosR;
-          return { ...p, x, z, y: p.baseY };
-        })
-        .sort((a, b) => a.z - b.z);
-
-      sortedParticles.forEach((p) => {
-        const scale = (p.z + radius * 1.5) / (radius * 3);
-        const alpha = Math.max(0.1, Math.min(1, scale));
-        const size = Math.max(1, 3 * scale);
-
-        // Two-tone sphere: cyan on top, violet on bottom
-        const normalizedY = (p.y + radius) / (radius * 2); // 0 = top, 1 = bottom
-        const cyanR = 6,
-          cyanG = 244,
-          cyanB = 255;
-        const violetR = 196,
-          violetG = 181,
-          violetB = 253;
-        const r = Math.round(cyanR + (violetR - cyanR) * normalizedY);
-        const g = Math.round(cyanG + (violetG - cyanG) * normalizedY);
-        const b = Math.round(cyanB + (violetB - cyanB) * normalizedY);
-
-        ctx.beginPath();
-        ctx.arc(centerX + p.x, centerY + p.y, size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha * 0.8})`;
-        ctx.fill();
+      ctx.clearRect(0, 0, width, height);
+      const centerX = width / 2;
+      const centerY = height / 2;
+      particles.sort((a, b) => b.z - a.z);
+      particles.forEach((p) => {
+        p.rotate(rotationSpeed, rotationSpeed * 0.6);
+        p.draw(ctx, centerX, centerY);
       });
-
       animationId = requestAnimationFrame(animate);
     };
 
     animate();
-
     return () => cancelAnimationFrame(animationId);
   }, [canvasRef]);
 }
+
 
 // ============================================
 // ANIMATION VARIANTS
