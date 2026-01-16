@@ -2,7 +2,14 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Scale, Network, RefreshCw, Settings, Layers, Code } from "lucide-react";
+import {
+  Scale,
+  Network,
+  RefreshCw,
+  Settings,
+  Layers,
+  Code,
+} from "lucide-react";
 import { useModelData } from "../app/contexts";
 import GlossaryTerm from "../components/ui/GlossaryTerm";
 import ProgressRing from "../components/ui/ProgressRing";
@@ -30,7 +37,7 @@ export default function MethodsPage() {
     return modelData.fitMeasures;
   }, [modelData]);
 
-    const fitRings = useMemo(() => {
+  const fitRings = useMemo(() => {
     if (!fitMeasures) return [];
     return [
       {
@@ -130,15 +137,21 @@ export default function MethodsPage() {
             <div className={styles.keyPoints}>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Accounts for selection bias in observational data</span>
+                <span className={styles.keyPointText}>
+                  Accounts for selection bias in observational data
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Balances 8 background covariates between groups</span>
+                <span className={styles.keyPointText}>
+                  Balances 8 background covariates between groups
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Creates pseudo-randomization without an experiment</span>
+                <span className={styles.keyPointText}>
+                  Creates pseudo-randomization without an experiment
+                </span>
               </div>
             </div>
           </div>
@@ -192,15 +205,21 @@ export default function MethodsPage() {
             <div className={styles.keyPoints}>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Tests direct and indirect effects simultaneously</span>
+                <span className={styles.keyPointText}>
+                  Tests direct and indirect effects simultaneously
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Handles measurement error through latent variables</span>
+                <span className={styles.keyPointText}>
+                  Handles measurement error through latent variables
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Parallel mediation design (stress & engagement)</span>
+                <span className={styles.keyPointText}>
+                  Parallel mediation design (stress & engagement)
+                </span>
               </div>
             </div>
           </div>
@@ -260,21 +279,29 @@ export default function MethodsPage() {
             <div className={styles.keyPoints}>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>No normality assumption required</span>
+                <span className={styles.keyPointText}>
+                  No normality assumption required
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Robust for indirect effects (products of coefficients)</span>
+                <span className={styles.keyPointText}>
+                  Robust for indirect effects (products of coefficients)
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Industry-standard BCa method for mediation</span>
+                <span className={styles.keyPointText}>
+                  Industry-standard BCa method for mediation
+                </span>
               </div>
             </div>
           </div>
           <div className={styles.cardVisualEnhanced}>
             <div className={styles.diagramContainer}>
-              <span className={styles.diagramLabel}>Bootstrap Distribution</span>
+              <span className={styles.diagramLabel}>
+                Bootstrap Distribution
+              </span>
               <BootstrapDistribution />
               <span className={styles.diagramCaption}>
                 2,000 resamples with BCa confidence intervals
@@ -400,15 +427,21 @@ export default function MethodsPage() {
             <div className={styles.keyPoints}>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>26 survey items total from NSSE</span>
+                <span className={styles.keyPointText}>
+                  26 survey items total from NSSE
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>3 latent constructs with validated scales</span>
+                <span className={styles.keyPointText}>
+                  3 latent constructs with validated scales
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Second-order factor for developmental adjustment</span>
+                <span className={styles.keyPointText}>
+                  Second-order factor for developmental adjustment
+                </span>
               </div>
             </div>
           </div>
@@ -481,15 +514,21 @@ export default function MethodsPage() {
             <div className={styles.keyPoints}>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Fully reproducible analysis pipeline</span>
+                <span className={styles.keyPointText}>
+                  Fully reproducible analysis pipeline
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>Code available on GitHub</span>
+                <span className={styles.keyPointText}>
+                  Code available on GitHub
+                </span>
               </div>
               <div className={styles.keyPoint}>
                 <span className={styles.keyPointMarker}>→</span>
-                <span className={styles.keyPointText}>No proprietary software required</span>
+                <span className={styles.keyPointText}>
+                  No proprietary software required
+                </span>
               </div>
             </div>
           </div>
@@ -530,7 +569,7 @@ export default function MethodsPage() {
         </motion.p>
 
         <motion.div className={styles.fitRingsGrid} variants={itemVariants}>
-                    {fitRings.map((ring) => (
+          {fitRings.map((ring) => (
             <ProgressRing
               key={ring.label}
               label={ring.label}
@@ -642,22 +681,28 @@ export default function MethodsPage() {
         </motion.h2>
         <motion.ul className={styles.referencesList} variants={itemVariants}>
           <li>
-            Hayes, A. F. (2022). <em>Introduction to mediation, moderation, and
-            conditional process analysis</em> (3rd ed.). Guilford Press.
+            Hayes, A. F. (2022).{" "}
+            <em>
+              Introduction to mediation, moderation, and conditional process
+              analysis
+            </em>{" "}
+            (3rd ed.). Guilford Press.
           </li>
           <li>
             Hu, L., & Bentler, P. M. (1999). Cutoff criteria for fit indexes in
-            covariance structure analysis. <em>Structural Equation Modeling,
-            6</em>(1), 1–55.
+            covariance structure analysis.{" "}
+            <em>Structural Equation Modeling, 6</em>(1), 1–55.
           </li>
           <li>
-            Kline, R. B. (2023). <em>Principles and practice of structural
-            equation modeling</em> (5th ed.). Guilford Press.
+            Kline, R. B. (2023).{" "}
+            <em>Principles and practice of structural equation modeling</em>{" "}
+            (5th ed.). Guilford Press.
           </li>
           <li>
             Li, F., Morgan, K. L., & Zaslavsky, A. M. (2018). Balancing
-            covariates via propensity score weighting. <em>Journal of the
-            American Statistical Association, 113</em>(521), 390–400.
+            covariates via propensity score weighting.{" "}
+            <em>Journal of the American Statistical Association, 113</em>(521),
+            390–400.
           </li>
           <li>
             Preacher, K. J., & Hayes, A. F. (2008). Asymptotic and resampling
@@ -684,4 +729,4 @@ export default function MethodsPage() {
       </section>
     </div>
   );
-} 
+}

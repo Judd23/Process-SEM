@@ -121,11 +121,11 @@
   .container {
     max-width: 280px;
   }
-  
+
   .histogram {
     height: 100px;
   }
-  
+
   .stats {
     gap: 1rem;
   }

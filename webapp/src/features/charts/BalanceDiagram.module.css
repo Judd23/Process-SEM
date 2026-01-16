@@ -155,12 +155,12 @@
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .arrow {
     transform: rotate(90deg);
     margin: 0.25rem 0;
   }
-  
+
   .arrowLabel {
     transform: rotate(-90deg);
   }

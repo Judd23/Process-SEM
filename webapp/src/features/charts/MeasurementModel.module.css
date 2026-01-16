@@ -106,21 +106,21 @@
   .container {
     max-width: 300px;
   }
-  
+
   .latent {
     width: 50px;
     height: 35px;
   }
-  
+
   .latentLabel {
     font-size: 0.55rem;
   }
-  
+
   .indicator {
     width: 14px;
     height: 12px;
   }
-  
+
   .indicatorLabel {
     font-size: 0.4rem;
   }

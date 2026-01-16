@@ -29,54 +29,66 @@
   composes: card;
   z-index: 10;
   top: 6rem;
-  background: linear-gradient(135deg, 
-    hsl(200 60% 12%) 0%, 
-    hsl(220 50% 18%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(200 60% 12%) 0%,
+    hsl(220 50% 18%) 100%
+  );
 }
 
 .card2 {
   composes: card;
   z-index: 20;
   top: 7rem;
-  background: linear-gradient(135deg, 
-    hsl(220 50% 14%) 0%, 
-    hsl(260 40% 20%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(220 50% 14%) 0%,
+    hsl(260 40% 20%) 100%
+  );
 }
 
 .card3 {
   composes: card;
   z-index: 30;
   top: 8rem;
-  background: linear-gradient(135deg, 
-    hsl(260 40% 16%) 0%, 
-    hsl(280 35% 22%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(260 40% 16%) 0%,
+    hsl(280 35% 22%) 100%
+  );
 }
 
 .card4 {
   composes: card;
   z-index: 40;
   top: 9rem;
-  background: linear-gradient(135deg, 
-    hsl(280 35% 14%) 0%, 
-    hsl(300 30% 18%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(280 35% 14%) 0%,
+    hsl(300 30% 18%) 100%
+  );
 }
 
 .card5 {
   composes: card;
   z-index: 50;
   top: 10rem;
-  background: linear-gradient(135deg, 
-    hsl(180 50% 12%) 0%, 
-    hsl(200 45% 18%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(180 50% 12%) 0%,
+    hsl(200 45% 18%) 100%
+  );
 }
 
 .card6 {
   composes: card;
   z-index: 60;
   top: 11rem;
-  background: linear-gradient(135deg, 
-    hsl(210 45% 14%) 0%, 
-    hsl(230 40% 20%) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(210 45% 14%) 0%,
+    hsl(230 40% 20%) 100%
+  );
 }
 
 /* Content column */
@@ -339,16 +351,16 @@
     min-height: auto;
     padding: var(--space-xl);
   }
-  
+
   .cardVisual {
     min-height: 200px;
     order: -1;
   }
-  
+
   .specGrid {
     grid-template-columns: 1fr;
   }
-  
+
   .fitRingsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -358,13 +370,13 @@
   .stackingContainer {
     min-height: auto;
   }
-  
+
   .card {
     position: relative;
     top: 0 !important;
     margin-bottom: var(--space-lg);
   }
-  
+
   .fitRingsGrid {
     grid-template-columns: 1fr 1fr;
   }
@@ -410,23 +422,59 @@
 }
 
 /* Per-card stage colors */
-.card1 .stageIcon { background: rgba(6, 182, 212, 0.1); border-color: rgba(6, 182, 212, 0.2); color: #06b6d4; }
-.card1 .stageLabel { color: #06b6d4; }
+.card1 .stageIcon {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.2);
+  color: #06b6d4;
+}
+.card1 .stageLabel {
+  color: #06b6d4;
+}
 
-.card2 .stageIcon { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
-.card2 .stageLabel { color: #8b5cf6; }
+.card2 .stageIcon {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
+}
+.card2 .stageLabel {
+  color: #8b5cf6;
+}
 
-.card3 .stageIcon { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); color: #10b981; }
-.card3 .stageLabel { color: #10b981; }
+.card3 .stageIcon {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+.card3 .stageLabel {
+  color: #10b981;
+}
 
-.card4 .stageIcon { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-.card4 .stageLabel { color: #f59e0b; }
+.card4 .stageIcon {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+.card4 .stageLabel {
+  color: #f59e0b;
+}
 
-.card5 .stageIcon { background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.2); color: #ec4899; }
-.card5 .stageLabel { color: #ec4899; }
+.card5 .stageIcon {
+  background: rgba(236, 72, 153, 0.1);
+  border-color: rgba(236, 72, 153, 0.2);
+  color: #ec4899;
+}
+.card5 .stageLabel {
+  color: #ec4899;
+}
 
-.card6 .stageIcon { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); color: #3b82f6; }
-.card6 .stageLabel { color: #3b82f6; }
+.card6 .stageIcon {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+.card6 .stageLabel {
+  color: #3b82f6;
+}
 
 /* ─── 1.2 KEY POINTS (INFORMATIONAL BULLETS) ─── */
 .keyPoints {
@@ -501,8 +549,7 @@
 .card {
   margin-bottom: 3rem;
   min-height: min(70vh, 550px);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
     0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
@@ -511,21 +558,21 @@
   .stageIndicator {
     margin-bottom: 1rem;
   }
-  
+
   .stageIcon {
     width: 36px;
     height: 36px;
   }
-  
+
   .stageIcon svg {
     width: 18px;
     height: 18px;
   }
-  
+
   .keyPoints {
     margin-top: 1.25rem;
   }
-  
+
   .diagramContainer {
     padding: 1rem;
   }
@@ -536,21 +583,21 @@
     width: 32px;
     height: 32px;
   }
-  
+
   .stageIcon svg {
     width: 16px;
     height: 16px;
   }
-  
+
   .stageLabel {
     font-size: 0.7rem;
     letter-spacing: 0.1em;
   }
-  
+
   .keyPointText {
     font-size: 0.8rem;
   }
-  
+
   .diagramCaption {
     font-size: 0.7rem;
   }

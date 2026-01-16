@@ -4,8 +4,8 @@
  * Shows X → M₁ → Y, X → M₂ → Y, X → Y pathways
  */
 
-import { motion } from 'framer-motion';
-import styles from './PathDiagramMini.module.css';
+import { motion } from "framer-motion";
+import styles from "./PathDiagramMini.module.css";
 
 interface PathDiagramMiniProps {
   className?: string;
@@ -13,17 +13,42 @@ interface PathDiagramMiniProps {
 
 export function PathDiagramMini({ className }: PathDiagramMiniProps) {
   return (
-    <div className={`${styles.container} ${className || ''}`} role="img" aria-label="Path diagram showing direct and indirect effects through emotional distress and quality of engagement">
+    <div
+      className={`${styles.container} ${className || ""}`}
+      role="img"
+      aria-label="Path diagram showing direct and indirect effects through emotional distress and quality of engagement"
+    >
       <svg viewBox="0 0 320 200" className={styles.svg}>
         <defs>
           {/* Arrow markers */}
-          <marker id="arrow-coral" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <marker
+            id="arrow-coral"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
             <path d="M0,0 L8,4 L0,8 Z" fill="#f87171" />
           </marker>
-          <marker id="arrow-cyan" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <marker
+            id="arrow-cyan"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
             <path d="M0,0 L8,4 L0,8 Z" fill="#06b6d4" />
           </marker>
-          <marker id="arrow-violet" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <marker
+            id="arrow-violet"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
             <path d="M0,0 L8,4 L0,8 Z" fill="#8b5cf6" />
           </marker>
         </defs>
@@ -41,7 +66,7 @@ export function PathDiagramMini({ className }: PathDiagramMiniProps) {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.2 }}
         />
-        
+
         {/* M1 → Y */}
         <motion.path
           d="M200,50 Q230,50 250,100"
@@ -67,7 +92,7 @@ export function PathDiagramMini({ className }: PathDiagramMiniProps) {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
         />
-        
+
         {/* M2 → Y */}
         <motion.path
           d="M200,150 Q230,150 250,100"
@@ -103,9 +128,20 @@ export function PathDiagramMini({ className }: PathDiagramMiniProps) {
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
         >
-          <rect x="20" y="80" width="50" height="40" rx="6" className={styles.nodeX} />
-          <text x="45" y="104" className={styles.nodeLabel}>Dual</text>
-          <text x="45" y="116" className={styles.nodeLabel}>Credit</text>
+          <rect
+            x="20"
+            y="80"
+            width="50"
+            height="40"
+            rx="6"
+            className={styles.nodeX}
+          />
+          <text x="45" y="104" className={styles.nodeLabel}>
+            Dual
+          </text>
+          <text x="45" y="116" className={styles.nodeLabel}>
+            Credit
+          </text>
         </motion.g>
 
         {/* M1 Node - Stress */}
@@ -116,7 +152,9 @@ export function PathDiagramMini({ className }: PathDiagramMiniProps) {
           transition={{ duration: 0.4, delay: 0.2 }}
         >
           <ellipse cx="175" cy="50" rx="30" ry="22" className={styles.nodeM1} />
-          <text x="175" y="54" className={styles.nodeLabel}>Stress</text>
+          <text x="175" y="54" className={styles.nodeLabel}>
+            Stress
+          </text>
         </motion.g>
 
         {/* M2 Node - Engagement */}
@@ -126,8 +164,16 @@ export function PathDiagramMini({ className }: PathDiagramMiniProps) {
           viewport={{ once: true }}
           transition={{ duration: 0.4, delay: 0.3 }}
         >
-          <ellipse cx="175" cy="150" rx="30" ry="22" className={styles.nodeM2} />
-          <text x="175" y="154" className={styles.nodeLabel}>Engage</text>
+          <ellipse
+            cx="175"
+            cy="150"
+            rx="30"
+            ry="22"
+            className={styles.nodeM2}
+          />
+          <text x="175" y="154" className={styles.nodeLabel}>
+            Engage
+          </text>
         </motion.g>
 
         {/* Y Node - Adjustment */}
@@ -137,8 +183,17 @@ export function PathDiagramMini({ className }: PathDiagramMiniProps) {
           viewport={{ once: true }}
           transition={{ duration: 0.4, delay: 0.4 }}
         >
-          <rect x="250" y="80" width="50" height="40" rx="6" className={styles.nodeY} />
-          <text x="275" y="104" className={styles.nodeLabel}>Adjust</text>
+          <rect
+            x="250"
+            y="80"
+            width="50"
+            height="40"
+            rx="6"
+            className={styles.nodeY}
+          />
+          <text x="275" y="104" className={styles.nodeLabel}>
+            Adjust
+          </text>
         </motion.g>
       </svg>
 

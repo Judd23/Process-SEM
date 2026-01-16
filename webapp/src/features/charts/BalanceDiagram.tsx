@@ -4,23 +4,43 @@
  * Shows FASt vs non-FASt groups with bar heights representing covariate means
  */
 
-import { motion } from 'framer-motion';
-import styles from './BalanceDiagram.module.css';
+import { motion } from "framer-motion";
+import styles from "./BalanceDiagram.module.css";
 
 interface BalanceDiagramProps {
   className?: string;
 }
 
 const covariates = [
-  { label: 'GPA', before: { fast: 0.85, nonfast: 0.55 }, after: { fast: 0.72, nonfast: 0.70 } },
-  { label: 'Parent Ed', before: { fast: 0.70, nonfast: 0.45 }, after: { fast: 0.58, nonfast: 0.56 } },
-  { label: 'Pell', before: { fast: 0.40, nonfast: 0.65 }, after: { fast: 0.52, nonfast: 0.54 } },
-  { label: 'AP/CL', before: { fast: 0.75, nonfast: 0.35 }, after: { fast: 0.55, nonfast: 0.53 } },
+  {
+    label: "GPA",
+    before: { fast: 0.85, nonfast: 0.55 },
+    after: { fast: 0.72, nonfast: 0.7 },
+  },
+  {
+    label: "Parent Ed",
+    before: { fast: 0.7, nonfast: 0.45 },
+    after: { fast: 0.58, nonfast: 0.56 },
+  },
+  {
+    label: "Pell",
+    before: { fast: 0.4, nonfast: 0.65 },
+    after: { fast: 0.52, nonfast: 0.54 },
+  },
+  {
+    label: "AP/CL",
+    before: { fast: 0.75, nonfast: 0.35 },
+    after: { fast: 0.55, nonfast: 0.53 },
+  },
 ];
 
 export function BalanceDiagram({ className }: BalanceDiagramProps) {
   return (
-    <div className={`${styles.container} ${className || ''}`} role="img" aria-label="Covariate balance diagram showing how propensity score weighting creates comparable groups">
+    <div
+      className={`${styles.container} ${className || ""}`}
+      role="img"
+      aria-label="Covariate balance diagram showing how propensity score weighting creates comparable groups"
+    >
       <div className={styles.panels}>
         {/* Before Panel */}
         <div className={styles.panel}>
@@ -56,8 +76,20 @@ export function BalanceDiagram({ className }: BalanceDiagramProps) {
 
         {/* Arrow */}
         <div className={styles.arrow}>
-          <svg width="32" height="24" viewBox="0 0 32 24" fill="none" aria-hidden="true">
-            <path d="M2 12h24M20 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg
+            width="32"
+            height="24"
+            viewBox="0 0 32 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M2 12h24M20 6l6 6-6 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           <span className={styles.arrowLabel}>PSW</span>
         </div>
