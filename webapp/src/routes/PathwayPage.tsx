@@ -239,6 +239,46 @@ export default function PathwayPage() {
           </p>
         </motion.header>
 
+        {/* Making Fair Comparisons - moved from Methods page */}
+        <motion.section
+          className={styles.fairComparisonsSection}
+          initial="hidden"
+          whileInView="visible"
+          viewport={VIEWPORT_CONFIG}
+          variants={revealVariants}
+        >
+          <InteractiveSurface
+            className={`${styles.fairComparisonsCard} interactiveSurface`}
+          >
+            <h3>Making Fair Comparisons</h3>
+            <p>
+              Students who earn college credits in high school are not randomly
+              selected—they tend to have higher GPAs, more educated parents, and
+              greater resources. We used{" "}
+              <GlossaryTerm
+                term="Propensity Score Weighting"
+                definition="A statistical technique that creates pseudo-randomization by weighting observations based on their probability of receiving treatment, reducing selection bias in observational studies."
+              >
+                propensity score weighting
+              </GlossaryTerm>{" "}
+              to account for these differences.
+            </p>
+            <details className={styles.covariatesDetails}>
+              <summary>Factors We Controlled For</summary>
+              <ul className={styles.covariatesList}>
+                <li><strong>hgrades</strong> — High school GPA</li>
+                <li><strong>bparented</strong> — Parent education level</li>
+                <li><strong>pell</strong> — Pell grant eligibility (income proxy)</li>
+                <li><strong>hapcl</strong> — Number of AP courses taken</li>
+                <li><strong>hprecalc13</strong> — Pre-calculus proficiency</li>
+                <li><strong>hchallenge_c</strong> — High school challenge level</li>
+                <li><strong>cSFcareer_c</strong> — Career expectations</li>
+                <li><strong>cohort</strong> — Enrollment year</li>
+              </ul>
+            </details>
+          </InteractiveSurface>
+        </motion.section>
+
         <section
           ref={controlsRef}
           className={`${styles.controls} ${isStuck ? styles.stuck : ""}`}

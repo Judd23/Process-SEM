@@ -722,3 +722,64 @@
     transform: none;
   }
 }
+
+/* Fair Comparisons section (moved from Methods) */
+.fairComparisonsSection {
+  padding-block: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.fairComparisonsCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+.fairComparisonsCard h3 {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-lg);
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.fairComparisonsCard p {
+  font-family: var(--font-body);
+  font-size: var(--font-size-md);
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.covariatesDetails {
+  margin-top: var(--spacing-md);
+}
+
+.covariatesDetails summary {
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+  padding: var(--spacing-xs) 0;
+}
+
+.covariatesList {
+  list-style: none;
+  padding: var(--spacing-sm) 0 0 var(--spacing-md);
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xs);
+}
+
+.covariatesList li {
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.covariatesList strong {
+  font-family: var(--font-mono, monospace);
+  color: var(--color-accent);
+}
