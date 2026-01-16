@@ -126,19 +126,25 @@ export default function MethodsPage() {
             </p>
             <div className={styles.keyPoints}>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   Accounts for selection bias in observational data
                 </span>
               </div>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   Balances 8 background covariates between groups
                 </span>
               </div>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   Creates pseudo-randomization without an experiment
                 </span>
@@ -159,50 +165,98 @@ export default function MethodsPage() {
                 <motion.polygon
                   points="100,130 85,150 115,150"
                   fill="rgba(6, 182, 212, 0.3)"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.3 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.3 } },
+                  }}
                 />
                 {/* Balance beam */}
                 <motion.line
-                  x1="30" y1="70" x2="170" y2="70"
+                  x1="30"
+                  y1="70"
+                  x2="170"
+                  y2="70"
                   stroke="rgba(255,255,255,0.25)"
                   strokeWidth="4"
                   strokeLinecap="round"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.1 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.1 } },
+                  }}
                 />
                 {/* Support pillar */}
                 <motion.line
-                  x1="100" y1="70" x2="100" y2="130"
+                  x1="100"
+                  y1="70"
+                  x2="100"
+                  y2="130"
                   stroke="rgba(255,255,255,0.2)"
                   strokeWidth="3"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.2 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.2 } },
+                  }}
                 />
                 {/* Left weight - represents one group */}
                 <motion.circle
-                  cx="50" cy="50" r="28"
+                  cx="50"
+                  cy="50"
+                  r="28"
                   fill="rgba(6, 182, 212, 0.35)"
                   stroke="rgba(6, 182, 212, 0.5)"
                   strokeWidth="2"
-                  variants={{ hidden: { opacity: 0, y: -20 }, visible: { opacity: 1, y: 0, transition: { delay: 0.4, type: "spring" } } }}
+                  variants={{
+                    hidden: { opacity: 0, y: -20 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { delay: 0.4, type: "spring" },
+                    },
+                  }}
                 />
                 {/* Right weight - represents other group */}
                 <motion.circle
-                  cx="150" cy="50" r="28"
+                  cx="150"
+                  cy="50"
+                  r="28"
                   fill="rgba(139, 92, 246, 0.35)"
                   stroke="rgba(139, 92, 246, 0.5)"
                   strokeWidth="2"
-                  variants={{ hidden: { opacity: 0, y: -20 }, visible: { opacity: 1, y: 0, transition: { delay: 0.5, type: "spring" } } }}
+                  variants={{
+                    hidden: { opacity: 0, y: -20 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { delay: 0.5, type: "spring" },
+                    },
+                  }}
                 />
                 {/* Center pivot */}
                 <motion.circle
-                  cx="100" cy="70" r="8"
+                  cx="100"
+                  cy="70"
+                  r="8"
                   fill="rgba(255,255,255,0.4)"
-                  variants={{ hidden: { scale: 0 }, visible: { scale: 1, transition: { delay: 0.6 } } }}
+                  variants={{
+                    hidden: { scale: 0 },
+                    visible: { scale: 1, transition: { delay: 0.6 } },
+                  }}
                 />
                 {/* Equal sign in center */}
                 <motion.text
-                  x="100" y="105" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="20" fontWeight="bold"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.7 } } }}
-                >=</motion.text>
+                  x="100"
+                  y="105"
+                  textAnchor="middle"
+                  fill="rgba(255,255,255,0.5)"
+                  fontSize="20"
+                  fontWeight="bold"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.7 } },
+                  }}
+                >
+                  =
+                </motion.text>
               </motion.svg>
               <span className={styles.diagramCaption}>
                 PSW creates comparable groups on observed characteristics
@@ -249,19 +303,25 @@ export default function MethodsPage() {
             </p>
             <div className={styles.keyPoints}>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   Tests direct and indirect effects simultaneously
                 </span>
               </div>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   Handles measurement error through latent variables
                 </span>
               </div>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   Parallel mediation design (stress & engagement)
                 </span>
@@ -285,7 +345,13 @@ export default function MethodsPage() {
                   strokeWidth="3"
                   fill="none"
                   strokeLinecap="round"
-                  variants={{ hidden: { pathLength: 0 }, visible: { pathLength: 1, transition: { duration: 0.8, delay: 0.2 } } }}
+                  variants={{
+                    hidden: { pathLength: 0 },
+                    visible: {
+                      pathLength: 1,
+                      transition: { duration: 0.8, delay: 0.2 },
+                    },
+                  }}
                 />
                 {/* Lower curve - engagement pathway */}
                 <motion.path
@@ -294,7 +360,13 @@ export default function MethodsPage() {
                   strokeWidth="3"
                   fill="none"
                   strokeLinecap="round"
-                  variants={{ hidden: { pathLength: 0 }, visible: { pathLength: 1, transition: { duration: 0.8, delay: 0.4 } } }}
+                  variants={{
+                    hidden: { pathLength: 0 },
+                    visible: {
+                      pathLength: 1,
+                      transition: { duration: 0.8, delay: 0.4 },
+                    },
+                  }}
                 />
                 {/* Direct path - dashed */}
                 <motion.path
@@ -303,39 +375,65 @@ export default function MethodsPage() {
                   strokeWidth="2"
                   strokeDasharray="6 4"
                   fill="none"
-                  variants={{ hidden: { pathLength: 0 }, visible: { pathLength: 1, transition: { duration: 0.6, delay: 0.6 } } }}
+                  variants={{
+                    hidden: { pathLength: 0 },
+                    visible: {
+                      pathLength: 1,
+                      transition: { duration: 0.6, delay: 0.6 },
+                    },
+                  }}
                 />
                 {/* Source node */}
                 <motion.circle
-                  cx="30" cy="80" r="14"
+                  cx="30"
+                  cy="80"
+                  r="14"
                   fill="rgba(255,255,255,0.15)"
                   stroke="rgba(255,255,255,0.3)"
                   strokeWidth="2"
-                  variants={{ hidden: { scale: 0 }, visible: { scale: 1, transition: { delay: 0 } } }}
+                  variants={{
+                    hidden: { scale: 0 },
+                    visible: { scale: 1, transition: { delay: 0 } },
+                  }}
                 />
                 {/* Mediator - stress */}
                 <motion.circle
-                  cx="110" cy="30" r="12"
+                  cx="110"
+                  cy="30"
+                  r="12"
                   fill="rgba(248, 113, 113, 0.25)"
                   stroke="rgba(248, 113, 113, 0.5)"
                   strokeWidth="2"
-                  variants={{ hidden: { scale: 0 }, visible: { scale: 1, transition: { delay: 0.3 } } }}
+                  variants={{
+                    hidden: { scale: 0 },
+                    visible: { scale: 1, transition: { delay: 0.3 } },
+                  }}
                 />
                 {/* Mediator - engagement */}
                 <motion.circle
-                  cx="110" cy="130" r="12"
+                  cx="110"
+                  cy="130"
+                  r="12"
                   fill="rgba(6, 182, 212, 0.25)"
                   stroke="rgba(6, 182, 212, 0.5)"
                   strokeWidth="2"
-                  variants={{ hidden: { scale: 0 }, visible: { scale: 1, transition: { delay: 0.5 } } }}
+                  variants={{
+                    hidden: { scale: 0 },
+                    visible: { scale: 1, transition: { delay: 0.5 } },
+                  }}
                 />
                 {/* Outcome node */}
                 <motion.circle
-                  cx="190" cy="80" r="14"
+                  cx="190"
+                  cy="80"
+                  r="14"
                   fill="rgba(139, 92, 246, 0.25)"
                   stroke="rgba(139, 92, 246, 0.5)"
                   strokeWidth="2"
-                  variants={{ hidden: { scale: 0 }, visible: { scale: 1, transition: { delay: 0.7 } } }}
+                  variants={{
+                    hidden: { scale: 0 },
+                    visible: { scale: 1, transition: { delay: 0.7 } },
+                  }}
                 />
               </motion.svg>
               <span className={styles.diagramCaption}>
@@ -389,19 +487,25 @@ export default function MethodsPage() {
             </p>
             <div className={styles.keyPoints}>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   No normality assumption required
                 </span>
               </div>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   Robust for indirect effects (products of coefficients)
                 </span>
               </div>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   Industry-standard BCa method for mediation
                 </span>
@@ -424,7 +528,10 @@ export default function MethodsPage() {
                 <motion.path
                   d="M20,120 Q50,120 70,75 Q110,15 150,75 Q170,120 200,120 L200,120 L20,120 Z"
                   fill="rgba(16, 185, 129, 0.12)"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.1 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.1 } },
+                  }}
                 />
                 {/* Distribution curve */}
                 <motion.path
@@ -433,40 +540,84 @@ export default function MethodsPage() {
                   strokeWidth="3"
                   fill="none"
                   strokeLinecap="round"
-                  variants={{ hidden: { pathLength: 0 }, visible: { pathLength: 1, transition: { duration: 1, delay: 0.2 } } }}
+                  variants={{
+                    hidden: { pathLength: 0 },
+                    visible: {
+                      pathLength: 1,
+                      transition: { duration: 1, delay: 0.2 },
+                    },
+                  }}
                 />
                 {/* Left CI bound */}
                 <motion.line
-                  x1="55" y1="25" x2="55" y2="120"
+                  x1="55"
+                  y1="25"
+                  x2="55"
+                  y2="120"
                   stroke="rgba(255,255,255,0.3)"
                   strokeWidth="2"
                   strokeDasharray="4 3"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.8 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.8 } },
+                  }}
                 />
                 {/* Right CI bound */}
                 <motion.line
-                  x1="165" y1="25" x2="165" y2="120"
+                  x1="165"
+                  y1="25"
+                  x2="165"
+                  y2="120"
                   stroke="rgba(255,255,255,0.3)"
                   strokeWidth="2"
                   strokeDasharray="4 3"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.8 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.8 } },
+                  }}
                 />
                 {/* Point estimate marker */}
                 <motion.circle
-                  cx="110" cy="20" r="6"
+                  cx="110"
+                  cy="20"
+                  r="6"
                   fill="rgba(16, 185, 129, 0.9)"
-                  variants={{ hidden: { scale: 0 }, visible: { scale: 1, transition: { delay: 1, type: "spring" } } }}
+                  variants={{
+                    hidden: { scale: 0 },
+                    visible: {
+                      scale: 1,
+                      transition: { delay: 1, type: "spring" },
+                    },
+                  }}
                 />
                 {/* CI label - left */}
                 <motion.text
-                  x="55" y="135" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="9"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.9 } } }}
-                >2.5%</motion.text>
+                  x="55"
+                  y="135"
+                  textAnchor="middle"
+                  fill="rgba(255,255,255,0.4)"
+                  fontSize="9"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.9 } },
+                  }}
+                >
+                  2.5%
+                </motion.text>
                 {/* CI label - right */}
                 <motion.text
-                  x="165" y="135" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="9"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.9 } } }}
-                >97.5%</motion.text>
+                  x="165"
+                  y="135"
+                  textAnchor="middle"
+                  fill="rgba(255,255,255,0.4)"
+                  fontSize="9"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.9 } },
+                  }}
+                >
+                  97.5%
+                </motion.text>
               </motion.svg>
               <span className={styles.diagramCaption}>
                 2,000 resamples with BCa confidence intervals
@@ -534,62 +685,108 @@ export default function MethodsPage() {
               >
                 {/* Main gear - outer */}
                 <motion.circle
-                  cx="90" cy="80" r="40"
+                  cx="90"
+                  cy="80"
+                  r="40"
                   fill="none"
                   stroke="rgba(245, 158, 11, 0.4)"
                   strokeWidth="10"
                   strokeDasharray="18 10"
-                  variants={{ hidden: { opacity: 0, rotate: -30 }, visible: { opacity: 1, rotate: 0, transition: { duration: 0.8 } } }}
+                  variants={{
+                    hidden: { opacity: 0, rotate: -30 },
+                    visible: {
+                      opacity: 1,
+                      rotate: 0,
+                      transition: { duration: 0.8 },
+                    },
+                  }}
                   style={{ transformOrigin: "90px 80px" }}
                 />
                 {/* Main gear - inner */}
                 <motion.circle
-                  cx="90" cy="80" r="18"
+                  cx="90"
+                  cy="80"
+                  r="18"
                   fill="rgba(245, 158, 11, 0.25)"
                   stroke="rgba(245, 158, 11, 0.5)"
                   strokeWidth="2"
-                  variants={{ hidden: { scale: 0 }, visible: { scale: 1, transition: { delay: 0.3 } } }}
+                  variants={{
+                    hidden: { scale: 0 },
+                    visible: { scale: 1, transition: { delay: 0.3 } },
+                  }}
                 />
                 {/* Small gear - top right */}
                 <motion.circle
-                  cx="145" cy="45" r="18"
+                  cx="145"
+                  cy="45"
+                  r="18"
                   fill="none"
                   stroke="rgba(255,255,255,0.2)"
                   strokeWidth="6"
                   strokeDasharray="10 6"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.4 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.4 } },
+                  }}
                 />
                 <motion.circle
-                  cx="145" cy="45" r="8"
+                  cx="145"
+                  cy="45"
+                  r="8"
                   fill="rgba(255,255,255,0.1)"
-                  variants={{ hidden: { scale: 0 }, visible: { scale: 1, transition: { delay: 0.5 } } }}
+                  variants={{
+                    hidden: { scale: 0 },
+                    visible: { scale: 1, transition: { delay: 0.5 } },
+                  }}
                 />
                 {/* Small gear - bottom left */}
                 <motion.circle
-                  cx="35" cy="115" r="18"
+                  cx="35"
+                  cy="115"
+                  r="18"
                   fill="none"
                   stroke="rgba(255,255,255,0.2)"
                   strokeWidth="6"
                   strokeDasharray="10 6"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.5 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.5 } },
+                  }}
                 />
                 <motion.circle
-                  cx="35" cy="115" r="8"
+                  cx="35"
+                  cy="115"
+                  r="8"
                   fill="rgba(255,255,255,0.1)"
-                  variants={{ hidden: { scale: 0 }, visible: { scale: 1, transition: { delay: 0.6 } } }}
+                  variants={{
+                    hidden: { scale: 0 },
+                    visible: { scale: 1, transition: { delay: 0.6 } },
+                  }}
                 />
                 {/* Connection indicators */}
                 <motion.line
-                  x1="120" y1="60" x2="130" y2="55"
+                  x1="120"
+                  y1="60"
+                  x2="130"
+                  y2="55"
                   stroke="rgba(255,255,255,0.15)"
                   strokeWidth="2"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.7 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.7 } },
+                  }}
                 />
                 <motion.line
-                  x1="60" y1="100" x2="50" y2="105"
+                  x1="60"
+                  y1="100"
+                  x2="50"
+                  y2="105"
                   stroke="rgba(255,255,255,0.15)"
                   strokeWidth="2"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.7 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.7 } },
+                  }}
                 />
               </motion.svg>
               <span className={styles.diagramCaption}>
@@ -651,19 +848,25 @@ export default function MethodsPage() {
             </div>
             <div className={styles.keyPoints}>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   26 survey items total from NSSE
                 </span>
               </div>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   3 latent constructs with validated scales
                 </span>
               </div>
               <div className={styles.keyPoint}>
-                <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+                <span className={styles.keyPointMarker}>
+                  <Check aria-hidden="true" />
+                </span>
                 <span className={styles.keyPointText}>
                   Second-order factor for developmental adjustment
                 </span>
@@ -694,7 +897,11 @@ export default function MethodsPage() {
                     strokeWidth="1"
                     variants={{
                       hidden: { opacity: 0, y: 15 },
-                      visible: { opacity: 1, y: 0, transition: { delay: 0.1 + i * 0.05 } }
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { delay: 0.1 + i * 0.05 },
+                      },
                     }}
                   />
                 ))}
@@ -710,41 +917,92 @@ export default function MethodsPage() {
                     strokeWidth="1"
                     variants={{
                       hidden: { opacity: 0 },
-                      visible: { opacity: 1, transition: { delay: 0.4 + i * 0.03 } }
+                      visible: {
+                        opacity: 1,
+                        transition: { delay: 0.4 + i * 0.03 },
+                      },
                     }}
                   />
                 ))}
                 {/* Middle layer - latent construct */}
                 <motion.rect
-                  x="45" y="65" width="130" height="35" rx="8"
+                  x="45"
+                  y="65"
+                  width="130"
+                  height="35"
+                  rx="8"
                   fill="rgba(236, 72, 153, 0.2)"
                   stroke="rgba(236, 72, 153, 0.45)"
                   strokeWidth="2"
-                  variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1, transition: { delay: 0.5 } } }}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.9 },
+                    visible: {
+                      opacity: 1,
+                      scale: 1,
+                      transition: { delay: 0.5 },
+                    },
+                  }}
                 />
                 <motion.text
-                  x="110" y="87" textAnchor="middle" fill="rgba(255,255,255,0.6)" fontSize="11" fontWeight="500"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.6 } } }}
-                >Latent Construct</motion.text>
+                  x="110"
+                  y="87"
+                  textAnchor="middle"
+                  fill="rgba(255,255,255,0.6)"
+                  fontSize="11"
+                  fontWeight="500"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.6 } },
+                  }}
+                >
+                  Latent Construct
+                </motion.text>
                 {/* Connecting line to second-order */}
                 <motion.line
-                  x1="110" y1="65" x2="110" y2="45"
+                  x1="110"
+                  y1="65"
+                  x2="110"
+                  y2="45"
                   stroke="rgba(139, 92, 246, 0.4)"
                   strokeWidth="2"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.65 } } }}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.65 } },
+                  }}
                 />
                 {/* Top layer - second-order factor */}
                 <motion.rect
-                  x="65" y="15" width="90" height="30" rx="6"
+                  x="65"
+                  y="15"
+                  width="90"
+                  height="30"
+                  rx="6"
                   fill="rgba(139, 92, 246, 0.25)"
                   stroke="rgba(139, 92, 246, 0.5)"
                   strokeWidth="2"
-                  variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1, transition: { delay: 0.7 } } }}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.9 },
+                    visible: {
+                      opacity: 1,
+                      scale: 1,
+                      transition: { delay: 0.7 },
+                    },
+                  }}
                 />
                 <motion.text
-                  x="110" y="35" textAnchor="middle" fill="rgba(255,255,255,0.6)" fontSize="10" fontWeight="500"
-                  variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.8 } } }}
-                >Second-Order</motion.text>
+                  x="110"
+                  y="35"
+                  textAnchor="middle"
+                  fill="rgba(255,255,255,0.6)"
+                  fontSize="10"
+                  fontWeight="500"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1, transition: { delay: 0.8 } },
+                  }}
+                >
+                  Second-Order
+                </motion.text>
               </motion.svg>
               <span className={styles.diagramCaption}>
                 Latent variables from multiple survey indicators
@@ -776,7 +1034,7 @@ export default function MethodsPage() {
           </p>
           <div className={styles.softwareList}>
             <div className={styles.softwareGroup}>
-              <h3>R Packages</h3>
+              <h4>R Packages</h4>
               <ul>
                 <li>
                   <code>lavaan</code> — Structural equation modeling
@@ -793,7 +1051,7 @@ export default function MethodsPage() {
               </ul>
             </div>
             <div className={styles.softwareGroup}>
-              <h3>Python Packages</h3>
+              <h4>Python Packages</h4>
               <ul>
                 <li>
                   <code>pandas</code>, <code>numpy</code> — Data processing
@@ -809,19 +1067,25 @@ export default function MethodsPage() {
           </div>
           <div className={styles.keyPoints}>
             <div className={styles.keyPoint}>
-              <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+              <span className={styles.keyPointMarker}>
+                <Check aria-hidden="true" />
+              </span>
               <span className={styles.keyPointText}>
                 Fully reproducible analysis pipeline
               </span>
             </div>
             <div className={styles.keyPoint}>
-              <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+              <span className={styles.keyPointMarker}>
+                <Check aria-hidden="true" />
+              </span>
               <span className={styles.keyPointText}>
                 Code available on GitHub
               </span>
             </div>
             <div className={styles.keyPoint}>
-              <span className={styles.keyPointMarker}><Check aria-hidden="true" /></span>
+              <span className={styles.keyPointMarker}>
+                <Check aria-hidden="true" />
+              </span>
               <span className={styles.keyPointText}>
                 No proprietary software required
               </span>
@@ -890,7 +1154,7 @@ export default function MethodsPage() {
               <td>Overall model-data discrepancy</td>
               <td>{fitMeasures?.chisq?.toFixed(2) ?? "—"}</td>
               <td>p &gt; .05</td>
-              <td className={styles.fitPass}>—</td>
+              <td className={styles.fitPass}>N/A</td>
             </tr>
             <tr>
               <td>df</td>
