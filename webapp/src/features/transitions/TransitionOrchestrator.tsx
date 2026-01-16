@@ -44,7 +44,6 @@ export default function TransitionOrchestrator({
   exitCompleteDelayMs = 0,
 }: TransitionOrchestratorProps) {
   const location = useLocation();
-  const { reducedMotion } = useChoreographer();
   const exitCompleteTimerRef = useRef<number | null>(null);
 
   // Instant scroll to top on route change
@@ -53,11 +52,6 @@ export default function TransitionOrchestrator({
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
   }, [location.pathname, scrollOnTransition]);
-
-  useEffect(() => {
-    if (!reducedMotion) return;
-    onExitComplete?.();
-  }, [location.pathname, onExitComplete, reducedMotion]);
 
   const handleExitComplete = useCallback(() => {
     if (!onExitComplete) return;
@@ -83,11 +77,6 @@ export default function TransitionOrchestrator({
       }
     };
   }, []);
-
-  // Handle reduced motion preference
-  if (reducedMotion) {
-    return <>{children}</>;
-  }
 
   return (
     <AnimatePresence mode="wait" onExitComplete={handleExitComplete}>
@@ -119,12 +108,6 @@ interface PageWrapperProps {
  * Use when you need more control than TransitionOrchestrator provides
  */
 export function PageWrapper({ children, className }: PageWrapperProps) {
-  const { reducedMotion } = useChoreographer();
-
-  if (reducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
   return (
     <motion.div
       className={className}

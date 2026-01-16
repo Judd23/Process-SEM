@@ -12,14 +12,12 @@ interface AppProvidersProps {
 /**
  * Global spring physics configuration.
  * All Framer Motion components inherit this transition by default.
- * reducedMotion="never" intentionally ignores user motion-reduction preferences
- * so all depth, parallax, and spring effects always run.
  */
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <MotionConfig reducedMotion="never" transition={DANCE_SPRING_HEAVY}>
+        <MotionConfig transition={DANCE_SPRING_HEAVY}>
           <ModelDataProvider>
             <ResearchProvider>
               <TransitionProvider>

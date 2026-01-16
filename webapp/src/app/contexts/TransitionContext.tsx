@@ -25,7 +25,6 @@ interface TransitionContextValue {
   setPhase: (phase: TransitionPhase) => void;
   sourceRoute: string | null;
   targetRoute: string | null;
-  reducedMotion: boolean;
   particleCount: number;
   sharedElements: Map<string, SharedElementRect>;
   registerSharedElement: (id: string, rect: DOMRect, route: string) => void;
@@ -46,8 +45,6 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
   const [phase, setPhase] = useState<TransitionPhase>('idle');
   const [sourceRoute, setSourceRoute] = useState<string | null>(null);
   const [targetRoute, setTargetRoute] = useState<string | null>(null);
-  // ALWAYS false - all users get full cinematic experience (no reduced motion)
-  const reducedMotion = false;
   const [particleCount, setParticleCount] = useState(200);
   const [sharedElements] = useState(() => new Map<string, SharedElementRect>());
   const [currentRoute, setCurrentRoute] = useState(() => {
@@ -120,10 +117,6 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
 
   const startTransition = useCallback(
     async (from: string, to: string) => {
-      if (reducedMotion) {
-        return; // Skip animation entirely
-      }
-
       setSourceRoute(from);
       setTargetRoute(to);
       setPhase('exiting');
@@ -138,7 +131,7 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
 
       setPhase('entering');
     },
-    [reducedMotion]
+    []
   );
 
   const completeTransition = useCallback(() => {
@@ -156,7 +149,6 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
         setPhase,
         sourceRoute,
         targetRoute,
-        reducedMotion,
         particleCount,
         sharedElements,
         registerSharedElement,
@@ -179,7 +171,6 @@ const defaultContext: TransitionContextValue = {
   setPhase: () => {},
   sourceRoute: null,
   targetRoute: null,
-  reducedMotion: false,
   particleCount: 0,
   sharedElements: new Map(),
   registerSharedElement: () => {},
@@ -194,8 +185,4 @@ export function useTransition() {
   // Return default context if provider is not present (graceful degradation)
   return context ?? defaultContext;
 }
-
-export function useReducedMotion() {
-  const { reducedMotion } = useTransition();
-  return reducedMotion;
 }

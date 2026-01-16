@@ -65,9 +65,6 @@ interface ChoreographerContextValue {
   // Transition orchestration
   startOrchestration: () => Promise<void>;
   completeOrchestration: () => void;
-  
-  // Accessibility
-  reducedMotion: boolean;
 }
 
 // =============================================================================
@@ -88,9 +85,6 @@ export function ChoreographerProvider({ children }: ChoreographerProviderProps) 
   const [phase, setPhase] = useState<ChoreographerPhase>('idle');
   const [visibleElements] = useState(() => new Map<string, RegisteredElement>());
   const [viewportCenter, setViewportCenter] = useState<ViewportCenter>({ x: 0, y: 0 });
-
-  // ALWAYS false - all users get full cinematic experience (no reduced motion)
-  const reducedMotion = false;
 
   // Track viewport center
   useEffect(() => {
@@ -177,10 +171,6 @@ export function ChoreographerProvider({ children }: ChoreographerProviderProps) 
 
   // Orchestrated transition sequence
   const startOrchestration = useCallback(async () => {
-    if (reducedMotion) {
-      return; // Skip animation entirely
-    }
-
     // Phase 1: Exit
     setPhase('exiting');
     await new Promise((resolve) => setTimeout(resolve, TIMING.exit));
@@ -195,7 +185,7 @@ export function ChoreographerProvider({ children }: ChoreographerProviderProps) 
 
     // Complete
     setPhase('idle');
-  }, [reducedMotion]);
+  }, []);
 
   const completeOrchestration = useCallback(() => {
     setPhase('idle');
@@ -215,7 +205,6 @@ export function ChoreographerProvider({ children }: ChoreographerProviderProps) 
       getDistanceFromCenter,
       startOrchestration,
       completeOrchestration,
-      reducedMotion, // Always false - full cinematic experience
     }),
     [
       phase,
@@ -273,8 +262,8 @@ export function useOrchestrationPhase(): ChoreographerPhase {
  * Hook for element-specific stagger delay
  */
 export function useStaggerDelay(elementId: string): number {
-  const { getStaggerDelay, reducedMotion } = useChoreographer();
-  return reducedMotion ? 0 : getStaggerDelay(elementId);
+  const { getStaggerDelay } = useChoreographer();
+  return getStaggerDelay(elementId);
 }
 
 /**

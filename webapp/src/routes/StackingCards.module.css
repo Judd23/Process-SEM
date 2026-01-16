@@ -6,89 +6,74 @@
   padding-block: var(--space-2xl);
 }
 
-/* Base card styles */
+/* Base card styles - thick glass */
 .card {
   position: sticky;
-  min-height: 80vh;
+  min-height: 500px;
   border-radius: var(--radius-xl);
   padding: var(--space-2xl);
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-xl);
   align-items: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  background: rgba(15, 15, 20, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 25px 50px -12px rgba(0, 0, 0, 0.5);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
-  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 30px 60px -15px rgba(0, 0, 0, 0.6);
 }
 
-/* Stacking positions */
+/* Stacking positions - no color theming, just z-index and top offset */
 .card1 {
   composes: card;
   z-index: 10;
   top: 6rem;
-  background: linear-gradient(
-    135deg,
-    hsl(200 60% 12%) 0%,
-    hsl(220 50% 18%) 100%
-  );
 }
 
 .card2 {
   composes: card;
   z-index: 20;
   top: 7rem;
-  background: linear-gradient(
-    135deg,
-    hsl(220 50% 14%) 0%,
-    hsl(260 40% 20%) 100%
-  );
 }
 
 .card3 {
   composes: card;
   z-index: 30;
   top: 8rem;
-  background: linear-gradient(
-    135deg,
-    hsl(260 40% 16%) 0%,
-    hsl(280 35% 22%) 100%
-  );
 }
 
 .card4 {
   composes: card;
   z-index: 40;
   top: 9rem;
-  background: linear-gradient(
-    135deg,
-    hsl(280 35% 14%) 0%,
-    hsl(300 30% 18%) 100%
-  );
 }
 
 .card5 {
   composes: card;
   z-index: 50;
   top: 10rem;
-  background: linear-gradient(
-    135deg,
-    hsl(180 50% 12%) 0%,
-    hsl(200 45% 18%) 100%
-  );
 }
 
-.card6 {
-  composes: card;
-  z-index: 60;
-  top: 11rem;
-  background: linear-gradient(
-    135deg,
-    hsl(210 45% 14%) 0%,
-    hsl(230 40% 20%) 100%
-  );
+/* Software Panel (standalone, not stacking) */
+.softwarePanel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  margin-block: var(--space-2xl);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xl);
+  align-items: start;
 }
 
 /* Content column */
@@ -545,13 +530,7 @@
   font-style: italic;
 }
 
-/* ─── 1.4 CARD SPACING AND POLISH ─── */
-.card {
-  margin-bottom: 3rem;
-  min-height: min(70vh, 550px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-}
+/* Card spacing handled in base .card rule */
 
 /* ─── RESPONSIVE ADJUSTMENTS FOR NEW ELEMENTS ─── */
 @media (max-width: 900px) {

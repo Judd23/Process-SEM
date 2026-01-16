@@ -388,24 +388,6 @@ export const CATEGORY_SPRINGS: Record<MorphCategory, Transition> = {
 // REDUCED MOTION
 // =============================================================================
 
-/**
- * Transition to use when user prefers reduced motion
- * Instant transitions, no springs
- */
-export const REDUCED_MOTION_TRANSITION: Transition = {
-  duration: 0,
-};
-
-/**
- * Get appropriate transition based on reduced motion preference
- */
-export function getTransition(
-  preferredTransition: Transition,
-  reducedMotion: boolean
-): Transition {
-  return reducedMotion ? REDUCED_MOTION_TRANSITION : preferredTransition;
-}
-
 // =============================================================================
 // CSS VARIABLE HELPERS
 // =============================================================================

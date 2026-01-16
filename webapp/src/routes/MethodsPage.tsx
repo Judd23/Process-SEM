@@ -8,7 +8,6 @@ import {
   RefreshCw,
   Settings,
   Layers,
-  Code,
 } from "lucide-react";
 import { useModelData } from "../app/contexts";
 import GlossaryTerm from "../components/ui/GlossaryTerm";
@@ -455,23 +454,21 @@ export default function MethodsPage() {
             </div>
           </div>
         </motion.section>
+      </div>
 
-        {/* Card 6: Software Used */}
-        <motion.section
-          className={styles.card6}
-          initial="hidden"
-          whileInView="visible"
-          viewport={VIEWPORT_CONFIG}
-          variants={revealVariants}
-        >
-          <div className={styles.cardContent}>
-            <div className={styles.stageIndicator}>
-              <div className={styles.stageIcon}>
-                <Code aria-hidden="true" />
-              </div>
-              <span className={styles.stageLabel}>Reproducibility</span>
-            </div>
-            <h2 className={styles.cardHeading}>Open-Source Toolkit</h2>
+      {/* Software Panel (standalone banner) */}
+      <motion.section
+        className={styles.softwarePanel}
+        initial="hidden"
+        whileInView="visible"
+        viewport={VIEWPORT_CONFIG}
+        variants={revealVariants}
+      >
+        <div className={styles.cardContent}>
+          <motion.p className={styles.cardEyebrow} variants={itemVariants}>
+            Reproducibility
+          </motion.p>
+          <motion.h2 className={styles.cardHeading} variants={itemVariants}>Open-Source Toolkit</motion.h2>
             <p className={styles.cardDescription}>
               All analyses used open-source software, ensuring transparency and
               full reproducibility. The complete codebase is available in the
@@ -479,7 +476,7 @@ export default function MethodsPage() {
             </p>
             <div className={styles.softwareList}>
               <div className={styles.softwareGroup}>
-                <h4>R Packages</h4>
+                <h3>R Packages</h3>
                 <ul>
                   <li>
                     <code>lavaan</code> — Structural equation modeling
@@ -496,7 +493,7 @@ export default function MethodsPage() {
                 </ul>
               </div>
               <div className={styles.softwareGroup}>
-                <h4>Python Packages</h4>
+                <h3>Python Packages</h3>
                 <ul>
                   <li>
                     <code>pandas</code>, <code>numpy</code> — Data processing
@@ -536,13 +533,12 @@ export default function MethodsPage() {
             <div className={styles.diagramContainer}>
               <span className={styles.diagramLabel}>Analysis Stack</span>
               <PackageStack />
-              <span className={styles.diagramCaption}>
-                Open-source, reproducible analysis
-              </span>
-            </div>
+            <span className={styles.diagramCaption}>
+              Open-source, reproducible analysis
+            </span>
           </div>
-        </motion.section>
-      </div>
+        </div>
+      </motion.section>
 
       {/* Model Fit Panel (standalone) */}
       <motion.section

@@ -15,7 +15,6 @@ export function usePageTransition() {
   const {
     mode,
     startTransition,
-    reducedMotion,
   } = useTransition();
 
   const navigateWithTransition = useCallback(
@@ -23,8 +22,8 @@ export function usePageTransition() {
       // Don't transition to same route
       if (location.pathname === to) return;
 
-      // Skip animation if reduced motion or transition is 'none'
-      if (reducedMotion || options?.transition === 'none') {
+      // Skip animation if transition is 'none'
+      if (options?.transition === 'none') {
         navigate(to, { replace: options?.replace });
         return;
       }
@@ -51,7 +50,6 @@ export function usePageTransition() {
       location.pathname,
       navigate,
       mode,
-      reducedMotion,
       startTransition,
     ]
   );
