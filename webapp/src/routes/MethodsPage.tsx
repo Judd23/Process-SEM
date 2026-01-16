@@ -51,7 +51,7 @@ export default function MethodsPage() {
   }, [fitMeasures]);
 
   return (
-    <div className={pageStyles.methodsPage}>
+    <div className={pageStyles.page}>
       {/* Page Header */}
       <header className={pageStyles.header}>
         <motion.p
