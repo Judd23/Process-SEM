@@ -1,9 +1,11 @@
-import styles from './ProgressRing.module.css';
+import styles from "./ProgressRing.module.css";
 
 interface ProgressRingProps {
   label: string;
-  value: number; // 0 to 1
-  displayValue: string;
+  value: number;
+  displayValue?: string;
+  format?: (v: number) => string;
+  invert?: boolean;
   color?: string;
   size?: number;
   strokeWidth?: number;
@@ -13,22 +15,32 @@ export default function ProgressRing({
   label,
   value,
   displayValue,
-  color = 'var(--color-accent)',
+  format,
+  invert = false,
+  color = "var(--color-accent)",
   size = 96,
   strokeWidth = 8,
 }: ProgressRingProps) {
-  const normalized = Math.min(Math.max(value, 0), 1);
+  // For inverted metrics (RMSEA, SRMR), lower is better, so invert the visual fill
+  const normalized = invert
+    ? Math.min(Math.max(1 - value, 0), 1)
+    : Math.min(Math.max(value, 0), 1);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - normalized);
+
+  const ariaValue = Math.round(normalized * 100);
+
+  // Use format function if provided, otherwise use displayValue
+  const formattedValue = format ? format(value) : displayValue;
 
   return (
     <div
       className={styles.ring}
       role="progressbar"
-      aria-valuenow={normalized}
+      aria-valuenow={ariaValue}
       aria-valuemin={0}
-      aria-valuemax={1}
+      aria-valuemax={100}
       aria-label={label}
     >
       <svg width={size} height={size} className={styles.svg} aria-hidden="true">
@@ -45,10 +57,14 @@ export default function ProgressRing({
           cy={size / 2}
           r={radius}
           strokeWidth={strokeWidth}
-          style={{ stroke: color, strokeDasharray: circumference, strokeDashoffset: dashOffset }}
+          style={{
+            stroke: color,
+            strokeDasharray: circumference,
+            strokeDashoffset: dashOffset,
+          }}
         />
       </svg>
-      <div className={styles.value}>{displayValue}</div>
+      <div className={styles.value}>{formattedValue}</div>
       <div className={styles.label}>{label}</div>
     </div>
   );
