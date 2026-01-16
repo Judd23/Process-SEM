@@ -5,7 +5,7 @@
   flex-direction: column;
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
   isolation: isolate;
 
   /* Static cosmic background - replaces ParallaxBackground */
@@ -61,7 +61,7 @@
   flex-direction: column;
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
+  overflow-x: clip;
   background: #030712;
 }
 
