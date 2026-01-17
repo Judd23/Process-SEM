@@ -158,6 +158,7 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
       {children}
     </TransitionContext.Provider>
   );
+}
 
 // Default context for when TransitionProvider is not present
 const defaultContext: TransitionContextValue = {
