@@ -3,9 +3,6 @@ name: pages-build-deploy
 on:
   push:
     branches: ["main"]
-    paths:
-      - "webapp/**"
-      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
